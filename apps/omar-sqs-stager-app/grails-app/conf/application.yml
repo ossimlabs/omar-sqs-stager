@@ -1,0 +1,223 @@
+---
+logging:
+  config: classpath:logback.groovy
+
+omar:
+  sqs:
+    reader:
+      # Defines an Amazon SQS endpoint for access.
+      queue: "https://sqs.us-east-1.amazonaws.com/320588532383/avro-dev"
+      # This value can be between 1 and 20 and can not exceed 20 or you get errors and the service will not start proeprly.
+      # This value is used by the AWS API to wait for a maximum time for a message to occur before returning.
+      waitTimeSeconds: 20
+      # Value can only be between 1 and 10.
+      # Any other value will give errors and the service will not start properly.
+      # This defines the maximum number of messages to pop off the queue during a single read request to the service.
+      maxNumberOfMessages: 5
+      # This can be any value and defines the number of second to "SLEEP" the background process between each call to the read request.
+      # By default it will keep calling the read request until no messages are found.
+      # After no messages are found the backgroun process will then "SLEEP" for "pollingIntervalSeconds".
+      pollingIntervalSeconds: 3
+    stager:
+      params:
+        buildHistograms: "true"
+        buildOverviews: "true"
+        overviewCompressionType: "NONE"
+        overviewType: "ossim_tiff_box"
+      destination:
+        type: "post"
+        post:
+          urlEndPoint: "http://omar-stager-app:8080/omar-stager/addRaster"
+---
+omar:
+  avro:
+    # The a post to the stager fails, this is the number of miliseconds to wait before trying again.
+    attemptDelay: 5000
+    # If a post to the stager fails, this is how many times it will trtry.
+    nAttempts: 10
+    # The source URI field name in the JSON Avro record.
+    sourceUriField: "uRL"
+    # Is the date field in the JSON Avro Record.
+    # This field is optional and is used as a way to encode the "directory" for storing the image.
+    # If this is not given then the directory suffix will be the path of the "sourceUriField"
+    dateField: "observationDateTime"
+    # Is the format of the date field.
+    # If you leave this blank "" then it will default to parsing an ISO8601 date.
+    # Typically left blank.
+    dateFieldFormat: ""
+    # This is the download specifications
+    download:
+      # This is the directory prefix where the file will be downloaded.
+      # For example, if we have the "sourceUriField" given as http://[path]/[to]/[image]/foo.tif and the date field content has for a value of 20090215011010 with a dateField format the directory structure will be \<yyyy>/\<mm>/\<dd>/\<hh> where "*yyyy" is a 4 character year and the "mm" is the two character month and the "dd" is the two character day and the "hh" is a two character hour.
+      # If the datefield is not specified then we use the path in the URI as a suffix to the local directory defined in the "directory" field above: /data/s3/[path]/[to]/[image]/foo.tif
+      directory: "/data/s3"
+      # If you do not want the standard HTTP connect to be used in java then you can pass a shell command: ex. `wget -O <destination> <source>` we use where the "source" and "*destination" are replaced internally with the proper values.
+      command: "wget --no-check-certificate -O <destination> <source>"
+    # Is the image Id field used to identify the image
+    imageIdField: "imageId"
+    # Allows one to specify a path separated by "." to the submessage to where all the image information resides.
+    # For example, if you pass a Message wrapped within the SNS notification it will be a subfield of the SNS message.
+    # This allows one to specify a path to the message to be handled.
+    jsonSubFieldPath: "Message"
+    metadata:
+      # Add metadata url.  Just so we can null it out this will have to be
+      # set on environments that support it
+      # You should just have to add the url:
+      # http://omar-avro-metadata-app:8080/omar-avro-metadata/avroMetadata/add
+      addMetadataEndPoint: ""
+
+quartz:
+  jdbcStore:   false
+
+# Set the context path for the application.
+#server:
+#  contextPath: /omar-sqs
+
+---
+grails:
+    cors:
+      enabled: true
+    resources:
+        pattern: '/**'
+    profile: web
+    codegen:
+        defaultPackage: omar.sqs
+    spring:
+        transactionManagement:
+            proxies: false
+    gorm:
+        reactor:
+            # Whether to translate GORM events into Reactor events
+            # Disabled by default for performance reasons
+            events: false
+info:
+    app:
+        name: '@info.app.name@'
+        version: '@info.app.version@'
+        grailsVersion: '@info.app.grailsVersion@'
+spring:
+    main:
+        banner-mode: "off"
+    groovy:
+        template:
+            check-template-location: false
+
+# Spring Actuator Endpoints are Disabled by Default
+endpoints:
+  enabled: true
+  health:
+    enabled: true
+  actuator:
+    sensitive: false
+  beans:
+    sensitive: false
+  metrics:
+    sensitive: false
+  configprops:
+    sensitive: false
+  trace:
+    sensitive: false
+  mappings:
+    sensitive: false
+  env:
+    sensitive: false
+---
+grails:
+    mime:
+        disable:
+            accept:
+                header:
+                    userAgents:
+                        - Gecko
+                        - WebKit
+                        - Presto
+                        - Trident
+        types:
+            all: '*/*'
+            atom: application/atom+xml
+            css: text/css
+            csv: text/csv
+            form: application/x-www-form-urlencoded
+            html:
+              - text/html
+              - application/xhtml+xml
+            js: text/javascript
+            json:
+              - application/json
+              - text/json
+            multipartForm: multipart/form-data
+            pdf: application/pdf
+            rss: application/rss+xml
+            text: text/plain
+            hal:
+              - application/hal+json
+              - application/hal+xml
+            xml:
+              - text/xml
+              - application/xml
+    urlmapping:
+        cache:
+            maxsize: 1000
+    controllers:
+        defaultScope: singleton
+    converters:
+        encoding: UTF-8
+    views:
+        default:
+            codec: html
+        gsp:
+            encoding: UTF-8
+            htmlcodec: xml
+            codecs:
+                expression: html
+                scriptlets: html
+                taglib: none
+                staticparts: none
+endpoints:
+    jmx:
+        unique-names: true
+
+---
+hibernate:
+    cache:
+        queries: false
+        use_second_level_cache: false
+        use_query_cache: false
+dataSource:
+    pooled: true
+    jmxExport: true
+    driverClassName: org.h2.Driver
+    username: sa
+    password: ''
+
+environments:
+    development:
+        dataSource:
+            dbCreate: create-drop
+            url: jdbc:h2:mem:devDb;MVCC=TRUE;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE
+    test:
+        dataSource:
+            dbCreate: update
+            url: jdbc:h2:mem:testDb;MVCC=TRUE;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE
+    production:
+        dataSource:
+            dbCreate: update
+            url: jdbc:h2:./prodDb;MVCC=TRUE;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE
+            properties:
+                jmxEnabled: true
+                initialSize: 5
+                maxActive: 50
+                minIdle: 5
+                maxIdle: 25
+                maxWait: 10000
+                maxAge: 600000
+                timeBetweenEvictionRunsMillis: 5000
+                minEvictableIdleTimeMillis: 60000
+                validationQuery: SELECT 1
+                validationQueryTimeout: 3
+                validationInterval: 15000
+                testOnBorrow: true
+                testWhileIdle: true
+                testOnReturn: false
+                jdbcInterceptors: ConnectionState
+                defaultTransactionIsolation: 2 # TRANSACTION_READ_COMMITTED
