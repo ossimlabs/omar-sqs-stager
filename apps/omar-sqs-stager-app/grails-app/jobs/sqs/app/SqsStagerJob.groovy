@@ -61,7 +61,7 @@ class SqsStagerJob {
               println "Getting XML"
               HashMap dataInfoResult = sqsService.getDataInfo(downloadResult.destination)
               println dataInfoResult.message
-              println "Getting XML"
+              println "Posting XML"
               HashMap postResult = sqsService.postXml(config?.stager?.addRaster?.url, 
                                                       dataInfoResult?.xml)
               println postResult.message
