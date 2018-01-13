@@ -171,10 +171,10 @@ class SqsService {
 
      jsonObj
    }
-   def downloadFile(def message)
+   HashMap downloadFile(def message)
    {
-      def result = [errorMessage:"",
-                    requestMethod: "downloadFile"
+      HashMap result = [errorMessage:"",
+                    requestMethod: "downloadFile",
                     source:"",
                     destination:"",
                     startTime:new Date(),
@@ -220,6 +220,7 @@ class SqsService {
                   HttpUtils.downloadURIShell(commandString, fullPathLocation.toString(), sourceURI)
                 }
                 result.fileSize    = fullPathLocation.size()
+                result.message = "Downloaded file to ${fullPathLocation}"
             }
             else
             {
@@ -249,10 +250,10 @@ class SqsService {
 
       result
    }
-  def stageFileJni( HashMap params )
+  HashMap stageFileJni( HashMap params )
   {
     def result = [status: HttpStatus.OK,
-                  requestMethod: "stageFileJni"
+                  requestMethod: "stageFileJni",
                   message:"",
                   startTime:new Date(),
                   endTime:null,
@@ -311,6 +312,7 @@ class SqsService {
               }
               imageStager.stage()
             }
+        result.message = "Staged file ${filename}"
         //imageStager.stageAll()
         imageStager.delete()
         imageStager = null
@@ -326,11 +328,13 @@ class SqsService {
       result.duration = (result.endTime.time-result.startTime.time)
       ingestMetricsService.endStaging( filename )
 
-      stager_logs = new JsonBuilder(timestamp: ingestdate.format("yyyy-MM-dd hh:mm:ss.ms"), requestType: requestType,
-          requestMethod: requestMethod, status: result.status, message: result.message, filename: filename,
-          endTime: result.endTime.format("yyyy-MM-dd hh:mm:ss.ms"), responseTime: result.duration)
+      // let's put this log in the job
+      //
+//      stager_logs = new JsonBuilder(timestamp: ingestdate.format("yyyy-MM-dd hh:mm:ss.ms"), requestType: requestType,
+//          requestMethod: requestMethod, status: result.status, message: result.message, filename: filename,
+//          endTime: result.endTime.format("yyyy-MM-dd hh:mm:ss.ms"), responseTime: result.duration)
 
-      log.info stager_logs.toString()
+//      log.info stager_logs.toString()
 
     }
     catch ( e )
@@ -340,12 +344,22 @@ class SqsService {
       log.error "${e.toString()}"
       ingestMetricsService.setStatus( filename, ProcessStatus.FAILED, "Unable to process file ${params.filename} with ERROR: ${e}" )
     }
+    finally{
+      imageStager?.delete()
+      imageStager = null
+    }
 
-    imageStager?.delete()
     result
   }
-  String getDataInfo(String filename, Integer entryId=null)
+  HashMap getDataInfo(String filename, Integer entryId=null)
   {
+    HashMap result = [status: HttpStatus.OK,
+                  message:"",
+                  requestMethod: "getDataInfo",
+                  startTime:new Date(),
+                  endTime:null,
+                  duration:0,
+                  xml:""]
     DataInfo dataInfo = new DataInfo();
     String xml
 
@@ -361,39 +375,52 @@ class SqsService {
             xml = dataInfo.info
         }
       }
+      else
+      {
+        result.status = HttpStatus.UNSUPPORTED_MEDIA_TYPE
+        result.message = "Could not open file: ${filename}"
+      }
     }
     catch(e)
     {
-      log.error e
+      result.status=HttpStatus.NOT_FOUND
+      result.message = e.toString()
     }
-    dataInfo.close()
-    dataInfo.delete();
-    dataInfo = null;
+    finally{
+      dataInfo.close()
+      dataInfo.delete();
+      dataInfo = null;      
+      result.xml = xml
+      result.endTime = new Date()
+      result.duration = (result.endTime.time-result.startTime.time)
+    }
 
-    xml
+    result
   }
-  HashMap postXml(String xml)
+  HashMap postXml(String url, String xml)
   {
     def result = [status: HttpStatus.OK,
                   message:"",
-                  requestMethod: "postXml"
+                  requestMethod: "postXml",
                   startTime:new Date(),
                   endTime:null,
                   duration:0]
-    def config = SqsUtils.sqsConfig
-    HashMap postResult = HttpUtils.postData(config?.stager?.addRaster?.url, 
-                                            xml, 
-                                            "application/xml")
+    try{
+      def config = SqsUtils.sqsConfig
+      HashMap postResult = HttpUtils.postData(url, 
+                                              xml, 
+                                              "application/xml")
 
-    if(postResult.status != HttpStatus.OK)
-    {
-
+      result.status = postResult.status
+      result.message = postResult.message
+      result.endTime = new Date()
+      result.duration = (result.endTime.time-result.startTime.time)
     }
-
-    result.status = postResult.status
-    result.message = postResult.message
-    result.endTime = new Date()
-    result.duration = (result.endTime.time-result.startTime.time)
+    catch(e)
+    {
+      result.status = HttpStatus.NOT_FOUND
+      result.message = e.toString()
+    }
 
     result
   }

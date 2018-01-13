@@ -15,45 +15,54 @@ class SqsStagerJob {
    static triggers = {
       simple repeatInterval: 1000l, name: 'SqsReaderTrigger', group: 'SqsReaderGroup'
    }
-
   def execute() {
-    Boolean keepGoing = true
     def messages
     def config = SqsUtils.sqsConfig
-    def ingestdate
-    if(config.reader.queue)
-    {
 
+    // do some validation
+    // if these are not set then let's not pop any messages off and just
+    // log the error and return
+    //
+    Boolean okToProceed = true
+    if(!config?.stager?.addRaster?.url)
+    {
+      // need to log error
+      okToProceed = false
+    }
+    if(!config?.reader?.queue)
+    {
+      // need to log error
+      okToProceed = false
+    }
+    if(okToProceed)
+    {
       while(messages = sqsService?.receiveMessages())
       {
        //ingestdate = new Date().format("yyyy-MM-dd HH:mm:ss.SSS")
-        ingestdate = DateUtil.formatUTC(new Date())
-
+        //ingestdate = DateUtil.formatUTC(new Date())
         def messagesToDelete = []
         def messageBodyList  = []
         HashMap stagerParams = config.stager.params as HashMap
-        String url
         messages?.each{message->
           try{
             if(sqsService.checkMd5(message.mD5OfBody, message.body))
             {
+              println "Got message and now parsing"
               // log message start
               def jsonMessage = sqsService.parseMessage(message.body.toString())
-
+              println "Downloading"
               // log message parsed
               def downloadResult = sqsService.downloadFile(jsonMessage)
-              println downloadResult
-
-              // need to log downloadResult.duration , startTime, endTime, destination and source and errorMessage
-              
+              println downloadResult.message
               stagerParams.filename = downloadResult.destination
               def stageFileResult = sqsService.stageFileJni(stagerParams)
-              println stageFileResult
+              println stageFileResult.message
+              HashMap dataInfoResult = sqsService.getDataInfo(downloadResult.destination)
+              println dataInfoResult.message
 
-              String xml = sqsService.getDataInfo(downloadResult.destination)
-
-              HashMap postResult = sqsService.postXml(xml)
-              println postResult
+              HashMap postResult = sqsService.postXml(config?.stager?.addRaster?.url, 
+                                                      dataInfoResult?.xml)
+              println postResult.message
               messagesToDelete << message
             }
             else
@@ -64,7 +73,7 @@ class SqsStagerJob {
           }
           catch(e)
           {
-            e.printStackTrace()
+            //e.printStackTrace()
             log.error "ERROR: ${e.toString()}"
           }
 
