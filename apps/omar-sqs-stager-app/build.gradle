@@ -64,6 +64,9 @@ grails {
   plugins {
     compile project(':omar-core-plugin')
     compile project(':omar-avro-plugin')
+    compile project(':omar-oms-plugin')
+    compile project(':omar-raster-plugin')
+    compile project(':omar-stager-plugin')
     compile project(':omar-ingest-metrics-plugin')
   }
 }

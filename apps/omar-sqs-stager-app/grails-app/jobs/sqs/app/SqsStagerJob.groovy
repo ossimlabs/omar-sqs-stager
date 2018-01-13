@@ -10,6 +10,7 @@ class SqsStagerJob {
    def sqsService
    def avroService
    def ingestMetricsService
+   def rasterDataSetService
    def concurrent = false
 
    static triggers = {
@@ -40,11 +41,11 @@ class SqsStagerJob {
       {
        //ingestdate = new Date().format("yyyy-MM-dd HH:mm:ss.SSS")
         //ingestdate = DateUtil.formatUTC(new Date())
-        def messagesToDelete = []
-        def messageBodyList  = []
         HashMap stagerParams = config.stager.params as HashMap
         messages?.each{message->
           try{
+            sqsService.deleteMessages(SqsUtils.sqsConfig.reader.queue,
+                                      [message])
             if(sqsService.checkMd5(message.mD5OfBody, message.body))
             {
               println "Got message and now parsing"
@@ -53,24 +54,25 @@ class SqsStagerJob {
               println "Downloading"
               // log message parsed
               def downloadResult = sqsService.downloadFile(jsonMessage)
-              println downloadResult.message
+              if(downloadResult.message) println downloadResult.message
               stagerParams.filename = downloadResult.destination
               println "Staging"
               def stageFileResult = sqsService.stageFileJni(stagerParams)
-              println stageFileResult.message
+              if(stageFileResult.message) println stageFileResult.message
               println "Getting XML"
               HashMap dataInfoResult = sqsService.getDataInfo(downloadResult.destination)
-              println dataInfoResult.message
-              println "Posting XML"
-              HashMap postResult = sqsService.postXml(config?.stager?.addRaster?.url, 
-                                                      dataInfoResult?.xml)
-              println postResult.message
-              messagesToDelete << message
+              if(dataInfoResult.message) println dataInfoResult.message
+              HashMap addRasterResult = rasterDataSetService.addRasterXml(dataInfoResult?.xml)
+             
+              println addRasterResult
+             // println "Posting XML"
+             // HashMap postResult = sqsService.postXml(config?.stager?.addRaster?.url, 
+             //                                         dataInfoResult?.xml)
+             // println postResult.message
             }
             else
             {
               log.error "ERROR: BAD MD5 Checksum For Message: ${messageBody}"
-              messagesToDelete << message
             }
           }
           catch(e)
@@ -78,14 +80,7 @@ class SqsStagerJob {
             //e.printStackTrace()
             log.error "ERROR: ${e.toString()}"
           }
-
-          messageBodyList = []
         }
-        if(messagesToDelete) sqsService.deleteMessages(
-                                       SqsUtils.sqsConfig.reader.queue,
-                                       messagesToDelete)
-        messagesToDelete = []
-
       }
     }
   }
