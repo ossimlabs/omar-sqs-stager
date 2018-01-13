@@ -55,11 +55,13 @@ class SqsStagerJob {
               def downloadResult = sqsService.downloadFile(jsonMessage)
               println downloadResult.message
               stagerParams.filename = downloadResult.destination
+              println "Staging"
               def stageFileResult = sqsService.stageFileJni(stagerParams)
               println stageFileResult.message
+              println "Getting XML"
               HashMap dataInfoResult = sqsService.getDataInfo(downloadResult.destination)
               println dataInfoResult.message
-
+              println "Getting XML"
               HashMap postResult = sqsService.postXml(config?.stager?.addRaster?.url, 
                                                       dataInfoResult?.xml)
               println postResult.message
