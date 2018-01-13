@@ -173,13 +173,14 @@ class SqsService {
    }
    HashMap downloadFile(def message)
    {
-      HashMap result = [errorMessage:"",
-                    requestMethod: "downloadFile",
-                    source:"",
-                    destination:"",
-                    startTime:new Date(),
-                    endTime:null,
-                    duration:0]
+      HashMap result = [status: HttpStatus.OK,
+                        message:"",
+                        requestMethod: "downloadFile",
+                        source:"",
+                        destination:"",
+                        startTime:new Date(),
+                        endTime:null,
+                        duration:0]
       def jsonObj = message
       String location
 
@@ -203,7 +204,8 @@ class SqsService {
                   sleepInMillis: OmarAvroUtils.avroConfig.createDirectoryRetryWaitInMillis.toInteger()
                   ]
           result.destination = fullPathLocation.toString()
-
+          ingestMetricsService.startIngest(fullPathLocation.toString())
+          ingestMetricsService.startCopy(fullPathLocation.toString())
           if(!fullPathLocation.exists())
           {
             if(AvroMessageUtils.tryToCreateDirectory(testPath, tryToCreateDirectoryConfig))
@@ -224,24 +226,30 @@ class SqsService {
             }
             else
             {
-              errorMessage = "Unable to create directory ${testPath}"
+              result.status = HttpStatus.NOT_FOUND
+              result.message = "Unable to create directory ${testPath}"
+              ingestMetricsService.setStatus( filename, ProcessStatus.FAILED, "Unable to process file ${params.filename} with ERROR: ${e}" )
             }
           }
           else
           {
-            result.errorMessage = "${fullPathLocation} already exists and will not be downloaded again"
+            result.status = HttpStatus.NOT_FOUND
+            result.message = "${fullPathLocation} already exists and will not be downloaded again"
             result.fileSize    = fullPathLocation.size()
           }
+          ingestMetricsService.endCopy(fullPathLocation.toString())
         }
         else
         {
-          result.errorMessage = "No source URI was found for download"
+          result.status = HttpStatus.NOT_FOUND
+          result.message = "No source URI was found for download"
         }
 
       }
       catch(e)
       {
-        result.errorMessage = e.toString()
+        result.status = HttpStatus.NOT_FOUND
+        result.message = e.toString()
       }
 
       result.endTime = new Date()
@@ -341,14 +349,17 @@ class SqsService {
     {
       //result.status = HttpStatus.UNSUPPORTED_MEDIA_TYPE
       result.message = "Unable to process file ${params.filename} with ERROR: ${e}"
-      log.error "${e.toString()}"
       ingestMetricsService.setStatus( filename, ProcessStatus.FAILED, "Unable to process file ${params.filename} with ERROR: ${e}" )
     }
     finally{
       imageStager?.delete()
       imageStager = null
-    }
 
+    }
+    if(result.status != HttpStatus.OK)
+    {
+      ingestMetricsService.setStatus( filename, ProcessStatus.FAILED, result.message?.toString() )
+    }
     result
   }
   HashMap getDataInfo(String filename, Integer entryId=null)

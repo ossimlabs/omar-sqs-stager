@@ -25,11 +25,6 @@ class SqsStagerJob {
     // log the error and return
     //
     Boolean okToProceed = true
-    if(!config?.stager?.addRaster?.url)
-    {
-      // need to log error
-      okToProceed = false
-    }
     if(!config?.reader?.queue)
     {
       // need to log error
@@ -63,12 +58,9 @@ class SqsStagerJob {
               HashMap dataInfoResult = sqsService.getDataInfo(downloadResult.destination)
               if(dataInfoResult.message) println dataInfoResult.message
               HashMap addRasterResult = rasterDataSetService.addRasterXml(dataInfoResult?.xml)
+              ingestMetricsService.endIngest(stagerParams.filename)
              
               println addRasterResult
-             // println "Posting XML"
-             // HashMap postResult = sqsService.postXml(config?.stager?.addRaster?.url, 
-             //                                         dataInfoResult?.xml)
-             // println postResult.message
             }
             else
             {
@@ -82,6 +74,10 @@ class SqsStagerJob {
           }
         }
       }
+    }
+    else
+    {
+
     }
   }
 }
