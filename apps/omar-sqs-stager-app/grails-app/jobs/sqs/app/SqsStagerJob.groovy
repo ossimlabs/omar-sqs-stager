@@ -69,40 +69,59 @@ class SqsStagerJob {
 
               // log message parsed
               def downloadResult = sqsService.downloadFile(jsonMessage)
-              messageInfo.downloadStartTime = downloadResult.startTime
-              messageInfo.downloadEndTime   = downloadResult.endTime
+              messageInfo.downloadStartTime = DateUtil.formatUTC(downloadResult.startTime)
+              messageInfo.downloadEndTime   = DateUtil.formatUTC(downloadResult.endTime)
               messageInfo.downloadDuration  = downloadResult.duration/1000
               messageInfo.duration         += messageInfo.downloadDuration
               messageInfo.sourceUri         = downloadResult.source 
               messageInfo.filename          = downloadResult.destination 
               stagerParams.filename         = downloadResult.destination
               log.info "MessageId: ${messageInfo.messageId}: Downloaded ${downloadResult.source} to ${downloadResult.destination}: ${downloadResult.message}"
-              log.info "MessageId: ${messageInfo.messageId}: Staging file ${stagerParams.filename} with message id: ${messageInfo.messageId}"
+              log.info "MessageId: ${messageInfo.messageId}: Staging file ${stagerParams.filename}"
+              
               def stageFileResult = sqsService.stageFileJni(stagerParams)
               if(stageFileResult.status != HttpStatus.OK) log.error stageFileResult.message
-              messageInfo.stageStartTime = stageFileResult.startTime
-              messageInfo.stageEndTime = stageFileResult.endTime
+              messageInfo.stageStartTime = DateUtil.formatUTC(stageFileResult.startTime)
+              messageInfo.stageEndTime = DateUtil.formatUTC(stageFileResult.endTime)
               messageInfo.stageDuration = stageFileResult.duration/1000
               messageInfo.duration += messageInfo.stageDuration
+              if(stageFileResult?.status == HttpStatus.UNSUPPORTED_MEDIA_TYPE)
+              {
+                try
+                {
+                  log.error "Deleting file ${downloadResult.destination} with source URL: ${downloadResult.source}"
+                  if(downloadResult?.destination){
+                    File localFile = new File(downloadResult.destination)
+                    if(localFile.exists()) localFile.delete()
+                  } 
+                }
+                catch(e)
+                {
+                  log.error "Unable to delete file ${downloadResult.destination} Error: ${e}" 
+                }
+              }
 
-              log.info "MessageId: ${messageInfo.messageId}: Getting XML from file ${stagerParams.filename}"
-              HashMap dataInfoResult = sqsService.getDataInfo(downloadResult.destination)
-              messageInfo.dataInfoStartTime = dataInfoResult.startTime
-              messageInfo.dataInfoEndTime   = dataInfoResult.endTime
-              messageInfo.dataInfoDuration  = dataInfoResult.duration/1000
-              messageInfo.duration         += messageInfo.dataInfoDuration
-              if(dataInfoResult.status != HttpStatus.OK) log.error dataInfoResult.message
+              if(stageFileResult?.status != HttpStatus.UNSUPPORTED_MEDIA_TYPE)
+              {
+                log.info "MessageId: ${messageInfo.messageId}: Getting XML from file ${stagerParams.filename}"
+                HashMap dataInfoResult = sqsService.getDataInfo(downloadResult.destination)
+                messageInfo.dataInfoStartTime = DateUtil.formatUTC(dataInfoResult.startTime)
+                messageInfo.dataInfoEndTime   = DateUtil.formatUTC(dataInfoResult.endTime)
+                messageInfo.dataInfoDuration  = dataInfoResult.duration/1000
+                messageInfo.duration         += messageInfo.dataInfoDuration
+                if(dataInfoResult.status != HttpStatus.OK) log.error dataInfoResult.message
 
+                log.info "MessageId: ${messageInfo.messageId}: Indexing file ${stagerParams.filename}"
+                HashMap addRasterResult     = rasterDataSetService.addRasterXml(dataInfoResult?.xml)
+                ingestMetricsService.endIngest(messageInfo.filename)
+                messageInfo.indexStartTime  = DateUtil.formatUTC(addRasterResult.startTime)
+                messageInfo.indexEndTime    = DateUtil.formatUTC(addRasterResult.endTime)
+                messageInfo.indexDuration   = addRasterResult.duration/1000
+                messageInfo.duration       += messageInfo.indexDuration
+                messageInfo.metadata        = addRasterResult.metadata
+                if(addRasterResult.status  != HttpStatus.OK) log.error addRasterResult.message
 
-              log.info "MessageId: ${messageInfo.messageId}: Indexing file ${stagerParams.filename}"
-              HashMap addRasterResult = rasterDataSetService.addRasterXml(dataInfoResult?.xml)
-              ingestMetricsService.endIngest(messageInfo.filename)
-              messageInfo.indexStartTime  = addRasterResult.startTime
-              messageInfo.indexEndTime    = addRasterResult.endTime
-              messageInfo.indexDuration   = addRasterResult.duration/1000
-              messageInfo.duration       += messageInfo.indexDuration
-              messageInfo.metadata        = addRasterResult.metadata
-              if(addRasterResult.status != HttpStatus.OK) log.error addRasterResult.message
+              }
 
               log.info "MessageId: ${messageInfo.messageId}: Finished processing message ${messageInfo}"
               log.info new JsonBuilder(messageInfo).toString()

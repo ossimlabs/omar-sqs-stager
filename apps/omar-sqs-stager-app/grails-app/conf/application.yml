@@ -16,15 +16,12 @@ omar:
       # After no messages are found the backgroun process will then "SLEEP" for "pollingIntervalSeconds".
       pollingIntervalSeconds: 3
     stager:
+      deleteIfNotSupported: false
       params:
         buildHistograms: "true"
         buildOverviews: "true"
         overviewCompressionType: "NONE"
         overviewType: "ossim_tiff_box"
-      destination:
-        type: "post"
-        post:
-          urlEndPoint: "http://omar-stager-app:8080/omar-stager/addRaster"
 ---
 omar:
   avro:
