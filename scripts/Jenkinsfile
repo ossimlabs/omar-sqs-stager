@@ -75,8 +75,8 @@ node("master"){
                             passwordVariable: 'ARTIFACTORY_PASSWORD']])
             {
                sh """
-                pushd ${workspaceDir}/${appName}/apps/${appName}-app
-                ./gradlew artifactoryPublish
+                pushd ${workspaceDir}/${appName}
+                ./gradlew ${appName}-app:artifactoryPublish
                 popd
                 """
             }
@@ -91,8 +91,8 @@ node("master"){
         {
             // Run all tasks on the app. This includes pushing to OpenShift and S3.
             sh """
-            pushd ${workspaceDir}/${appName}/apps/${appName}-app
-            ./gradlew ${GRADLE_TASK}
+            pushd ${workspaceDir}/${appName}
+            ./gradlew :${appName}-app:${GRADLE_TASK}
             popd
             """
         }
