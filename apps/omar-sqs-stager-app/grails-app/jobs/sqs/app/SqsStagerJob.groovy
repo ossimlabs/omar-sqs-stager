@@ -36,7 +36,6 @@ class SqsStagerJob {
     {
       while(messages = sqsService?.receiveMessages())
       {
-       //ingestdate = new Date().format("yyyy-MM-dd HH:mm:ss.SSS")
         //ingestdate = DateUtil.formatUTC(new Date())
         HashMap stagerParams = config.stager.params as HashMap
         messages?.each{message->
@@ -77,7 +76,7 @@ class SqsStagerJob {
               messageInfo.sourceUri         = downloadResult.source 
               messageInfo.filename          = downloadResult.destination 
               stagerParams.filename         = downloadResult.destination
-              log.info "MessageId: ${messageInfo.messageId}: Download ${downloadResult.source} to ${downloadResult.destination}: ${downloadResult.message}"
+              log.info "MessageId: ${messageInfo.messageId}: Downloaded ${downloadResult.source} to ${downloadResult.destination}: ${downloadResult.message}"
               log.info "MessageId: ${messageInfo.messageId}: Staging file ${stagerParams.filename} with message id: ${messageInfo.messageId}"
               def stageFileResult = sqsService.stageFileJni(stagerParams)
               if(stageFileResult.status != HttpStatus.OK) log.error stageFileResult.message
@@ -122,7 +121,7 @@ class SqsStagerJob {
     }
     else
     {
-
+      log.error "No queue defined for SQS stager to read from."
     }
   }
 }
