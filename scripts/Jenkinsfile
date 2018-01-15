@@ -28,6 +28,15 @@ node("master"){
         dir(omarCommonProjName) {
             git branch: "${OSSIM_GIT_BRANCH}", url: "${GIT_PUBLIC_SERVER_URL}/${omarCommonProjName}.git"
         }
+        dir("omar-hibernate-spatial") {
+            git branch: "${OSSIM_GIT_BRANCH}", url: "${GIT_PUBLIC_SERVER_URL}/omar-hibernate-spatial.git"
+        }
+        dir("omar-ingest-metrics") {
+            git branch: "${OSSIM_GIT_BRANCH}", url: "${GIT_PUBLIC_SERVER_URL}/omar-ingest-metrics.git"
+        }
+        dir("omar-raster") {
+            git branch: "${OSSIM_GIT_BRANCH}", url: "${GIT_PUBLIC_SERVER_URL}/omar-raster.git"
+        }
         dir("omar-core"){
             git branch: "${OSSIM_GIT_BRANCH}", url: "${GIT_PUBLIC_SERVER_URL}/omar-core.git"
 
