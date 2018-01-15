@@ -18,14 +18,6 @@ class SqsStagerJob {
       simple repeatInterval: 1000l, name: 'SqsReaderTrigger', group: 'SqsReaderGroup'
    }
 
-
-/*            def raster_logs = new JsonBuilder(timestamp: startTime.format("yyyy-MM-dd hh:mm:ss.ms"), requestType: requestType,
-                requestMethod: requestMethod, status: result?.status, message: result?.message,
-                filetypes: fileTypes, filenames: filenames, acquisitionDates: acquisitionDates,
-                ingestDates: ingestDates, missionids: missionids, imageids: imageids, sensorids: sensorids)
-
-            log.info raster_logs.toString()
-*/
   def execute() {
     def messages
     def config = SqsUtils.sqsConfig
