@@ -1,22 +1,22 @@
 package sqs.app
 
-import grails.test.mixin.TestFor
-import spock.lang.Specification
+//import grails.test.mixin.TestFor
+//import spock.lang.Specification
 
 /**
  * See the API for {@link grails.test.mixin.services.ServiceUnitTestMixin} for usage instructions
  */
-@TestFor(SqsService)
-class SqsServiceSpec extends Specification {
+//@TestFor(SqsService)
+//class SqsServiceSpec extends Specification {
 
-    def setup() {
-    }
+//    def setup() {
+//    }
 
-    def cleanup() {
-    }
+//    def cleanup() {
+//    }
 
-    void "test something"() {
-        expect:"fix me"
-            true 
-    }
-}
+//    void "test something"() {
+//        expect:"fix me"
+//            true 
+//    }
+//}
