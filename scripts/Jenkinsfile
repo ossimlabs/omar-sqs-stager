@@ -15,7 +15,7 @@ node("master"){
     def workspaceDir = pwd()
     def appName = "omar-sqs-stager"
     def omarCommonProjName = "omar-common"
-    env.O2_DEV_HOME = worksspaceDir
+    env.O2_DEV_HOME = workspaceDir
     env.OMAR_COMMON_PROPERTIES="${workspaceDir}/${omarCommonProjName}/omar-common-properties.gradle"
 
     stage("Checkout"){
