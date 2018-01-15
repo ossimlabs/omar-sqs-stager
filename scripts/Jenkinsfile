@@ -13,7 +13,7 @@
 // TODO: get to run on any node
 node("master"){
     def workspaceDir = pwd()
-    def appName = "omar-sqs"
+    def appName = "omar-sqs-stager"
     def omarCommonProjName = "omar-common"
     env.OMAR_COMMON_PROPERTIES="${workspaceDir}/${omarCommonProjName}/omar-common-properties.gradle"
 
@@ -27,6 +27,30 @@ node("master"){
 
         dir(omarCommonProjName) {
             git branch: "${OSSIM_GIT_BRANCH}", url: "${GIT_PUBLIC_SERVER_URL}/${omarCommonProjName}.git"
+        }
+        dir("omar-core"){
+            git branch: "${OSSIM_GIT_BRANCH}", url: "${GIT_PUBLIC_SERVER_URL}/omar-core.git"
+
+        }
+        dir("omar-oms"){
+            git branch: "${OSSIM_GIT_BRANCH}", url: "${GIT_PUBLIC_SERVER_URL}/omar-oms.git"
+
+        }
+        dir("omar-raster"){
+            git branch: "${OSSIM_GIT_BRANCH}", url: "${GIT_PUBLIC_SERVER_URL}/omar-raster.git"
+
+        }
+        dir("omar-avro"){
+            git branch: "${OSSIM_GIT_BRANCH}", url: "${GIT_PUBLIC_SERVER_URL}/omar-avro.git"
+
+        }
+        dir("omar-stager"){
+            git branch: "${OSSIM_GIT_BRANCH}", url: "${GIT_PUBLIC_SERVER_URL}/omar-stager.git"
+
+        }
+        dir("omar-ingest-metrics"){
+            git branch: "${OSSIM_GIT_BRANCH}", url: "${GIT_PUBLIC_SERVER_URL}/omar-ingest-metrics.git"
+
         }
 
         notifyObj = load "${workspaceDir}/ossim-ci/jenkins/pipeline/notify.groovy"
