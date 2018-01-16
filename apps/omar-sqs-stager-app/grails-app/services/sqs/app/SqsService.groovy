@@ -228,7 +228,7 @@ class SqsService {
             {
               result.status = HttpStatus.NOT_FOUND
               result.message = "Unable to create directory ${testPath}"
-              ingestMetricsService.setStatus( filename, ProcessStatus.FAILED, "Unable to process file ${params.filename} with ERROR: ${e}" )
+              ingestMetricsService.setStatus( filename, ProcessStatus.FAILED.toString(), "Unable to process file ${params.filename} with ERROR: ${e}" )
             }
           }
           else
