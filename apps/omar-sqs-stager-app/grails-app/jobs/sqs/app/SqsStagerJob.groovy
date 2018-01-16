@@ -181,6 +181,13 @@ class SqsStagerJob {
                 messageInfo = indexRaster(messageInfo)
               }
 
+//              def addMetadataURL = OmarAvroUtils.avroConfig?.metadata?.addMetadataEndPoint
+//              if(addMetadataURL)
+//              {
+//                HttpUtils.postToAvroMetadata(addMetadataURL, messageRecord.message)
+//              }
+
+
               log.info "MessageId: ${messageInfo.messageId}: Finished processing"
               log.info new JsonBuilder(messageInfo).toString()
             }
