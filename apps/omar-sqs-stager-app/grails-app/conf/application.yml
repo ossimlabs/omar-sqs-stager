@@ -16,7 +16,10 @@ omar:
       # After no messages are found the backgroun process will then "SLEEP" for "pollingIntervalSeconds".
       pollingIntervalSeconds: 3
     stager:
+      # If a file is not supported you can set this option to true
+      # and will delete the file.
       deleteIfNotSupported: false
+      # These are the paramters used for building overviews and histograms
       params:
         buildHistograms: "true"
         buildOverviews: "true"
