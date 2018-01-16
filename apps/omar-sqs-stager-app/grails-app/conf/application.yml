@@ -42,6 +42,8 @@ omar:
     # If you leave this blank "" then it will default to parsing an ISO8601 date.
     # Typically left blank.
     dateFieldFormat: ""
+    destination:
+      type: ""
     # This is the download specifications
     download:
       # This is the directory prefix where the file will be downloaded.
