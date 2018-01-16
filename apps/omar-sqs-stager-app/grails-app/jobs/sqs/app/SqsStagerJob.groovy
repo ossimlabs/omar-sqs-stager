@@ -186,7 +186,7 @@ class SqsStagerJob {
               if(addMetadataURL)
               {
                 log.info "Posting Avro Metadata to ${addMetadataURL}..."
-                HashMap avroMetadataResult = HttpUtils.postToAvroMetadata(addMetadataURL, message.toString())
+                HashMap avroMetadataResult = HttpUtils.postToAvroMetadata(addMetadataURL, message.body.toString())
                 if(avroMetadataResult?.status != HttpStatus.OK)
                 {
                   log.error "Unable to post metadata.  ERROR: ${avroMetadataResult.message}"
