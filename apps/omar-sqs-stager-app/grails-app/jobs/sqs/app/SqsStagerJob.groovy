@@ -5,6 +5,7 @@ import groovy.json.JsonSlurper
 import omar.core.DateUtil
 import omar.avro.HttpUtils
 import omar.core.HttpStatus
+import omar.avro.OmarAvroUtils
 import groovy.json.JsonBuilder
 
 class SqsStagerJob {
@@ -181,11 +182,16 @@ class SqsStagerJob {
                 messageInfo = indexRaster(messageInfo)
               }
 
-//              def addMetadataURL = OmarAvroUtils.avroConfig?.metadata?.addMetadataEndPoint
-//              if(addMetadataURL)
-//              {
-//                HttpUtils.postToAvroMetadata(addMetadataURL, messageRecord.message)
-//              }
+              def addMetadataURL = OmarAvroUtils.avroConfig?.metadata?.addMetadataEndPoint
+              if(addMetadataURL)
+              {
+                log.info "Posting Avro Metadata to ${addMetadataURL}..."
+                HashMap avroMetadataResult = HttpUtils.postToAvroMetadata(addMetadataURL, message.toString())
+                if(avroMetadataResult?.status != HttpStatus.OK)
+                {
+                  log.error "Unable to post metadata.  ERROR: ${avroMetadataResult.message}"
+                }
+              }
 
 
               log.info "MessageId: ${messageInfo.messageId}: Finished processing"
