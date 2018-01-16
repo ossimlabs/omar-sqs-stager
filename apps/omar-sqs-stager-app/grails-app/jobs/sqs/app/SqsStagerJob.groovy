@@ -152,7 +152,7 @@ class SqsStagerJob {
                                   messageId:null,
                                   sourceUri: "",
                                   filename: "",
-                                  startTime: DateUtil.formatUTC(new Date), 
+                                  startTime: DateUtil.formatUTC(new Date()), 
                                   downloadStartTime:null,
                                   downloadEndTime: null,
                                   downloadDuration: 0,
@@ -183,7 +183,7 @@ class SqsStagerJob {
                 messageInfo = indexRaster(messageInfo)
               }
               messageInfo.endTime = DateUtil.formatUTC(new Date())
-              
+
               def addMetadataURL = OmarAvroUtils.avroConfig?.metadata?.addMetadataEndPoint
               if(addMetadataURL)
               {
