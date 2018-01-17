@@ -7,9 +7,16 @@ appender('STDOUT', ConsoleAppender) {
         pattern = "%level %logger - %msg%n"
     }
 }
+// This appender is used to only print the message, such as when printing JSON to
+// be parsed by Elasticsearch
+appender('NO_HEADER', ConsoleAppender) {
+    encoder(PatternLayoutEncoder) {
+        pattern = "%msg%n"
+    }
+}
 
 root(ERROR, ['STDOUT'])
-logger("omar.sqs",INFO,['STDOUT'], false)
+logger("sqs.app.SqsStagerJob",INFO,['NO_HEADER'], false)
 
 def targetDir = BuildSettings.TARGET_DIR
 if (Environment.isDevelopmentMode() && targetDir) {

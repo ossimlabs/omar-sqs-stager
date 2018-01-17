@@ -1,4 +1,8 @@
+logging:
+  config: "classpath:logback.groovy"
+
 ---
+
 omar:
   sqs:
     reader:
