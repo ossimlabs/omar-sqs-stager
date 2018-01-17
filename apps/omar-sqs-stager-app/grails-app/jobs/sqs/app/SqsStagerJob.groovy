@@ -112,7 +112,7 @@ class SqsStagerJob {
         result.indexStatus     = addRasterResult.status
         result.indexMessage    = addRasterResult.message
         result.duration       += result.indexDuration
-        result.metadata        = addRasterResult.metadata
+        if(addRasterResult.metadata) result = result<< addRasterResult.metadata
         log.info "MessageId: ${messageInfo.messageId}: Indexed file ${messageInfo.filename} with status ${messageInfo.indexMessage}"
       }
       else
@@ -182,20 +182,27 @@ class SqsStagerJob {
               {
                 messageInfo = indexRaster(messageInfo)
               }
-              messageInfo.endTime = DateUtil.formatUTC(new Date())
 
               def addMetadataURL = OmarAvroUtils.avroConfig?.metadata?.addMetadataEndPoint
               if(addMetadataURL)
               {
+                Date postAvroMetadataStartTime = new Date()
                 log.info "Posting Avro Metadata to ${addMetadataURL}..."
                 HashMap avroMetadataResult = HttpUtils.postToAvroMetadata(addMetadataURL, message.body.toString())
                 if(avroMetadataResult?.status != HttpStatus.OK)
                 {
                   log.error "Unable to post metadata.  ERROR: ${avroMetadataResult.message}"
                 }
+                Date postAvroMetadataEndTime = new Date()
+                Integer duration = (postAvroMetadataEndTime.time - postAvroMetadataStartTime.time)/1000
+                messageInfo.postAvroMetadataStartTime = DateUtil.formatUTC(postAvroMetadataStartTime)
+                messageInfo.postAvroMetadataEndTime = DateUtil.formatUTC(postAvroMetadataEndTime)
+                messageInfo.postAvroMetadataDuration = duration
+                messageInfo.duration += duration
               }
+              messageInfo.endTime = DateUtil.formatUTC(new Date())
 
-              log.info "MessageId: ${messageInfo.messageId}: Finished processing"
+              log.info "MessageId: ${messageInfo.messageId}: Finished processing..."
               log.info new JsonBuilder(messageInfo).toString()
             }
             else
