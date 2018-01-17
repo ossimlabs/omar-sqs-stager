@@ -33,6 +33,7 @@ class SqsStagerJob {
       result.duration         += result.downloadDuration
       result.sourceUri         = downloadResult.source 
       result.filename          = downloadResult.destination 
+      result.fileSize          = downloadResult.fileSize?:0
       log.info "MessageId: ${messageInfo.messageId}: Downloaded ${downloadResult.source} to ${downloadResult.destination}: ${downloadResult.message}"
     }
     catch(e)
@@ -142,13 +143,15 @@ class SqsStagerJob {
       // need to log error
       okToProceed = false
     }
+    HashMap messageInfo
     if(okToProceed)
     {
       while(messages = sqsService?.receiveMessages())
       {
         //ingestdate = DateUtil.formatUTC(new Date())
         messages?.each{message->
-          HashMap messageInfo = [ requestMethod: "SqsStagerJob",
+          messageInfo = [ requestMethod: "SqsStagerJob",
+                          status: HttpStatus.OK,
                                   messageId:null,
                                   sourceUri: "",
                                   filename: "",
@@ -181,25 +184,31 @@ class SqsStagerJob {
               if(messageInfo.stageStatus != HttpStatus.UNSUPPORTED_MEDIA_TYPE)
               {
                 messageInfo = indexRaster(messageInfo)
+
+                def addMetadataURL = OmarAvroUtils.avroConfig?.metadata?.addMetadataEndPoint
+                if(addMetadataURL)
+                {
+                  Date postAvroMetadataStartTime = new Date()
+                  log.info "Posting Avro Metadata to ${addMetadataURL}..."
+                  HashMap avroMetadataResult = HttpUtils.postToAvroMetadata(addMetadataURL, message.body.toString())
+                  if(avroMetadataResult?.status != HttpStatus.OK)
+                  {
+                    log.error "Unable to post metadata.  ERROR: ${avroMetadataResult.message}"
+                  }
+                  Date postAvroMetadataEndTime = new Date()
+                  def duration = (postAvroMetadataEndTime.time - postAvroMetadataStartTime.time)/1000.0
+                  messageInfo.postAvroMetadataStartTime = DateUtil.formatUTC(postAvroMetadataStartTime)
+                  messageInfo.postAvroMetadataEndTime = DateUtil.formatUTC(postAvroMetadataEndTime)
+                  messageInfo.postAvroMetadataDuration = duration
+                  messageInfo.duration += duration
+                }
+              }
+              else
+              {
+                messageInfo.status = HttpStatus.UNSUPPORTED_MEDIA_TYPE
+                messageInfo.statusMessage = messageInfo.stageMessage   
               }
 
-              def addMetadataURL = OmarAvroUtils.avroConfig?.metadata?.addMetadataEndPoint
-              if(addMetadataURL)
-              {
-                Date postAvroMetadataStartTime = new Date()
-                log.info "Posting Avro Metadata to ${addMetadataURL}..."
-                HashMap avroMetadataResult = HttpUtils.postToAvroMetadata(addMetadataURL, message.body.toString())
-                if(avroMetadataResult?.status != HttpStatus.OK)
-                {
-                  log.error "Unable to post metadata.  ERROR: ${avroMetadataResult.message}"
-                }
-                Date postAvroMetadataEndTime = new Date()
-                def duration = (postAvroMetadataEndTime.time - postAvroMetadataStartTime.time)/1000.0
-                messageInfo.postAvroMetadataStartTime = DateUtil.formatUTC(postAvroMetadataStartTime)
-                messageInfo.postAvroMetadataEndTime = DateUtil.formatUTC(postAvroMetadataEndTime)
-                messageInfo.postAvroMetadataDuration = duration
-                messageInfo.duration += duration
-              }
               messageInfo.endTime = DateUtil.formatUTC(new Date())
 
               log.info "MessageId: ${messageInfo.messageId}: Finished processing..."
@@ -207,18 +216,27 @@ class SqsStagerJob {
             }
             else
             {
+              messageInfo.status = HttpStatus.BAD_REQUEST
+              messageInfo.statusMessage = "MessageId: ${messageInfo.messageId} ERROR: BAD MD5 Checksum For Message: ${messageBody}"
               log.error "MessageId: ${messageInfo.messageId} ERROR: BAD MD5 Checksum For Message: ${messageBody}"
+              log.info new JsonBuilder(messageInfo).toString()
             }
           }
           catch(e)
           {
+            messageInfo.status = HttpStatus.NOT_FOUND
+            messageInfo.statusMessage = "MessageId: ${messageInfo.messageId} ERROR: ${e.toString()}"
             log.error "MessageId: ${messageInfo.messageId} ERROR: ${e.toString()}"
+            log.info new JsonBuilder(messageInfo).toString()
           }
         }
       }
     }
     else
     {
+      messageInfo.status = HttpStatus.NOT_FOUND
+      messageInfo.statusMessage = "No queue defined for SQS stager to read from."
+      log.info new JsonBuilder(messageInfo).toString()
       log.error "No queue defined for SQS stager to read from."
     }
   }

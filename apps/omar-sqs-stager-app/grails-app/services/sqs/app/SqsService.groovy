@@ -233,7 +233,7 @@ class SqsService {
           }
           else
           {
-            result.status = HttpStatus.NOT_FOUND
+            result.status = HttpStatus.FOUND
             result.message = "${fullPathLocation} already exists and will not be downloaded again"
             result.fileSize    = fullPathLocation.size()
           }
