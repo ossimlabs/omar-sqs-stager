@@ -129,6 +129,26 @@ class SqsStagerJob {
     }
     result
   }
+  HashMap newMessageInfo(){
+     [requestMethod: "SqsStagerJob",
+      status: HttpStatus.OK,
+      messageId:null,
+      sourceUri: "",
+      filename: "",
+      startTime: DateUtil.formatUTC(new Date()), 
+      downloadStartTime:null,
+      downloadEndTime: null,
+      downloadDuration: 0,
+      stageStartTime:null,
+      stageEndTime: null,
+      dataInfoStartTime:null,
+      dataInfoEndTime:null,
+      dataInfoDuration:0,
+      indexStartTime: null,
+      indexEndTime: null,
+      indexDuration: 0,
+      duration:0]  
+  }
   def execute() {
     def messages
     def config = SqsUtils.sqsConfig
@@ -150,63 +170,56 @@ class SqsStagerJob {
       {
         //ingestdate = DateUtil.formatUTC(new Date())
         messages?.each{message->
-          messageInfo = [ requestMethod: "SqsStagerJob",
-                          status: HttpStatus.OK,
-                                  messageId:null,
-                                  sourceUri: "",
-                                  filename: "",
-                                  startTime: DateUtil.formatUTC(new Date()), 
-                                  downloadStartTime:null,
-                                  downloadEndTime: null,
-                                  downloadDuration: 0,
-                                  stageStartTime:null,
-                                  stageEndTime: null,
-                                  dataInfoStartTime:null,
-                                  dataInfoEndTime:null,
-                                  dataInfoDuration:0,
-                                  indexStartTime: null,
-                                  indexEndTime: null,
-                                  indexDuration: 0,
-                                  duration:0]
+          messageInfo = newMessageInfo()
           try{
             messageInfo.messageId = message?.messageId
 
-            sqsService.deleteMessages(SqsUtils.sqsConfig.reader.queue,
-                                      [message])
+            sqsService.deleteMessages(SqsUtils.sqsConfig.reader.queue, [message])
             if(sqsService.checkMd5(message.mD5OfBody, message.body))
             {
               log.info "MessageId: ${messageInfo.messageId}"
               // log message start
               def jsonMessage = sqsService.parseMessage(message.body.toString())
               messageInfo = downloadFile(messageInfo,jsonMessage)
-              // log message parsed
-              messageInfo = stageFile(messageInfo)
-              if(messageInfo.stageStatus != HttpStatus.UNSUPPORTED_MEDIA_TYPE)
+              if(messageInfo.downloadStatus == HttpStatus.FOUND ||
+                 messageInfo.downloadStatus == HttpStatus.OK)
               {
-                messageInfo = indexRaster(messageInfo)
-
-                def addMetadataURL = OmarAvroUtils.avroConfig?.metadata?.addMetadataEndPoint
-                if(addMetadataURL)
+              // log message parsed
+                messageInfo = stageFile(messageInfo)
+                if(messageInfo.stageStatus != HttpStatus.UNSUPPORTED_MEDIA_TYPE)
                 {
-                  Date postAvroMetadataStartTime = new Date()
-                  log.info "Posting Avro Metadata to ${addMetadataURL}..."
-                  HashMap avroMetadataResult = HttpUtils.postToAvroMetadata(addMetadataURL, message.body.toString())
-                  if(avroMetadataResult?.status != HttpStatus.OK)
+                  messageInfo = indexRaster(messageInfo)
+
+                  def addMetadataURL = OmarAvroUtils.avroConfig?.metadata?.addMetadataEndPoint
+                  if(addMetadataURL)
                   {
-                    log.error "Unable to post metadata.  ERROR: ${avroMetadataResult.message}"
+                    Date postAvroMetadataStartTime = new Date()
+                    log.info "Posting Avro Metadata to ${addMetadataURL}..."
+                    HashMap avroMetadataResult = HttpUtils.postToAvroMetadata(addMetadataURL, message.body.toString())
+                    if(avroMetadataResult?.status != HttpStatus.OK)
+                    {
+                      log.error "Unable to post metadata.  ERROR: ${avroMetadataResult.message}"
+                      messageInfo.status = avroMetadataResult?.status
+                      messageInfo.statusMessage = "Unable to post metadata.  ERROR: ${avroMetadataResult.message}"
+                    }
+                    Date postAvroMetadataEndTime = new Date()
+                    def duration = (postAvroMetadataEndTime.time - postAvroMetadataStartTime.time)/1000.0
+                    messageInfo.postAvroMetadataStartTime = DateUtil.formatUTC(postAvroMetadataStartTime)
+                    messageInfo.postAvroMetadataEndTime = DateUtil.formatUTC(postAvroMetadataEndTime)
+                    messageInfo.postAvroMetadataDuration = duration
+                    messageInfo.duration += duration
                   }
-                  Date postAvroMetadataEndTime = new Date()
-                  def duration = (postAvroMetadataEndTime.time - postAvroMetadataStartTime.time)/1000.0
-                  messageInfo.postAvroMetadataStartTime = DateUtil.formatUTC(postAvroMetadataStartTime)
-                  messageInfo.postAvroMetadataEndTime = DateUtil.formatUTC(postAvroMetadataEndTime)
-                  messageInfo.postAvroMetadataDuration = duration
-                  messageInfo.duration += duration
+                }
+                else
+                {
+                  messageInfo.status = HttpStatus.UNSUPPORTED_MEDIA_TYPE
+                  messageInfo.statusMessage = messageInfo.stageMessage   
                 }
               }
               else
               {
-                messageInfo.status = HttpStatus.UNSUPPORTED_MEDIA_TYPE
-                messageInfo.statusMessage = messageInfo.stageMessage   
+                  messageInfo.status        = messageInfo.downloadStatus
+                  messageInfo.statusMessage = messageInfo.downloadMessage   
               }
 
               messageInfo.endTime = DateUtil.formatUTC(new Date())
