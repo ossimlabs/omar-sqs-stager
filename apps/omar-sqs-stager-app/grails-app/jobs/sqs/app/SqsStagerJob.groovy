@@ -194,7 +194,7 @@ class SqsStagerJob {
                   log.error "Unable to post metadata.  ERROR: ${avroMetadataResult.message}"
                 }
                 Date postAvroMetadataEndTime = new Date()
-                Integer duration = (postAvroMetadataEndTime.time - postAvroMetadataStartTime.time)/1000
+                def duration = (postAvroMetadataEndTime.time - postAvroMetadataStartTime.time)/1000.0
                 messageInfo.postAvroMetadataStartTime = DateUtil.formatUTC(postAvroMetadataStartTime)
                 messageInfo.postAvroMetadataEndTime = DateUtil.formatUTC(postAvroMetadataEndTime)
                 messageInfo.postAvroMetadataDuration = duration
