@@ -58,8 +58,6 @@ node(""){
             git branch: "${OSSIM_GIT_BRANCH}", url: "${GIT_PUBLIC_SERVER_URL}/omar-ingest-metrics.git"
 
         }
-
-        notifyObj = load "${workspaceDir}/ossim-ci/jenkins/pipeline/notify.groovy"
     }
     stage("Download Artifacts"){
        step ([$class: "CopyArtifact",
