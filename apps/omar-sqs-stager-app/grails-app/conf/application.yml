@@ -26,6 +26,10 @@ omar:
       #
       timestampAttribute: ""
       # If you want to only delete a message if no errors then set this flag
+      # Warning...You must have your SQS settings to allow the message to stay in flight long enough to be processed.  
+      # for if it doesn't delete then the message will be added back to the sqs queue.  If the queue
+      # settings are too short then it runs a risk of adding back to the queue from in flight status to ready
+      # and be processed again.
       deleteMessageIfNoError: false
     stager:
       # If a file is not supported you can set this option to true
