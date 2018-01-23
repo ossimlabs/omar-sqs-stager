@@ -18,6 +18,15 @@ omar:
       # By default it will keep calling the read request until no messages are found.
       # After no messages are found the backgroun process will then "SLEEP" for "pollingIntervalSeconds".
       pollingIntervalSeconds: 3
+      # If you know the message attribute for the timestamp of a message then you can specify it
+      # here.  We have not read anywhere for a standard timestamp name so we are adding a field to allow
+      # one to map to a message attribute timestamp
+      # We have seen in docs names such as "Timestamp, SentTimestamp, ... etc.  "
+      # check you queue message for attributes
+      #
+      timestampAttribute: ""
+      # If you want to only delete a message if no errors then set this flag
+      deleteMessageIfNoError: false
     stager:
       # If a file is not supported you can set this option to true
       # and will delete the file.

@@ -152,12 +152,13 @@ class SqsStagerJob {
   def execute() {
     def messages
     def config = SqsUtils.sqsConfig
-
+    String timestampAtributeName = config.reader.timestampAttribute?:""
     // do some validation
     // if these are not set then let's not pop any messages off and just
     // log the error and return
     //
     Boolean okToProceed = true
+    Boolean deleteIfNoErrorsFlag = config.reader.deleteMessageIfNoError?:false
     if(!config?.reader?.queue)
     {
       // need to log error
@@ -170,14 +171,18 @@ class SqsStagerJob {
       {
         //ingestdate = DateUtil.formatUTC(new Date())
         messages?.each{message->
+          Boolean okToDelete = true
           messageInfo = newMessageInfo()
           try{
             messageInfo.messageId = message?.messageId
-
-            sqsService.deleteMessages(SqsUtils.sqsConfig.reader.queue, [message])
+            // if the flag is not set then delete immediately
+            if(!deleteMessageIfNoError) sqsService.deleteMessages(SqsUtils.sqsConfig.reader.queue, [message])
             if(sqsService.checkMd5(message.mD5OfBody, message.body))
             {
-              log.info "MessageId: ${messageInfo.messageId}"
+              if(timestampAtributeName)
+              {
+                messageInfo.sqsTimestamp = message?.attrributres."${timestampAtributeName}"
+              }
               // log message start
               def jsonMessage = sqsService.parseMessage(message.body.toString())
               messageInfo = downloadFile(messageInfo,jsonMessage)
@@ -198,6 +203,7 @@ class SqsStagerJob {
                     HashMap avroMetadataResult = HttpUtils.postToAvroMetadata(addMetadataURL, message.body.toString())
                     if(avroMetadataResult?.status != HttpStatus.OK)
                     {
+                      okToDelete = false;
                       log.error "Unable to post metadata.  ERROR: ${avroMetadataResult.message}"
                       messageInfo.status = avroMetadataResult?.status
                       messageInfo.statusMessage = "Unable to post metadata.  ERROR: ${avroMetadataResult.message}"
@@ -218,6 +224,7 @@ class SqsStagerJob {
               }
               else
               {
+                  okToDelete = false;
                   messageInfo.status        = messageInfo.downloadStatus
                   messageInfo.statusMessage = messageInfo.downloadMessage   
               }
@@ -237,10 +244,16 @@ class SqsStagerJob {
           }
           catch(e)
           {
+            okToDelete = false;
             messageInfo.status = HttpStatus.NOT_FOUND
             messageInfo.statusMessage = "MessageId: ${messageInfo.messageId} ERROR: ${e.toString()}"
             log.error "MessageId: ${messageInfo.messageId} ERROR: ${e.toString()}"
             log.info new JsonBuilder(messageInfo).toString()
+          }
+
+          if(deleteMessageIfNoError&&okToDelete) 
+          {
+            sqsService.deleteMessages(config.reader.queue, [message])
           }
         }
       }
@@ -250,7 +263,7 @@ class SqsStagerJob {
       messageInfo.status = HttpStatus.NOT_FOUND
       messageInfo.statusMessage = "No queue defined for SQS stager to read from."
       log.info new JsonBuilder(messageInfo).toString()
-      log.error "No queue defined for SQS stager to read from."
+      log.error messageInfo.statusMessage
     }
   }
 }
