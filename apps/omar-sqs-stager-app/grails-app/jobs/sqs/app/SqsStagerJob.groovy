@@ -158,7 +158,7 @@ class SqsStagerJob {
     // log the error and return
     //
     Boolean okToProceed = true
-    Boolean deleteIfNoErrorsFlag = config.reader.deleteMessageIfNoError?:false
+    Boolean deleteMessageIfNoError = config.reader.deleteMessageIfNoError?:false
     if(!config?.reader?.queue)
     {
       // need to log error
