@@ -5,8 +5,8 @@ metadata:
   namespace: omar-dev
   selfLink: /oapi/v1/namespaces/omar-dev/deploymentconfigs/omar-sqs-stager-app
   uid: 88fef8c2-fad5-11e7-ba3b-0e704fd9c8b2
-  resourceVersion: '12942758'
-  generation: 26
+  resourceVersion: '14200595'
+  generation: 80
   creationTimestamp: '2018-01-16T15:54:29Z'
   labels:
     app: omar-sqs-stager-app
@@ -35,8 +35,8 @@ spec:
           namespace: openshift
           name: 'omar-sqs-stager-app:latest'
         lastTriggeredImage: >-
-          172.30.181.173:5000/openshift/omar-sqs-stager-app@sha256:111609584a87533e646bf98e87e9f57454368863d71c7e44102115e13140c6fd
-  replicas: 2
+          172.30.181.173:5000/openshift/omar-sqs-stager-app@sha256:6d4c64eb7cc92f8b28d6dbc4be2f50387126712de14173040f1e155fde3f7857
+  replicas: 1
   test: false
   selector:
     app: omar-sqs-stager-app
@@ -57,7 +57,7 @@ spec:
       containers:
         - name: omar-sqs-stager-app
           image: >-
-            172.30.181.173:5000/openshift/omar-sqs-stager-app@sha256:111609584a87533e646bf98e87e9f57454368863d71c7e44102115e13140c6fd
+            172.30.181.173:5000/openshift/omar-sqs-stager-app@sha256:6d4c64eb7cc92f8b28d6dbc4be2f50387126712de14173040f1e155fde3f7857
           ports:
             - containerPort: 8080
               protocol: TCP
@@ -90,32 +90,3 @@ spec:
       terminationGracePeriodSeconds: 30
       dnsPolicy: ClusterFirst
       securityContext: {}
-status:
-  latestVersion: 22
-  observedGeneration: 26
-  replicas: 2
-  updatedReplicas: 2
-  availableReplicas: 2
-  unavailableReplicas: 0
-  details:
-    message: image change
-    causes:
-      - type: ImageChange
-        imageTrigger:
-          from:
-            kind: ImageStreamTag
-            namespace: openshift
-            name: 'omar-sqs-stager-app:latest'
-  conditions:
-    - type: Progressing
-      status: 'True'
-      lastUpdateTime: '2018-01-17T12:50:41Z'
-      lastTransitionTime: '2018-01-17T12:50:39Z'
-      reason: NewReplicationControllerAvailable
-      message: replication controller "omar-sqs-stager-app-22" successfully rolled out
-    - type: Available
-      status: 'True'
-      lastUpdateTime: '2018-01-17T12:56:06Z'
-      lastTransitionTime: '2018-01-17T12:56:06Z'
-      message: Deployment config has minimum availability.
-  readyReplicas: 2
