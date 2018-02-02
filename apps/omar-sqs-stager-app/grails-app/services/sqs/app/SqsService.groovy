@@ -219,7 +219,7 @@ class SqsService {
                 }
                 else
                 {
-                  HttpUtils.downloadURIShell(commandString, fullPathLocation.toString(), sourceURI)
+                  HttpUtils.downloadURIShell(commandString, result.destination?.toString(), sourceURI)
                 }
                 result.fileSize    = fullPathLocation.size()
                 result.message = "Downloaded file to ${fullPathLocation}"
@@ -228,7 +228,7 @@ class SqsService {
             {
               result.status = HttpStatus.NOT_FOUND
               result.message = "Unable to create directory ${testPath}"
-              ingestMetricsService.setStatus( filename, ProcessStatus.FAILED.toString(), "Unable to process file ${params.filename} with ERROR: ${e}" )
+              ingestMetricsService.setStatus( result.destination, ProcessStatus.FAILED.toString(), "Unable to process file ${result.source} with ERROR: ${e}" )
             }
           }
           else
