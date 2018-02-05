@@ -11,7 +11,6 @@ import groovy.json.JsonBuilder
 class SqsStagerJob {
    def sqsService
    def avroService
-   def ingestMetricsService
    def rasterDataSetService
    def concurrent = false
 
@@ -106,7 +105,6 @@ class SqsStagerJob {
       {
         log.info "MessageId: ${messageInfo.messageId}: Indexing file ${messageInfo.filename}"
         HashMap addRasterResult     = rasterDataSetService.addRasterXml(dataInfoResult?.xml)
-        ingestMetricsService.endIngest(messageInfo.filename)
         result.indexStartTime  = DateUtil.formatUTC(addRasterResult.startTime)
         result.indexEndTime    = DateUtil.formatUTC(addRasterResult.endTime)
         result.indexDuration   = addRasterResult.duration/1000
