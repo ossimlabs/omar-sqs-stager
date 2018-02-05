@@ -55,7 +55,6 @@ import omar.core.ProcessStatus
 //@Transactional
 class SqsService {
    def avroService
-   def ingestMetricsService
    AmazonSQSClient sqs
    static Boolean checkMd5(String messageBodyMd5, String message)
    {
@@ -204,8 +203,6 @@ class SqsService {
                   sleepInMillis: OmarAvroUtils.avroConfig.createDirectoryRetryWaitInMillis.toInteger()
                   ]
           result.destination = fullPathLocation.toString()
-          ingestMetricsService.startIngest(fullPathLocation.toString())
-          ingestMetricsService.startCopy(fullPathLocation.toString())
           if(!fullPathLocation.exists())
           {
             if(AvroMessageUtils.tryToCreateDirectory(testPath, tryToCreateDirectoryConfig))
@@ -228,7 +225,6 @@ class SqsService {
             {
               result.status = HttpStatus.NOT_FOUND
               result.message = "Unable to create directory ${testPath}"
-              ingestMetricsService.setStatus( result.destination, ProcessStatus.FAILED.toString(), "Unable to process file ${result.source} With ERROR: ${result.message}" )
             }
           }
           else
@@ -237,7 +233,6 @@ class SqsService {
             result.message = "${fullPathLocation} already exists and will not be downloaded again"
             result.fileSize    = fullPathLocation.size()
           }
-          ingestMetricsService.endCopy(fullPathLocation.toString())
         }
         else
         {
@@ -277,7 +272,6 @@ class SqsService {
 
     try
     {
-      ingestMetricsService.startStaging( filename )
       ingestdate = new Date()
 
       if ( imageStager.open( filename ) )
@@ -333,22 +327,16 @@ class SqsService {
       result.endTime = new Date()
 
       result.duration = (result.endTime.time-result.startTime.time)
-      ingestMetricsService.endStaging( filename )
     }
     catch ( e )
     {
       //result.status = HttpStatus.UNSUPPORTED_MEDIA_TYPE
       result.message = "Unable to process file ${params.filename} with ERROR: ${e}"
-      ingestMetricsService.setStatus( filename, ProcessStatus.FAILED.toString(), "Unable to process file ${params.filename} with ERROR: ${e}" )
     }
     finally{
       imageStager?.delete()
       imageStager = null
 
-    }
-    if(result.status != HttpStatus.OK)
-    {
-      ingestMetricsService.setStatus( filename, ProcessStatus.FAILED.toString(), result.message?.toString() )
     }
     result
   }
