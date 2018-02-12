@@ -178,7 +178,7 @@ class SqsStagerJob {
           try{
             messageInfo.messageId = message?.messageId
             println "JSON Message\n${message}"
-            messageInfo.sqsTimestamp = message?."${timestampName}"?:""
+            messageInfo.sqsTimestamp = message?.body?."${timestampName}"?:""
             println "SQS Timestamp: ${messageInfo.sqsTimestamp}"
 
             // if the flag is not set then delete immediately
