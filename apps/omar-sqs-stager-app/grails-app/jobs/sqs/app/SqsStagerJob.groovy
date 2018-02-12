@@ -151,9 +151,7 @@ class SqsStagerJob {
   def execute() {
     def messages
     def config = SqsUtils.sqsConfig
-    String timestampName = config.reader.timestampName?:""
-    println "*" * 40
-    println "Timestamp Name: ${timestampName}"
+
     // do some validation
     // if these are not set then let's not pop any messages off and just
     // log the error and return
@@ -168,6 +166,9 @@ class SqsStagerJob {
     HashMap messageInfo
     if(okToProceed)
     {
+      String timestampName = config.reader.timestampName?:""
+      println "*" * 40
+      println "Timestamp Name: ${timestampName}"
       while(messages = sqsService?.receiveMessages())
       {
         //ingestdate = DateUtil.formatUTC(new Date())
@@ -176,18 +177,18 @@ class SqsStagerJob {
           messageInfo = newMessageInfo()
           try{
             messageInfo.messageId = message?.messageId
+            println "JSON Message\n${message?}"
+            if(timestampName)
+            {
+                messageInfo.sqsTimestamp = message?."${timestampName}"?:""
+                println "SQS Timestamp: ${messageInfo.sqsTimestamp}"
+            }
             // if the flag is not set then delete immediately
             if(!deleteMessageIfNoError) sqsService.deleteMessages(SqsUtils.sqsConfig.reader.queue, [message])
             if(sqsService.checkMd5(message.mD5OfBody, message.body))
             {
               // log message start
               def jsonMessage = sqsService.parseMessage(message.body.toString())
-               println "JSON Message\n${jsonMessage}"
-              if(timestampName)
-              {
-                messageInfo.sqsTimestamp = jsonMessage?."${timestampName}"?:""
-                 println "SQS Timestamp: ${messageInfo.sqsTimestamp}"
-              }
               messageInfo = downloadFile(messageInfo,jsonMessage)
               if(messageInfo.downloadStatus == HttpStatus.FOUND ||
                  messageInfo.downloadStatus == HttpStatus.OK)
