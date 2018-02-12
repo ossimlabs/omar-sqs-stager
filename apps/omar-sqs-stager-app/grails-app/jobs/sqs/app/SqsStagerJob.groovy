@@ -167,8 +167,7 @@ class SqsStagerJob {
     if(okToProceed)
     {
       String timestampName = config.reader.timestampName?:""
-      println "*" * 40
-      println "Timestamp Name: ${timestampName}"
+
       while(messages = sqsService?.receiveMessages())
       {
         //ingestdate = DateUtil.formatUTC(new Date())
@@ -177,10 +176,8 @@ class SqsStagerJob {
           messageInfo = newMessageInfo()
           try{
             messageInfo.messageId = message?.messageId
-            println "JSON Message\n${message}"
             def json = new JsonSlurper().parseText(message?.body)
             messageInfo.sqsTimestamp = json."${timestampName}"?:""
-            println "SQS Timestamp: ${messageInfo.sqsTimestamp}"
 
             // if the flag is not set then delete immediately
             if(!deleteMessageIfNoError) sqsService.deleteMessages(SqsUtils.sqsConfig.reader.queue, [message])
