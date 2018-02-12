@@ -178,11 +178,9 @@ class SqsStagerJob {
           try{
             messageInfo.messageId = message?.messageId
             println "JSON Message\n${message}"
-            if(timestampName)
-            {
-                messageInfo.sqsTimestamp = message?."${timestampName}"?:""
-                println "SQS Timestamp: ${messageInfo.sqsTimestamp}"
-            }
+            messageInfo.sqsTimestamp = message?."${timestampName}"?:""
+            println "SQS Timestamp: ${messageInfo.sqsTimestamp}"
+
             // if the flag is not set then delete immediately
             if(!deleteMessageIfNoError) sqsService.deleteMessages(SqsUtils.sqsConfig.reader.queue, [message])
             if(sqsService.checkMd5(message.mD5OfBody, message.body))
