@@ -182,7 +182,7 @@ class SqsStagerJob {
             {
               // log message start
               def jsonMessage = sqsService.parseMessage(message.body.toString())
-               println "JSON Message/n${jsonMessage}"
+               println "JSON Message\n${jsonMessage}"
               if(timestampName)
               {
                 messageInfo.sqsTimestamp = jsonMessage?."${timestampName}"?:""
