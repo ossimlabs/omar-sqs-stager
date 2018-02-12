@@ -178,8 +178,14 @@ class SqsStagerJob {
           try{
             messageInfo.messageId = message?.messageId
             def json = new JsonSlurper().parseText(message?.body?:"")
-            String 
-            messageInfo.sqsTimestamp = json?."${timestampName}"?:messageInfo.startTime
+            if (json?."${timestampName}"?)
+            {
+               messageInfo.sqsTimestamp = DateUtil.parseDate(json."${timestampName}" as String)
+            }
+            else
+            {
+               messageInfo.sqsTimestamp = messageInfo.startTime
+            }
             messageInfo.secondsOnQueue = (messageInfo.startTime.time - messageInfo.sqsTimestamp.time) / 1000.0
 
             // if the flag is not set then delete immediately
