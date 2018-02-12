@@ -152,6 +152,8 @@ class SqsStagerJob {
     def messages
     def config = SqsUtils.sqsConfig
     String timestampName = config.reader.timestampName?:""
+    println "*" * 40
+    println "Timestamp Name: ${timestampName}"
     // do some validation
     // if these are not set then let's not pop any messages off and just
     // log the error and return
@@ -180,9 +182,11 @@ class SqsStagerJob {
             {
               // log message start
               def jsonMessage = sqsService.parseMessage(message.body.toString())
+               println "JSON Message/n${jsonMessage}"
               if(timestampName)
               {
                 messageInfo.sqsTimestamp = jsonMessage?."${timestampName}"?:""
+                 println "SQS Timestamp: ${messageInfo.sqsTimestamp}"
               }
               messageInfo = downloadFile(messageInfo,jsonMessage)
               if(messageInfo.downloadStatus == HttpStatus.FOUND ||
