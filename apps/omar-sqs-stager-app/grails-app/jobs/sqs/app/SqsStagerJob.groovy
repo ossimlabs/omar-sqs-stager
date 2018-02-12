@@ -178,7 +178,8 @@ class SqsStagerJob {
           try{
             messageInfo.messageId = message?.messageId
             println "JSON Message\n${message}"
-            messageInfo.sqsTimestamp = message?.body?."${timestampName}"?:""
+            def json = new JsonSlurper().parseText(message?.body)
+            messageInfo.sqsTimestamp = json."${timestampName}"?:""
             println "SQS Timestamp: ${messageInfo.sqsTimestamp}"
 
             // if the flag is not set then delete immediately
