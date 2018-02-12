@@ -177,7 +177,7 @@ class SqsStagerJob {
           messageInfo = newMessageInfo()
           try{
             messageInfo.messageId = message?.messageId
-            println "JSON Message\n${message?}"
+            println "JSON Message\n${message}"
             if(timestampName)
             {
                 messageInfo.sqsTimestamp = message?."${timestampName}"?:""
