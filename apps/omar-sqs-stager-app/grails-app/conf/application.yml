@@ -18,13 +18,8 @@ omar:
       # By default it will keep calling the read request until no messages are found.
       # After no messages are found the backgroun process will then "SLEEP" for "pollingIntervalSeconds".
       pollingIntervalSeconds: 3
-      # If you know the message attribute for the timestamp of a message then you can specify it
-      # here.  We have not read anywhere for a standard timestamp name so we are adding a field to allow
-      # one to map to a message attribute timestamp
-      # We have seen in docs names such as "Timestamp, SentTimestamp, ... etc.  "
-      # check you queue message for attributes
-      #
-      timestampAttribute: ""
+      # Looks in the message body for a field specified by timestampName to retrieve the time the message was placed on the queue.
+      timestampName: ""
       # If you want to only delete a message if no errors then set this flag
       # Warning...You must have your SQS settings to allow the message to stay in flight long enough to be processed.  
       # for if it doesn't delete then the message will be added back to the sqs queue.  If the queue
@@ -242,4 +237,3 @@ swagger:
   schemes:
     - HTTPS
     - HTTP
-

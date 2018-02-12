@@ -139,6 +139,7 @@ class SqsStagerJob {
       downloadDuration: 0,
       stageStartTime:null,
       stageEndTime: null,
+      sqsTimestamp: null,
       dataInfoStartTime:null,
       dataInfoEndTime:null,
       dataInfoDuration:0,
@@ -150,7 +151,7 @@ class SqsStagerJob {
   def execute() {
     def messages
     def config = SqsUtils.sqsConfig
-    String timestampAtributeName = config.reader.timestampAttribute?:""
+    String timestampName = config.reader.timestampName?:""
     // do some validation
     // if these are not set then let's not pop any messages off and just
     // log the error and return
@@ -177,12 +178,12 @@ class SqsStagerJob {
             if(!deleteMessageIfNoError) sqsService.deleteMessages(SqsUtils.sqsConfig.reader.queue, [message])
             if(sqsService.checkMd5(message.mD5OfBody, message.body))
             {
-              if(timestampAtributeName)
-              {
-                messageInfo.sqsTimestamp = message?.attrributres."${timestampAtributeName}"
-              }
               // log message start
               def jsonMessage = sqsService.parseMessage(message.body.toString())
+              if(timestampName)
+              {
+                messageInfo.sqsTimestamp = jsonMessage?."${timestampName}"?:""
+              }
               messageInfo = downloadFile(messageInfo,jsonMessage)
               if(messageInfo.downloadStatus == HttpStatus.FOUND ||
                  messageInfo.downloadStatus == HttpStatus.OK)
