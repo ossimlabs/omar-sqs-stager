@@ -140,6 +140,7 @@ class SqsStagerJob {
       stageStartTime:null,
       stageEndTime: null,
       sqsTimestamp: null,
+      secondsOnQueue: 0,
       dataInfoStartTime:null,
       dataInfoEndTime:null,
       dataInfoDuration:0,
@@ -176,8 +177,9 @@ class SqsStagerJob {
           messageInfo = newMessageInfo()
           try{
             messageInfo.messageId = message?.messageId
-            def json = new JsonSlurper().parseText(message?.body)
-            messageInfo.sqsTimestamp = json."${timestampName}"?:""
+            def json = new JsonSlurper().parseText(message?.body?:"")
+            messageInfo.sqsTimestamp = DateUtil.parse(json?."${timestampName}"?:messageInfo.startTime.time)
+            messageInfo.secondsOnQueue = (messageInfo.startTime.time - messageInfo.sqsTimestamp.time) / 1000.0
 
             // if the flag is not set then delete immediately
             if(!deleteMessageIfNoError) sqsService.deleteMessages(SqsUtils.sqsConfig.reader.queue, [message])
