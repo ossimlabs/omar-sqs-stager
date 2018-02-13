@@ -130,19 +130,19 @@ class SqsStagerJob {
   HashMap newMessageInfo(){
      [requestMethod: "SqsStagerJob",
       status: HttpStatus.OK,
-      messageId:null,
+      messageId: null,
       sourceUri: "",
       filename: "",
-      startTime: DateUtil.formatUTC(new Date()), 
-      downloadStartTime:null,
+      startTime: new Date(), 
+      downloadStartTime: null,
       downloadEndTime: null,
       downloadDuration: 0,
-      stageStartTime:null,
+      stageStartTime: null,
       stageEndTime: null,
       sqsTimestamp: null,
       secondsOnQueue: 0,
-      dataInfoStartTime:null,
-      dataInfoEndTime:null,
+      dataInfoStartTime: null,
+      dataInfoEndTime: null,
       dataInfoDuration:0,
       indexStartTime: null,
       indexEndTime: null,
@@ -171,22 +171,23 @@ class SqsStagerJob {
 
       while(messages = sqsService?.receiveMessages())
       {
-        //ingestdate = DateUtil.formatUTC(new Date())
         messages?.each{message->
           Boolean okToDelete = true
           messageInfo = newMessageInfo()
           try{
             messageInfo.messageId = message?.messageId
             def json = new JsonSlurper().parseText(message?.body?:"")
+            def sqsTimestampDate
             if (json?."${timestampName}")
             {
-               messageInfo.sqsTimestamp = DateUtil.parseDate(json."${timestampName}" as String)
+               sqsTimestampDate = DateUtil.parseDate(json."${timestampName}" as String)
             }
             else
             {
-               messageInfo.sqsTimestamp = messageInfo.startTime
+               sqsTimestampDate = messageInfo.startTime
             }
-            messageInfo.secondsOnQueue = (messageInfo.startTime.time - messageInfo.sqsTimestamp.time) / 1000.0
+            messageInfo.secondsOnQueue = (messageInfo.startTime.time - sqsTimestampDate.time) / 1000.0
+            messageInfo.sqsTimestamp = DateUtil.formatUTC(sqsTimestampDate)
 
             // if the flag is not set then delete immediately
             if(!deleteMessageIfNoError) sqsService.deleteMessages(SqsUtils.sqsConfig.reader.queue, [message])
