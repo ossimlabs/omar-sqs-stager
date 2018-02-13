@@ -129,7 +129,7 @@ class SqsStagerJob {
   }
   HashMap newMessageInfo(){
      [requestMethod: "SqsStagerJob",
-      status: HttpStatus.OK,
+      httpStatus: HttpStatus.OK,
       messageId: null,
       sourceUri: "",
       filename: "",
@@ -217,7 +217,7 @@ class SqsStagerJob {
                     {
                       okToDelete = false;
                       log.error "Unable to post metadata.  ERROR: ${avroMetadataResult.message}"
-                      messageInfo.status = avroMetadataResult?.status
+                      messageInfo.httpStatus = avroMetadataResult?.status
                       messageInfo.statusMessage = "Unable to post metadata.  ERROR: ${avroMetadataResult.message}"
                     }
                     Date postAvroMetadataEndTime = new Date()
@@ -230,14 +230,14 @@ class SqsStagerJob {
                 }
                 else
                 {
-                  messageInfo.status = HttpStatus.UNSUPPORTED_MEDIA_TYPE
+                  messageInfo.httpStatus = HttpStatus.UNSUPPORTED_MEDIA_TYPE
                   messageInfo.statusMessage = messageInfo.stageMessage   
                 }
               }
               else
               {
                   okToDelete = false;
-                  messageInfo.status        = messageInfo.downloadStatus
+                  messageInfo.httpStatus        = messageInfo.downloadStatus
                   messageInfo.statusMessage = messageInfo.downloadMessage   
               }
 
@@ -248,7 +248,7 @@ class SqsStagerJob {
             }
             else
             {
-              messageInfo.status = HttpStatus.BAD_REQUEST
+              messageInfo.httpStatus = HttpStatus.BAD_REQUEST
               messageInfo.statusMessage = "MessageId: ${messageInfo.messageId} ERROR: BAD MD5 Checksum For Message: ${messageBody}"
               log.error "MessageId: ${messageInfo.messageId} ERROR: BAD MD5 Checksum For Message: ${messageBody}"
               log.info new JsonBuilder(messageInfo).toString()
@@ -257,7 +257,7 @@ class SqsStagerJob {
           catch(e)
           {
             okToDelete = false;
-            messageInfo.status = HttpStatus.NOT_FOUND
+            messageInfo.httpStatus = HttpStatus.NOT_FOUND
             messageInfo.statusMessage = "MessageId: ${messageInfo.messageId} ERROR: ${e.toString()}"
             log.error "MessageId: ${messageInfo.messageId} ERROR: ${e.toString()}"
             log.info new JsonBuilder(messageInfo).toString()
@@ -272,7 +272,7 @@ class SqsStagerJob {
     }
     else
     {
-      messageInfo.status = HttpStatus.NOT_FOUND
+      messageInfo.httpStatus = HttpStatus.NOT_FOUND
       messageInfo.statusMessage = "No queue defined for SQS stager to read from."
       log.info new JsonBuilder(messageInfo).toString()
       log.error messageInfo.statusMessage
