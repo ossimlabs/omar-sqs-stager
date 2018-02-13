@@ -178,7 +178,7 @@ class SqsStagerJob {
           try{
             messageInfo.messageId = message?.messageId
             def json = new JsonSlurper().parseText(message?.body?:"")
-            if (json?."${timestampName}"?)
+            if (json?."${timestampName}")
             {
                messageInfo.sqsTimestamp = DateUtil.parseDate(json."${timestampName}" as String)
             }
