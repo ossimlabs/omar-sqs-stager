@@ -133,7 +133,7 @@ class SqsStagerJob {
       messageId: null,
       sourceUri: "",
       filename: "",
-      startTime: new Date(), 
+      startTime: null, 
       downloadStartTime: null,
       downloadEndTime: null,
       downloadDuration: 0,
@@ -174,6 +174,7 @@ class SqsStagerJob {
         messages?.each{message->
           Boolean okToDelete = true
           messageInfo = newMessageInfo()
+          def startTimeDate = new Date()
           try{
             messageInfo.messageId = message?.messageId
             def json = new JsonSlurper().parseText(message?.body?:"")
@@ -184,10 +185,11 @@ class SqsStagerJob {
             }
             else
             {
-               sqsTimestampDate = messageInfo.startTime
+               sqsTimestampDate = startTimeDate
             }
-            messageInfo.secondsOnQueue = (messageInfo.startTime.time - sqsTimestampDate.time) / 1000.0
+            messageInfo.secondsOnQueue = (startTimeDate.time - sqsTimestampDate.time) / 1000.0
             messageInfo.sqsTimestamp = DateUtil.formatUTC(sqsTimestampDate)
+            messageInfo.startTime = DateUtil.formatUTC(startTimeDate)
 
             // if the flag is not set then delete immediately
             if(!deleteMessageIfNoError) sqsService.deleteMessages(SqsUtils.sqsConfig.reader.queue, [message])
