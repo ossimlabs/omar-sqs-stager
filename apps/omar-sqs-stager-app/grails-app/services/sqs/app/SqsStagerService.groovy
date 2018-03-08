@@ -272,7 +272,7 @@ class SqsStagerService
                             Boolean buildHistograms = params.buildHistograms != null ? params.buildHistograms.toBoolean() : false
                             Boolean buildOverviews = params.buildOverviews != null ? params.buildOverviews.toBoolean() : false
                             Boolean useFastHistogramStaging = params.useFastHistogramStaging != null ? params.useFastHistogramStaging.toBoolean() : false
-                            imageStager.setEntry(it)
+                            imageStager.setEntry(it as long)
                             imageStager.setDefaults()
                             imageStager.setHistogramStagingFlag(buildHistograms)
                             imageStager.setOverviewStagingFlag(buildOverviews)
