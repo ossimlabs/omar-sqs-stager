@@ -265,7 +265,7 @@ class SqsStagerService
                 List entriesToStage = oms.dataSets.RasterDataSet.rasterEntries.RasterEntry.collect {[
                         entryId: it.entryId,
                         imageRepresentation: it.metadata.imageRepresentation
-                ]}.findAll { it.entryId == 0 || it.imageRepresentation != "NODISPLY"}.entryId
+                ]}.findAll { it.entryId == 0 || it.imageRepresentation != "NODISPLY" }.entryId
 
                 println entriesToStage
                 entriesToStage.each
@@ -275,7 +275,8 @@ class SqsStagerService
                         Boolean buildHistograms = params.buildHistograms != null ? params.buildHistograms.toBoolean() : false
                         Boolean buildOverviews = params.buildOverviews != null ? params.buildOverviews.toBoolean() : false
                         Boolean useFastHistogramStaging = params.useFastHistogramStaging != null ? params.useFastHistogramStaging.toBoolean() : false
-                        imageStager.setEntry(it)
+                        imageStager.setEntry(it as long)
+                        println "set entry to ${it as long}"
                         imageStager.setDefaults()
                         imageStager.setHistogramStagingFlag(buildHistograms)
                         imageStager.setOverviewStagingFlag(buildOverviews)
@@ -290,9 +291,11 @@ class SqsStagerService
 
                             imageStager.setHistogramStagingFlag(false)
                             imageStager.stage()
+                            println "staged histograms"
 
                             imageStager.setHistogramStagingFlag(true)
                             imageStager.setOverviewStagingFlag(false)
+                            println "staged overviews"
                         }
                         imageStager.stage()
                     }
@@ -321,6 +324,7 @@ class SqsStagerService
             imageStager = null
 
         }
+        println "got to return of stageFileJni"
         result
     }
 
