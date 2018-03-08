@@ -260,8 +260,8 @@ class SqsStagerService
                     params.buildOverviews = false
                 }
 
-                def xml = XmlSlurper.parseText(getDataInfo(filename).xml)
-                List entriesToStage = xml.dataSets.RasterDataSet.rasterEntries.RasterEntry.collect {[
+                def oms = new XmlSlurper().parseText(DataInfo.readInfo(filename))
+                List entriesToStage = oms.dataSets.RasterDataSet.rasterEntries.RasterEntry.collect {[
                         entryId: it.entryId,
                         imageRepresentation: it.metadata.imageRepresentation
                 ]}.findAll { it.entryId as int == 0 || !"${it.imageRepresentation}".equalsIgnoreCase("NODISPLY")}.entryId
