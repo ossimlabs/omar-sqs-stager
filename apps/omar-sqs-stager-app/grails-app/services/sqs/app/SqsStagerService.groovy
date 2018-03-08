@@ -259,8 +259,14 @@ class SqsStagerService
                     params.buildHistograms = false
                     params.buildOverviews = false
                 }
-                Integer nEntries = imageStager.getNumberOfEntries()
-                (0..<nEntries).each
+
+                def xml = XmlSlurper.parseText(getDataInfo(filename).xml)
+                List entriesToStage = xml.dataSets.RasterDataSet.rasterEntries.RasterEntry.collect {[
+                        entryId: it.entryId,
+                        imageRepresentation: it.metadata.imageRepresentation
+                ]}.findAll { it.entryId as int == 0 || !"${it.imageRepresentation}".equalsIgnoreCase("NODISPLY")}.entryId
+
+                entriesToStage.each
                         {
                             Boolean buildHistogramsWithR0 = params.buildHistogramsWithR0 != null ? params.buildHistogramsWithR0.toBoolean() : false
                             Boolean buildHistograms = params.buildHistograms != null ? params.buildHistograms.toBoolean() : false
