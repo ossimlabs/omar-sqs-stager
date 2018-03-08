@@ -19,6 +19,7 @@ import org.apache.http.client.HttpClient
 import org.apache.http.client.methods.HttpPost
 import org.apache.http.entity.StringEntity
 import org.apache.http.impl.client.DefaultHttpClient
+import groovy.util.XmlSlurper
 
 class SqsStagerService
 {
@@ -264,7 +265,7 @@ class SqsStagerService
                 List entriesToStage = oms.dataSets.RasterDataSet.rasterEntries.RasterEntry.collect {[
                         entryId: it.entryId,
                         imageRepresentation: it.metadata.imageRepresentation
-                ]}.findAll { it.entryId as int == 0 || !"${it.imageRepresentation}".equalsIgnoreCase("NODISPLY")}.entryId
+                ]}.findAll { it.entryId == 0 || it.imageRepresentation != "NODISPLY"}.entryId
 
                 entriesToStage.each
                         {
