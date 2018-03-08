@@ -9,7 +9,7 @@ import omar.avro.OmarAvroUtils
 import groovy.json.JsonBuilder
 
 class SqsStagerJob {
-   def sqsService
+   def sqsStagerService
    def avroService
    def rasterDataSetService
    def concurrent = false
@@ -23,15 +23,15 @@ class SqsStagerJob {
     HashMap result = new HashMap(messageInfo)
     log.info "MessageId: ${messageInfo.messageId}: Downloading...."
     try{
-      HashMap downloadResult   = sqsService.downloadFile(jsonMessage)
+      HashMap downloadResult   = sqsStagerService.downloadFile(jsonMessage)
       result.downloadStartTime = DateUtil.formatUTC(downloadResult.startTime)
       result.downloadEndTime   = DateUtil.formatUTC(downloadResult.endTime)
       result.downloadDuration  = downloadResult.duration/1000
       result.downloadStatus    = downloadResult.status
       result.downloadMessage   = downloadResult.message
       result.duration         += result.downloadDuration
-      result.sourceUri         = downloadResult.source 
-      result.filename          = downloadResult.destination 
+      result.sourceUri         = downloadResult.source
+      result.filename          = downloadResult.destination
       result.fileSize          = downloadResult.fileSize?:0
       log.info "MessageId: ${messageInfo.messageId}: Downloaded ${downloadResult.source} to ${downloadResult.destination}: ${downloadResult.message}"
     }
@@ -41,7 +41,7 @@ class SqsStagerJob {
       result.downloadMessage = e.toString()
       log.error "Error downloading file: ${e}"
     }
-  
+
     result
   }
   HashMap stageFile(HashMap messageInfo)
@@ -53,7 +53,7 @@ class SqsStagerJob {
 
       stagerParams.filename = messageInfo.filename
       log.info "MessageId: ${messageInfo.messageId}: Staging file ${messageInfo.filename}"
-      def stageFileResult        = sqsService.stageFileJni(stagerParams)
+      def stageFileResult        = sqsStagerService.stageFileJni(stagerParams)
       if(stageFileResult.status != HttpStatus.OK) log.error stageFileResult.message
       result.stageStartTime = DateUtil.formatUTC(stageFileResult.startTime)
       result.stageEndTime   = DateUtil.formatUTC(stageFileResult.endTime)
@@ -69,11 +69,11 @@ class SqsStagerJob {
           if(messageInfo?.filename){
             File localFile = new File(messageInfo.filename)
             if(localFile.exists()) localFile.delete()
-          } 
+          }
         }
         catch(e)
         {
-          log.error "Unable to delete file ${messageInfo.filename} Error: ${e}" 
+          log.error "Unable to delete file ${messageInfo.filename} Error: ${e}"
         }
       }
 
@@ -94,7 +94,7 @@ class SqsStagerJob {
 
     try{
       log.info "MessageId: ${messageInfo.messageId}: Getting XML from file ${messageInfo.filename}"
-      HashMap dataInfoResult = sqsService.getDataInfo(messageInfo.filename)
+      HashMap dataInfoResult = sqsStagerService.getDataInfo(messageInfo.filename)
       result.dataInfoStartTime = DateUtil.formatUTC(dataInfoResult.startTime)
       result.dataInfoEndTime   = DateUtil.formatUTC(dataInfoResult.endTime)
       result.dataInfoDuration  = dataInfoResult.duration/1000
@@ -133,7 +133,7 @@ class SqsStagerJob {
       messageId: null,
       sourceUri: "",
       filename: "",
-      startTime: null, 
+      startTime: null,
       downloadStartTime: null,
       downloadEndTime: null,
       downloadDuration: 0,
@@ -147,7 +147,7 @@ class SqsStagerJob {
       indexStartTime: null,
       indexEndTime: null,
       indexDuration: 0,
-      duration:0]  
+      duration:0]
   }
   def execute() {
     def messages
@@ -169,7 +169,7 @@ class SqsStagerJob {
     {
       String timestampName = config.reader.timestampName?:""
 
-      while(messages = sqsService?.receiveMessages())
+      while(messages = sqsStagerService?.receiveMessages())
       {
         messages?.each{message->
           Boolean okToDelete = true
@@ -192,11 +192,11 @@ class SqsStagerJob {
             messageInfo.startTime = DateUtil.formatUTC(startTimeDate)
 
             // if the flag is not set then delete immediately
-            if(!deleteMessageIfNoError) sqsService.deleteMessages(SqsUtils.sqsConfig.reader.queue, [message])
-            if(sqsService.checkMd5(message.mD5OfBody, message.body))
+            if(!deleteMessageIfNoError) sqsStagerService.deleteMessages(SqsUtils.sqsConfig.reader.queue, [message])
+            if(sqsStagerService.checkMd5(message.mD5OfBody, message.body))
             {
               // log message start
-              def jsonMessage = sqsService.parseMessage(message.body.toString())
+              def jsonMessage = sqsStagerService.parseMessage(message.body.toString())
               messageInfo = downloadFile(messageInfo,jsonMessage)
               if(messageInfo.downloadStatus == HttpStatus.FOUND ||
                  messageInfo.downloadStatus == HttpStatus.OK)
@@ -231,14 +231,14 @@ class SqsStagerJob {
                 else
                 {
                   messageInfo.httpStatus = HttpStatus.UNSUPPORTED_MEDIA_TYPE
-                  messageInfo.statusMessage = messageInfo.stageMessage   
+                  messageInfo.statusMessage = messageInfo.stageMessage
                 }
               }
               else
               {
                   okToDelete = false;
                   messageInfo.httpStatus        = messageInfo.downloadStatus
-                  messageInfo.statusMessage = messageInfo.downloadMessage   
+                  messageInfo.statusMessage = messageInfo.downloadMessage
               }
 
               messageInfo.endTime = DateUtil.formatUTC(new Date())
@@ -263,9 +263,9 @@ class SqsStagerJob {
             log.info new JsonBuilder(messageInfo).toString()
           }
 
-          if(deleteMessageIfNoError&&okToDelete) 
+          if(deleteMessageIfNoError&&okToDelete)
           {
-            sqsService.deleteMessages(config.reader.queue, [message])
+            sqsStagerService.deleteMessages(config.reader.queue, [message])
           }
         }
       }

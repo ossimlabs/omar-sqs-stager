@@ -1,59 +1,27 @@
 package sqs.app
-import com.amazonaws.AmazonClientException;
-import com.amazonaws.AmazonServiceException;
-import com.amazonaws.auth.AWSCredentials;
-import com.amazonaws.auth.profile.ProfileCredentialsProvider;
-import com.amazonaws.regions.Region;
-import com.amazonaws.regions.Regions;
-import com.amazonaws.services.sqs.AmazonSQS;
-import com.amazonaws.services.sqs.AmazonSQSClient;
-import com.amazonaws.services.sqs.model.CreateQueueRequest;
-import com.amazonaws.services.sqs.model.DeleteMessageRequest;
-import com.amazonaws.services.sqs.model.DeleteQueueRequest;
-import com.amazonaws.services.sqs.model.Message;
-import com.amazonaws.services.sqs.model.ReceiveMessageRequest;
-import com.amazonaws.services.sqs.model.SendMessageRequest;
-import com.amazonaws.services.sqs.model.SendMessageBatchRequest;
-import com.amazonaws.services.sqs.model.SendMessageBatchRequestEntry
-import com.amazonaws.services.sqs.model.DeleteMessageBatchRequest;
-import com.amazonaws.services.sqs.model.DeleteMessageBatchRequestEntry
-//import com.amazonaws.services.sqs.model.ChangeMessageVisibilityRequest
-import org.apache.commons.codec.digest.DigestUtils
-//import groovyx.net.http.HTTPBuilder
-//import groovyx.net.http.ContentType
-//import groovyx.net.http.Method
-//import groovyx.net.http.RESTClient
-//import org.apache.http.Header;
-//import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-//import org.apache.http.StatusLine;
-import org.apache.http.client.HttpClient;
-import org.apache.http.impl.client.DefaultHttpClient;
-//import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import com.amazonaws.auth.AWSCredentials;
-//import com.amazonaws.auth.AWSCredentialsProvider;
-//import com.amazonaws.auth.AWSCredentialsProviderChain;
-//import com.amazonaws.auth.BasicAWSCredentials;
-//import com.amazonaws.auth.EnvironmentVariableCredentialsProvider;
-//import com.amazonaws.auth.InstanceProfileCredentialsProvider;
-//import com.amazonaws.auth.SystemPropertiesCredentialsProvider;
+
+import com.amazonaws.AmazonClientException
+import com.amazonaws.auth.AWSCredentials
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain
-//import groovy.json.JsonSlurper
-
-//import grails.transaction.Transactional
-import omar.avro.OmarAvroUtils
-import omar.avro.AvroMessageUtils
-import groovy.json.JsonBuilder
-import omar.core.HttpStatus
-import omar.avro.HttpUtils
-
-import joms.oms.ImageStager
+import com.amazonaws.services.sqs.AmazonSQSClient
+import com.amazonaws.services.sqs.model.DeleteMessageBatchRequest
+import com.amazonaws.services.sqs.model.DeleteMessageBatchRequestEntry
+import com.amazonaws.services.sqs.model.ReceiveMessageRequest
 import joms.oms.DataInfo
-import omar.core.ProcessStatus
-//@Transactional
-class SqsService {
+import joms.oms.ImageStager
+import omar.avro.AvroMessageUtils
+import omar.avro.HttpUtils
+import omar.avro.OmarAvroUtils
+import omar.core.HttpStatus
+import org.apache.commons.codec.digest.DigestUtils
+import org.apache.http.HttpResponse
+import org.apache.http.client.HttpClient
+import org.apache.http.client.methods.HttpPost
+import org.apache.http.entity.StringEntity
+import org.apache.http.impl.client.DefaultHttpClient
+
+class SqsStagerService
+{
    def avroService
    AmazonSQSClient sqs
    static Boolean checkMd5(String messageBodyMd5, String message)
@@ -158,7 +126,7 @@ class SqsService {
    }
    def parseMessage(def message){
      def jsonObj
-     
+
      try{
        jsonObj = avroService.convertMessageToJsonWithSubField(message)
      }
@@ -209,7 +177,7 @@ class SqsService {
             {
                 String commandString = OmarAvroUtils.avroConfig.download?.command
                 //println "COMMAND STRING === ${commandString}"
-            
+
                 if(!commandString)
                 {
                   HttpUtils.downloadURI(fullPathLocation.toString(), sourceURI)
@@ -378,7 +346,7 @@ class SqsService {
     finally{
       dataInfo.close()
       dataInfo.delete();
-      dataInfo = null;      
+      dataInfo = null;
       result.xml = xml
       result.endTime = new Date()
       result.duration = (result.endTime.time-result.startTime.time)
@@ -396,8 +364,8 @@ class SqsService {
                   duration:0]
     try{
       def config = SqsUtils.sqsConfig
-      HashMap postResult = HttpUtils.postData(url, 
-                                              xml, 
+      HashMap postResult = HttpUtils.postData(url,
+                                              xml,
                                               "application/xml")
 
       result.status = postResult.status
