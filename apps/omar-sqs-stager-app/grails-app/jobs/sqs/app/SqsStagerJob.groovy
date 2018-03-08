@@ -83,7 +83,7 @@ class SqsStagerJob {
     {
       result.stageStatus = HttpStatus.BAD_REQUEST
       result.stageMessage = e.toString()
-      log.error "Error stageFile: ${e}"
+      log.error "Error stageFile: ${e.getMessage()}"
     }
 
     result
