@@ -261,39 +261,41 @@ class SqsStagerService
                     params.buildOverviews = false
                 }
 
-                def oms = new XmlSlurper().parseText(DataInfo.readInfo(filename))
+                def oms = new XmlSlurper().parseText(getDataInfo(filename).xml)
                 List entriesToStage = oms.dataSets.RasterDataSet.rasterEntries.RasterEntry.collect {[
                         entryId: it.entryId,
                         imageRepresentation: it.metadata.imageRepresentation
                 ]}.findAll { it.entryId == 0 || it.imageRepresentation != "NODISPLY"}.entryId
 
+                println entriesToStage
                 entriesToStage.each
+                    {
+                        println it
+                        Boolean buildHistogramsWithR0 = params.buildHistogramsWithR0 != null ? params.buildHistogramsWithR0.toBoolean() : false
+                        Boolean buildHistograms = params.buildHistograms != null ? params.buildHistograms.toBoolean() : false
+                        Boolean buildOverviews = params.buildOverviews != null ? params.buildOverviews.toBoolean() : false
+                        Boolean useFastHistogramStaging = params.useFastHistogramStaging != null ? params.useFastHistogramStaging.toBoolean() : false
+                        imageStager.setEntry(it)
+                        imageStager.setDefaults()
+                        imageStager.setHistogramStagingFlag(buildHistograms)
+                        imageStager.setOverviewStagingFlag(buildOverviews)
+                        if (params.overviewCompressionType != null) imageStager.setCompressionType(params.overviewCompressionType)
+                        if (params.overviewType != null) imageStager.setOverviewType(params.overviewType)
+                        if (params.useFastHistogramStaging != null) imageStager.setUseFastHistogramStagingFlag(useFastHistogramStaging)
+                        imageStager.setQuietFlag(true)
+
+                        if (buildHistograms && buildOverviews
+                                && imageStager.hasOverviews() && buildHistogramsWithR0)
                         {
-                            Boolean buildHistogramsWithR0 = params.buildHistogramsWithR0 != null ? params.buildHistogramsWithR0.toBoolean() : false
-                            Boolean buildHistograms = params.buildHistograms != null ? params.buildHistograms.toBoolean() : false
-                            Boolean buildOverviews = params.buildOverviews != null ? params.buildOverviews.toBoolean() : false
-                            Boolean useFastHistogramStaging = params.useFastHistogramStaging != null ? params.useFastHistogramStaging.toBoolean() : false
-                            imageStager.setEntry(it as long)
-                            imageStager.setDefaults()
-                            imageStager.setHistogramStagingFlag(buildHistograms)
-                            imageStager.setOverviewStagingFlag(buildOverviews)
-                            if (params.overviewCompressionType != null) imageStager.setCompressionType(params.overviewCompressionType)
-                            if (params.overviewType != null) imageStager.setOverviewType(params.overviewType)
-                            if (params.useFastHistogramStaging != null) imageStager.setUseFastHistogramStagingFlag(useFastHistogramStaging)
-                            imageStager.setQuietFlag(true)
 
-                            if (buildHistograms && buildOverviews
-                                    && imageStager.hasOverviews() && buildHistogramsWithR0)
-                            {
-
-                                imageStager.setHistogramStagingFlag(false)
-                                imageStager.stage()
-
-                                imageStager.setHistogramStagingFlag(true)
-                                imageStager.setOverviewStagingFlag(false)
-                            }
+                            imageStager.setHistogramStagingFlag(false)
                             imageStager.stage()
+
+                            imageStager.setHistogramStagingFlag(true)
+                            imageStager.setOverviewStagingFlag(false)
                         }
+                        imageStager.stage()
+                    }
                 result.message = "Staged file ${filename}"
                 imageStager.delete()
                 imageStager = null
