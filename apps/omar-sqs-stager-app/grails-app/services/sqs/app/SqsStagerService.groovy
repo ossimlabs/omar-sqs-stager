@@ -262,10 +262,10 @@ class SqsStagerService
                 }
 
                 def oms = new XmlSlurper().parseText(getDataInfo(filename).xml)
-                List entriesToStage = oms.dataSets.RasterDataSet.rasterEntries.RasterEntry.collect {[
+                List<Long> entriesToStage = oms.dataSets.RasterDataSet.rasterEntries.RasterEntry.collect {[
                         entryId: it.entryId,
                         imageRepresentation: it.metadata.imageRepresentation
-                ]}.findAll { it.entryId == 0 || it.imageRepresentation != "NODISPLY" }.entryId
+                ]}.findAll { it.entryId == 0 || it.imageRepresentation != "NODISPLY" }.entryId as List<Long>
 
                 println entriesToStage
                 entriesToStage.each
@@ -275,8 +275,8 @@ class SqsStagerService
                         Boolean buildHistograms = params.buildHistograms != null ? params.buildHistograms.toBoolean() : false
                         Boolean buildOverviews = params.buildOverviews != null ? params.buildOverviews.toBoolean() : false
                         Boolean useFastHistogramStaging = params.useFastHistogramStaging != null ? params.useFastHistogramStaging.toBoolean() : false
-                        imageStager.setEntry(it as long)
-                        println "set entry to ${it as long}"
+                        imageStager.setEntry(it)
+                        println "set entry to ${it}"
                         imageStager.setDefaults()
                         imageStager.setHistogramStagingFlag(buildHistograms)
                         imageStager.setOverviewStagingFlag(buildOverviews)
