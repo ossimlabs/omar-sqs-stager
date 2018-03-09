@@ -263,7 +263,7 @@ class SqsStagerService
 
                 def oms = new XmlSlurper().parseText(DataInfo.readInfo(filename))
                 def entryImageRepresentations = oms.dataSets.RasterDataSet.rasterEntries.RasterEntry.inject([:]) { imageRepresentations, entry ->
-                    imageRepresentations[entry.entryId as Integer] = entry.metadata.imageRepresentation; imageRepresentations
+                    imageRepresentations[entry.entryId] = entry.metadata.imageRepresentation; imageRepresentations
                 }
 
                 println entryImageRepresentations
@@ -273,7 +273,7 @@ class SqsStagerService
                     {
                         println entryImageRepresentations[it]
                         println entryImageRepresentations[it] as String
-                        println entryImageRepresentations["${it}"]
+                        println entryImageRepresentations[it as String]
                         print "image rep exists? "
                         println !(entryImageRepresentations[it]?.equalsIgnoreCase("NODISPLY")?:false)
                         if (it == 0 || !(entryImageRepresentations[it]?.equalsIgnoreCase("NODISPLY")?:false))
