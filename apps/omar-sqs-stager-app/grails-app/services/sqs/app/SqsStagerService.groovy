@@ -263,7 +263,7 @@ class SqsStagerService
 
                 def oms = new XmlSlurper().parseText(DataInfo.readInfo(filename))
                 def entryImageRepresentations = oms.dataSets.RasterDataSet.rasterEntries.RasterEntry.inject([:]) { imageRepresentations, entry ->
-                    imageRepresentations[entry.entryId] = entry.metadata.imageRepresentation; imageRepresentations
+                    imageRepresentations[entry.entryId.toInteger()] = entry.metadata.imageRepresentation.toString(); imageRepresentations
                 }
 
                 println entryImageRepresentations
@@ -271,12 +271,15 @@ class SqsStagerService
                 Integer nEntries = imageStager.getNumberOfEntries()
                 (0..<nEntries).each
                     {
+                        println "it as string interpolation ${it}"
+                        print "it as string "
+                        println it as String
                         println entryImageRepresentations[it]
                         println entryImageRepresentations[it] as String
                         println entryImageRepresentations[it as String]
                         print "image rep exists? "
                         println !(entryImageRepresentations[it]?.equalsIgnoreCase("NODISPLY")?:false)
-                        if (it == 0 || !(entryImageRepresentations[it]?.equalsIgnoreCase("NODISPLY")?:false))
+                        if (it == 0 || !(entryImageRepresentations[it as String]?.equalsIgnoreCase("NODISPLY")?:false))
                         {
                             println it
                             Boolean buildHistogramsWithR0 = params.buildHistogramsWithR0 != null ? params.buildHistogramsWithR0.toBoolean() : false
