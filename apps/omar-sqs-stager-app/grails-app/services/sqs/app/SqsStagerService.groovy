@@ -266,20 +266,16 @@ class SqsStagerService
                     imageRepresentations[entry.entryId.toInteger()] = entry.metadata.imageRepresentation.toString(); imageRepresentations
                 }
 
-                println entryImageRepresentations
-
                 Integer nEntries = imageStager.getNumberOfEntries()
                 (0..<nEntries).each
                     {
                         if (it == 0 || !(entryImageRepresentations[it]?.equalsIgnoreCase("NODISPLY")?:false))
                         {
-                            println it
                             Boolean buildHistogramsWithR0 = params.buildHistogramsWithR0 != null ? params.buildHistogramsWithR0.toBoolean() : false
                             Boolean buildHistograms = params.buildHistograms != null ? params.buildHistograms.toBoolean() : false
                             Boolean buildOverviews = params.buildOverviews != null ? params.buildOverviews.toBoolean() : false
                             Boolean useFastHistogramStaging = params.useFastHistogramStaging != null ? params.useFastHistogramStaging.toBoolean() : false
                             imageStager.setEntry(it)
-                            println "set entry to ${it}"
                             imageStager.setDefaults()
                             imageStager.setHistogramStagingFlag(buildHistograms)
                             imageStager.setOverviewStagingFlag(buildOverviews)
@@ -328,7 +324,6 @@ class SqsStagerService
             imageStager = null
 
         }
-        println "got to return of stageFileJni"
         println result
         result
     }
