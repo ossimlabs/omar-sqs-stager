@@ -262,16 +262,14 @@ class SqsStagerService
                 }
 
                 def oms = new XmlSlurper().parseText(getDataInfo(filename).xml)
-                List<Integer> entriesToStage = oms.dataSets.RasterDataSet.rasterEntries.RasterEntry.collect {[
-                        entryId: it.entryId,
-                        imageRepresentation: it.metadata.imageRepresentation
-                ]}.findAll { it.entryId == 0 || it.imageRepresentation != "NODISPLY" }.entryId as List<Integer>
+                def entryImageRepresentations = oms.dataSets.RasterDataSet.rasterEntries.RasterEntry.inject([:]) { imageRepresentations, entry ->
+                    imageRepresentations[entry.entryId] = entry.metadata.imageRepresentation; imageRepresentations
+                }
 
-                println entriesToStage
                 Integer nEntries = imageStager.getNumberOfEntries()
                 (0..<nEntries).each
                     {
-                        if (entriesToStage.contains(it as Integer))
+                        if (it == 0 || !entryImageRepresentations[it].equalsIgnoreCase("NODISPLY"))
                         {
                             println it
                             Boolean buildHistogramsWithR0 = params.buildHistogramsWithR0 != null ? params.buildHistogramsWithR0.toBoolean() : false
