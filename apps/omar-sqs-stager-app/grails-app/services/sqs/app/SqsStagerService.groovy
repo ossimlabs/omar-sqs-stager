@@ -271,6 +271,9 @@ class SqsStagerService
                 Integer nEntries = imageStager.getNumberOfEntries()
                 (0..<nEntries).each
                     {
+                        println entryImageRepresentations[it]
+                        println entryImageRepresentations[it] as String
+                        println entryImageRepresentations["${it}"]
                         print "image rep exists? "
                         println !(entryImageRepresentations[it]?.equalsIgnoreCase("NODISPLY")?:false)
                         if (it == 0 || !(entryImageRepresentations[it]?.equalsIgnoreCase("NODISPLY")?:false))
