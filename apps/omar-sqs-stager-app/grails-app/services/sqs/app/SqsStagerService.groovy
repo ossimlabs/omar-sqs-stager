@@ -269,38 +269,40 @@ class SqsStagerService
 
                 println entriesToStage
                 Integer nEntries = imageStager.getNumberOfEntries()
-//                entriesToStage.each
                 (0..<nEntries).each
                     {
-                        println it
-                        Boolean buildHistogramsWithR0 = params.buildHistogramsWithR0 != null ? params.buildHistogramsWithR0.toBoolean() : false
-                        Boolean buildHistograms = params.buildHistograms != null ? params.buildHistograms.toBoolean() : false
-                        Boolean buildOverviews = params.buildOverviews != null ? params.buildOverviews.toBoolean() : false
-                        Boolean useFastHistogramStaging = params.useFastHistogramStaging != null ? params.useFastHistogramStaging.toBoolean() : false
-                        println "before setEntry"
-                        imageStager.setEntry(it)
-                        println "set entry to ${it}"
-                        imageStager.setDefaults()
-                        imageStager.setHistogramStagingFlag(buildHistograms)
-                        imageStager.setOverviewStagingFlag(buildOverviews)
-                        if (params.overviewCompressionType != null) imageStager.setCompressionType(params.overviewCompressionType)
-                        if (params.overviewType != null) imageStager.setOverviewType(params.overviewType)
-                        if (params.useFastHistogramStaging != null) imageStager.setUseFastHistogramStagingFlag(useFastHistogramStaging)
-                        imageStager.setQuietFlag(true)
-
-                        if (buildHistograms && buildOverviews
-                                && imageStager.hasOverviews() && buildHistogramsWithR0)
+                        if (entriesToStage.contains(it as Integer))
                         {
+                            println it
+                            Boolean buildHistogramsWithR0 = params.buildHistogramsWithR0 != null ? params.buildHistogramsWithR0.toBoolean() : false
+                            Boolean buildHistograms = params.buildHistograms != null ? params.buildHistograms.toBoolean() : false
+                            Boolean buildOverviews = params.buildOverviews != null ? params.buildOverviews.toBoolean() : false
+                            Boolean useFastHistogramStaging = params.useFastHistogramStaging != null ? params.useFastHistogramStaging.toBoolean() : false
+                            println "before setEntry"
+                            imageStager.setEntry(it)
+                            println "set entry to ${it}"
+                            imageStager.setDefaults()
+                            imageStager.setHistogramStagingFlag(buildHistograms)
+                            imageStager.setOverviewStagingFlag(buildOverviews)
+                            if (params.overviewCompressionType != null) imageStager.setCompressionType(params.overviewCompressionType)
+                            if (params.overviewType != null) imageStager.setOverviewType(params.overviewType)
+                            if (params.useFastHistogramStaging != null) imageStager.setUseFastHistogramStagingFlag(useFastHistogramStaging)
+                            imageStager.setQuietFlag(true)
 
-                            imageStager.setHistogramStagingFlag(false)
+                            if (buildHistograms && buildOverviews
+                                    && imageStager.hasOverviews() && buildHistogramsWithR0)
+                            {
+
+                                imageStager.setHistogramStagingFlag(false)
+                                imageStager.stage()
+                                println "staged histograms"
+
+                                imageStager.setHistogramStagingFlag(true)
+                                imageStager.setOverviewStagingFlag(false)
+                                println "staged overviews"
+                            }
                             imageStager.stage()
-                            println "staged histograms"
-
-                            imageStager.setHistogramStagingFlag(true)
-                            imageStager.setOverviewStagingFlag(false)
-                            println "staged overviews"
                         }
-                        imageStager.stage()
                     }
                 result.message = "Staged file ${filename}"
                 imageStager.delete()
