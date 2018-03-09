@@ -268,7 +268,9 @@ class SqsStagerService
                 ]}.findAll { it.entryId == 0 || it.imageRepresentation != "NODISPLY" }.entryId as List<Integer>
 
                 println entriesToStage
-                entriesToStage.each
+                Integer nEntries = imageStager.getNumberOfEntries()
+//                entriesToStage.each
+                (0..<nEntries).each
                     {
                         println it
                         Boolean buildHistogramsWithR0 = params.buildHistogramsWithR0 != null ? params.buildHistogramsWithR0.toBoolean() : false
