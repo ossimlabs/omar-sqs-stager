@@ -266,10 +266,12 @@ class SqsStagerService
                     imageRepresentations[entry.entryId] = entry.metadata.imageRepresentation; imageRepresentations
                 }
 
+                println entryImageRepresentations
+
                 Integer nEntries = imageStager.getNumberOfEntries()
                 (0..<nEntries).each
                     {
-                        if (it == 0 || !entryImageRepresentations[it].equalsIgnoreCase("NODISPLY"))
+                        if (it >= 0 || !entryImageRepresentations[it].equalsIgnoreCase("NODISPLY"))
                         {
                             println it
                             Boolean buildHistogramsWithR0 = params.buildHistogramsWithR0 != null ? params.buildHistogramsWithR0.toBoolean() : false
@@ -328,6 +330,7 @@ class SqsStagerService
 
         }
         println "got to return of stageFileJni"
+        println result
         result
     }
 
