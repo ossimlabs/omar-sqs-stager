@@ -261,7 +261,7 @@ class SqsStagerService
                     params.buildOverviews = false
                 }
 
-                def oms = new XmlSlurper().parseText(getDataInfo(filename).xml)
+                def oms = new XmlSlurper().parseText(DataInfo.readInfo(filename))
                 def entryImageRepresentations = oms.dataSets.RasterDataSet.rasterEntries.RasterEntry.inject([:]) { imageRepresentations, entry ->
                     imageRepresentations[entry.entryId] = entry.metadata.imageRepresentation; imageRepresentations
                 }
