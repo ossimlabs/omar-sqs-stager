@@ -271,22 +271,13 @@ class SqsStagerService
                 Integer nEntries = imageStager.getNumberOfEntries()
                 (0..<nEntries).each
                     {
-                        println "it as string interpolation ${it}"
-                        print "it as string "
-                        println it as String
-                        println entryImageRepresentations[it]
-                        println entryImageRepresentations[it] as String
-                        println entryImageRepresentations[it as String]
-                        print "image rep exists? "
-                        println !(entryImageRepresentations[it]?.equalsIgnoreCase("NODISPLY")?:false)
-                        if (it == 0 || !(entryImageRepresentations[it as String]?.equalsIgnoreCase("NODISPLY")?:false))
+                        if (it == 0 || !(entryImageRepresentations[it]?.equalsIgnoreCase("NODISPLY")?:false))
                         {
                             println it
                             Boolean buildHistogramsWithR0 = params.buildHistogramsWithR0 != null ? params.buildHistogramsWithR0.toBoolean() : false
                             Boolean buildHistograms = params.buildHistograms != null ? params.buildHistograms.toBoolean() : false
                             Boolean buildOverviews = params.buildOverviews != null ? params.buildOverviews.toBoolean() : false
                             Boolean useFastHistogramStaging = params.useFastHistogramStaging != null ? params.useFastHistogramStaging.toBoolean() : false
-                            println "before setEntry"
                             imageStager.setEntry(it)
                             println "set entry to ${it}"
                             imageStager.setDefaults()
