@@ -176,6 +176,19 @@ class SqsStagerService
             {
                 String prefixPath = "${OmarAvroUtils.avroConfig.download.directory}"
                 File fullPathLocation = avroService.getFullPathFromMessage(jsonObj)
+
+                // Add extension to path in order to avoid image conflicts when only the extension is different.
+                String fileExtension = fullPathLocation.path(
+                        fullPathLocation.path.lastIndexOf('.'),
+                        fullPathLocation.path.length() - 1
+                )
+
+                println "DEBUG"
+                println "Full path: $fullPathLocation"
+                println "Derived: $fileExtension"
+                println "Unused prefix var: $prefixPath"
+
+
                 File testPath = fullPathLocation?.parentFile
                 Long fileSize = 0
                 result.source = sourceURI
