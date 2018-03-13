@@ -179,9 +179,11 @@ class SqsStagerService
 
                 // Add extension to path in order to avoid image conflicts when only the extension is different.
                 String fileExtension = fullPathLocation.path.substring(
-                        fullPathLocation.path.lastIndexOf('.'),
-                        fullPathLocation.path.length() - 1
+                        fullPathLocation.path.lastIndexOf('.') + 1,
+                        fullPathLocation.path.length()
                 )
+                fullPathLocation = new File("${fullPathLocation.parent}/${fileExtension}/${fullPathLocation.name}")
+
 
                 println "DEBUG"
                 println "Full path: $fullPathLocation"
