@@ -184,13 +184,6 @@ class SqsStagerService
                 )
                 fullPathLocation = new File("${fullPathLocation.parent}/${fileExtension}/${fullPathLocation.name}")
 
-
-                println "DEBUG"
-                println "Full path: $fullPathLocation"
-                println "Derived: $fileExtension"
-                println "Unused prefix var: $prefixPath"
-
-
                 File testPath = fullPathLocation?.parentFile
                 Long fileSize = 0
                 result.source = sourceURI
