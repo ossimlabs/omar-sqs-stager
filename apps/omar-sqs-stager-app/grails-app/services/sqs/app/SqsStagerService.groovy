@@ -178,16 +178,11 @@ class SqsStagerService
                 File fullPathLocation = avroService.getFullPathFromMessage(jsonObj)
 
                 // Add extension to path in order to avoid image conflicts when only the extension is different.
-                String fileExtension = fullPathLocation.path(
-                        fullPathLocation.path.lastIndexOf('.'),
-                        fullPathLocation.path.length() - 1
+                String fileExtension = fullPathLocation.path.substring(
+                        fullPathLocation.path.lastIndexOf('.') + 1,
+                        fullPathLocation.path.length()
                 )
-
-                println "DEBUG"
-                println "Full path: $fullPathLocation"
-                println "Derived: $fileExtension"
-                println "Unused prefix var: $prefixPath"
-
+                fullPathLocation = new File("${fullPathLocation.parent}/${fileExtension}/${fullPathLocation.name}")
 
                 File testPath = fullPathLocation?.parentFile
                 Long fileSize = 0
@@ -235,7 +230,7 @@ class SqsStagerService
             }
 
         }
-        catch (e)
+        catch (e)  // FIXME: Bad catch-all. Catches everything and silently continues on.
         {
             result.status = HttpStatus.NOT_FOUND
             result.message = e.toString()
