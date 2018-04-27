@@ -76,7 +76,6 @@ node(""){
                sh """
                 pushd ${workspaceDir}/${appName}
                 aws s3 cp s3://ossimlabs/dependencies/goofys/goofys ./apps/${appName}-app/docker/
-ls -alRh
                 gradle ${appName}-app:artifactoryPublish
                 popd
                 """
