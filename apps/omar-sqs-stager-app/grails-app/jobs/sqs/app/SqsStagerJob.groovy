@@ -2,11 +2,14 @@ package sqs.app
 
 import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper
+import groovy.time.TimeDuration
 import omar.core.DateUtil
 import omar.avro.HttpUtils
 import omar.core.HttpStatus
 import omar.avro.OmarAvroUtils
 import groovy.json.JsonBuilder
+
+import java.time.Duration
 
 class SqsStagerJob {
    def sqsStagerService
@@ -193,8 +196,13 @@ class SqsStagerJob {
 
             Date acquisitionDate = DateUtil.parseDate(json."acquisitionDates" as String) ?: new Date()
             println("DEBUG: Acq date = $acquisitionDate")
-            Date acquisitionToStartTime = new Date() - acquisitionDate
-            messageInfo.acquisitionToStartTime = acquisitionToStartTime
+            TimeDuration acquisitionToStartTime = null
+            if (acquisitionDate instanceof Date) {
+              use(groovy.time.TimeCategory) {
+                acquisitionToStartTime = startTimeDate - acquisitionDate
+              }
+            }
+            messageInfo.acquisitionToStartTime = acquisitionToStartTime.toMilliseconds()
             println("DEBUG: acquisitionToStartTime = $acquisitionToStartTime")
 
             // if the flag is not set then delete immediately
