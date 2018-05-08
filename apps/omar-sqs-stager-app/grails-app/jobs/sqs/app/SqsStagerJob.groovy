@@ -191,6 +191,12 @@ class SqsStagerJob {
             messageInfo.sqsTimestamp = DateUtil.formatUTC(sqsTimestampDate)
             messageInfo.startTime = DateUtil.formatUTC(startTimeDate)
 
+            Date acquisitionDate = DateUtil.parseDate(json."acquisitionDates" as String) ?: new Date()
+            println("DEBUG: Acq date = $acquisitionDate")
+            Date acquisitionToStartTime = new Date() - acquisitionDate
+            messageInfo.acquisitionToStartTime = acquisitionToStartTime
+            println("DEBUG: acquisitionToStartTime = $acquisitionToStartTime")
+
             // if the flag is not set then delete immediately
             if(!deleteMessageIfNoError) sqsStagerService.deleteMessages(SqsUtils.sqsConfig.reader.queue, [message])
             if(sqsStagerService.checkMd5(message.mD5OfBody, message.body))
