@@ -163,6 +163,7 @@ class SqsStagerService
                           destination  : "",
                           startTime    : new Date(),
                           endTime      : null,
+                          acquisitionToStartTime: null,
                           duration     : 0]
         def jsonObj = message
         String location
@@ -185,7 +186,7 @@ class SqsStagerService
             }
             println("DEBUG: Diff in millis = ${acquisitionToStartTime.toMilliseconds()}")
             println("DEBUG: Diff pretty = ${acquisitionToStartTime}")
-            result."acquisitionToStartTime" = acquisitionToStartTime.toMilliseconds()
+            result["acquisitionToStartTime"] = acquisitionToStartTime.toMilliseconds()
 
             String sourceURI = jsonObj?."${OmarAvroUtils.avroConfig.sourceUriField}" ?: ""
             if (sourceURI)
