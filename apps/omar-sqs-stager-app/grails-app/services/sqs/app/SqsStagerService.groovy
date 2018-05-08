@@ -171,6 +171,7 @@ class SqsStagerService
                 jsonObj = parseMessage(message)
             }
 
+            println("DEBUG: Acq date = ${jsonObj?.acquisitionDates}")
             Date acquisitionDate = new Date(jsonObj?."acquisitionDates")
             println("DEBUG: Acq date = $acquisitionDate")
             result.acquisitionToStartTime = new Date() - acquisitionDate
