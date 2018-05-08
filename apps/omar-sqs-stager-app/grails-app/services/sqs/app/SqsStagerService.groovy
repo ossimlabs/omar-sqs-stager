@@ -7,6 +7,7 @@ import com.amazonaws.services.sqs.AmazonSQSClient
 import com.amazonaws.services.sqs.model.DeleteMessageBatchRequest
 import com.amazonaws.services.sqs.model.DeleteMessageBatchRequestEntry
 import com.amazonaws.services.sqs.model.ReceiveMessageRequest
+import groovy.time.TimeCategory
 import groovy.time.TimeDuration
 import joms.oms.DataInfo
 import joms.oms.ImageStager
@@ -179,7 +180,7 @@ class SqsStagerService
             TimeDuration acquisitionToStartTime = null
             if (acquisitionDate instanceof Date) {
                 use(groovy.time.TimeCategory) {
-                    acquisitionToStartTime = acquisitionDate - startTimeDate
+                    acquisitionToStartTime = acquisitionDate - new Date()
                 }
             }
             println("DEBUG: Diff in millis = $acquisitionToStartTime")
