@@ -171,10 +171,9 @@ class SqsStagerService
                 jsonObj = parseMessage(message)
             }
 
-            println("DEBUG: acquisitionDates = ${jsonObj?.acquisitionDates}")
-            Date acquisitionDate = new Date(jsonObj?."acquisitionDates")
+            println("DEBUG: acquisitionDates = ${jsonObj?."${OmarAvroUtils.avroConfig.dateField}"}")
+            Date acquisitionDate = DateUtil.parseDate(jsonObj?."${OmarAvroUtils.avroConfig.dateField}")
             println("DEBUG: Acq date = $acquisitionDate")
-            result.acquisitionToStartTime = new Date() - acquisitionDate
 
             String sourceURI = jsonObj?."${OmarAvroUtils.avroConfig.sourceUriField}" ?: ""
             if (sourceURI)
