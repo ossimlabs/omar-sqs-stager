@@ -194,15 +194,6 @@ class SqsStagerJob {
             messageInfo.sqsTimestamp = DateUtil.formatUTC(sqsTimestampDate)
             messageInfo.startTime = DateUtil.formatUTC(startTimeDate)
 
-            Date acquisitionDate = DateUtil.parseDate(json."acquisitionDates" as String) ?: startTimeDate
-            println("DEBUG: json = ${json}")
-            println("DEBUG: Acq date = $acquisitionDate")
-            TimeDuration acquisitionToStartTime = null
-            if (acquisitionDate instanceof Date) {
-              use(groovy.time.TimeCategory) {
-                acquisitionToStartTime = acquisitionDate - startTimeDate
-              }
-            }
             messageInfo.acquisitionToStartTime = acquisitionToStartTime.toMilliseconds()
             println("DEBUG: acquisitionToStartTime = $acquisitionToStartTime")
 

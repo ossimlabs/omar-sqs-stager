@@ -7,6 +7,7 @@ import com.amazonaws.services.sqs.AmazonSQSClient
 import com.amazonaws.services.sqs.model.DeleteMessageBatchRequest
 import com.amazonaws.services.sqs.model.DeleteMessageBatchRequestEntry
 import com.amazonaws.services.sqs.model.ReceiveMessageRequest
+import groovy.time.TimeDuration
 import joms.oms.DataInfo
 import joms.oms.ImageStager
 import omar.avro.AvroMessageUtils
@@ -175,6 +176,13 @@ class SqsStagerService
             println("DEBUG: acquisitionDates = ${jsonObj?."${OmarAvroUtils.avroConfig.dateField}"}")
             Date acquisitionDate = DateUtil.parseDate(jsonObj?."${OmarAvroUtils.avroConfig.dateField}")
             println("DEBUG: Acq date = $acquisitionDate")
+            TimeDuration acquisitionToStartTime = null
+            if (acquisitionDate instanceof Date) {
+                use(groovy.time.TimeCategory) {
+                    acquisitionToStartTime = acquisitionDate - startTimeDate
+                }
+            }
+            println("DEBUG: Diff in millis = $acquisitionToStartTime")
 
             String sourceURI = jsonObj?."${OmarAvroUtils.avroConfig.sourceUriField}" ?: ""
             if (sourceURI)
