@@ -238,6 +238,7 @@ class SqsStagerService
         {
             result.status = HttpStatus.NOT_FOUND
             result.message = e.toString()
+            e.printStackTrace()
         }
 
         result.endTime = new Date()
