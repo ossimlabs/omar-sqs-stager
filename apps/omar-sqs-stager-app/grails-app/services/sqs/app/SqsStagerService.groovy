@@ -13,6 +13,7 @@ import omar.avro.AvroMessageUtils
 import omar.avro.HttpUtils
 import omar.avro.OmarAvroUtils
 import omar.core.HttpStatus
+import omar.core.DateUtil
 import org.apache.commons.codec.digest.DigestUtils
 import org.apache.http.HttpResponse
 import org.apache.http.client.HttpClient
@@ -20,6 +21,7 @@ import org.apache.http.client.methods.HttpPost
 import org.apache.http.entity.StringEntity
 import org.apache.http.impl.client.DefaultHttpClient
 import groovy.util.XmlSlurper
+import org.apache.tools.ant.util.DateUtils
 
 class SqsStagerService
 {
@@ -172,7 +174,7 @@ class SqsStagerService
             }
 
             println("DEBUG: acquisitionDates = ${jsonObj?."${OmarAvroUtils.avroConfig.dateField}"}")
-            Date acquisitionDate = new Date(jsonObj?."${OmarAvroUtils.avroConfig.dateField}")
+            Date acquisitionDate = DateUtil.parseDate(jsonObj?."${OmarAvroUtils.avroConfig.dateField}")
             println("DEBUG: Acq date = $acquisitionDate")
 
             String sourceURI = jsonObj?."${OmarAvroUtils.avroConfig.sourceUriField}" ?: ""
