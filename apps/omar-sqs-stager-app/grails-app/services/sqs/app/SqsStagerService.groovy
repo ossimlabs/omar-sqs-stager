@@ -21,7 +21,6 @@ import org.apache.http.client.methods.HttpPost
 import org.apache.http.entity.StringEntity
 import org.apache.http.impl.client.DefaultHttpClient
 import groovy.util.XmlSlurper
-import org.apache.tools.ant.util.DateUtils
 
 class SqsStagerService
 {
