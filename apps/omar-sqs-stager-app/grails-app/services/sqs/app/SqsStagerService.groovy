@@ -179,11 +179,13 @@ class SqsStagerService
             println("DEBUG: Acq date = $acquisitionDate")
             TimeDuration acquisitionToStartTime = null
             if (acquisitionDate instanceof Date) {
-                use(groovy.time.TimeCategory) {
-                    acquisitionToStartTime = acquisitionDate - new Date()
+                use(TimeCategory) {
+                    acquisitionToStartTime = new Date() - acquisitionDate
                 }
             }
-            println("DEBUG: Diff in millis = $acquisitionToStartTime")
+            println("DEBUG: Diff in millis = ${acquisitionToStartTime.toMilliseconds()}")
+            println("DEBUG: Diff pretty = ${acquisitionToStartTime}")
+            result."acquisitionToStartTime" = acquisitionToStartTime.toMilliseconds()
 
             String sourceURI = jsonObj?."${OmarAvroUtils.avroConfig.sourceUriField}" ?: ""
             if (sourceURI)
