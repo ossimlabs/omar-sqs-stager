@@ -288,8 +288,17 @@ class SqsStagerService
                             Boolean buildHistograms = params.buildHistograms != null ? params.buildHistograms.toBoolean() : false
                             Boolean buildOverviews = params.buildOverviews != null ? params.buildOverviews.toBoolean() : false
                             Boolean useFastHistogramStaging = params.useFastHistogramStaging != null ? params.useFastHistogramStaging.toBoolean() : false
+                            Boolean buildThumbnails = params.buildThumbnails != null ? params.buildThumbnails.toBoolean() : true
+                            Integer thumbnailSize = params.thumbnailSize != null ? params.thumbnailSize : 256
+                            String thumbnailType = params.thumbnailType != null ? params.thumbnailType : "png"
+                            String thumbnailStretchType = params.thumbnailStretchType != null ? params.thumbnailStretchType : "auto-minmax"
                             imageStager.setEntry(it)
                             imageStager.setDefaults()
+
+                            imageStager.setThumbnailStagingFlag( buildThumbnails, thumbnailSize )
+                            imageStager.setThumbnailType( thumbnailType )
+                            imageStager.setThumbnailStretchType( thumbnailStretchType )
+
                             imageStager.setHistogramStagingFlag(buildHistograms)
                             imageStager.setOverviewStagingFlag(buildOverviews)
                             if (params.overviewCompressionType != null) imageStager.setCompressionType(params.overviewCompressionType)
@@ -303,12 +312,11 @@ class SqsStagerService
 
                                 imageStager.setHistogramStagingFlag(false)
                                 imageStager.stage()
-                                println "staged histograms"
 
                                 imageStager.setHistogramStagingFlag(true)
                                 imageStager.setOverviewStagingFlag(false)
-                                println "staged overviews"
                             }
+
                             imageStager.stage()
                         }
                     }
