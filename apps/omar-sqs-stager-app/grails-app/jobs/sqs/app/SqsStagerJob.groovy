@@ -2,11 +2,14 @@ package sqs.app
 
 import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper
+import groovy.time.TimeDuration
 import omar.core.DateUtil
 import omar.avro.HttpUtils
 import omar.core.HttpStatus
 import omar.avro.OmarAvroUtils
 import groovy.json.JsonBuilder
+
+import java.time.Duration
 
 class SqsStagerJob {
    def sqsStagerService

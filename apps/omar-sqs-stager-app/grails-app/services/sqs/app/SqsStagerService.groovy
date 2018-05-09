@@ -7,12 +7,15 @@ import com.amazonaws.services.sqs.AmazonSQSClient
 import com.amazonaws.services.sqs.model.DeleteMessageBatchRequest
 import com.amazonaws.services.sqs.model.DeleteMessageBatchRequestEntry
 import com.amazonaws.services.sqs.model.ReceiveMessageRequest
+import groovy.time.TimeCategory
+import groovy.time.TimeDuration
 import joms.oms.DataInfo
 import joms.oms.ImageStager
 import omar.avro.AvroMessageUtils
 import omar.avro.HttpUtils
 import omar.avro.OmarAvroUtils
 import omar.core.HttpStatus
+import omar.core.DateUtil
 import org.apache.commons.codec.digest.DigestUtils
 import org.apache.http.HttpResponse
 import org.apache.http.client.HttpClient
@@ -160,6 +163,7 @@ class SqsStagerService
                           destination  : "",
                           startTime    : new Date(),
                           endTime      : null,
+                          acquisitionToStartTime: null,
                           duration     : 0]
         def jsonObj = message
         String location
@@ -170,6 +174,19 @@ class SqsStagerService
             {
                 jsonObj = parseMessage(message)
             }
+
+            println("DEBUG: acquisitionDates = ${jsonObj?."${OmarAvroUtils.avroConfig.dateField}"}")
+            Date acquisitionDate = DateUtil.parseDate(jsonObj?."${OmarAvroUtils.avroConfig.dateField}")
+            println("DEBUG: Acq date = $acquisitionDate")
+            TimeDuration acquisitionToStartTime = null
+            if (acquisitionDate instanceof Date) {
+                use(TimeCategory) {
+                    acquisitionToStartTime = new Date() - acquisitionDate
+                }
+            }
+            println("DEBUG: Diff in millis = ${acquisitionToStartTime.toMilliseconds()}")
+            println("DEBUG: Diff pretty = ${acquisitionToStartTime}")
+            result["acquisitionToStartTime"] = acquisitionToStartTime.toMilliseconds()
 
             String sourceURI = jsonObj?."${OmarAvroUtils.avroConfig.sourceUriField}" ?: ""
             if (sourceURI)
@@ -234,6 +251,7 @@ class SqsStagerService
         {
             result.status = HttpStatus.NOT_FOUND
             result.message = e.toString()
+            e.printStackTrace()
         }
 
         result.endTime = new Date()
@@ -283,8 +301,17 @@ class SqsStagerService
                             Boolean buildHistograms = params.buildHistograms != null ? params.buildHistograms.toBoolean() : false
                             Boolean buildOverviews = params.buildOverviews != null ? params.buildOverviews.toBoolean() : false
                             Boolean useFastHistogramStaging = params.useFastHistogramStaging != null ? params.useFastHistogramStaging.toBoolean() : false
+                            Boolean buildThumbnails = params.buildThumbnails != null ? params.buildThumbnails.toBoolean() : true
+                            Integer thumbnailSize = params.thumbnailSize != null ? params.thumbnailSize : 256
+                            String thumbnailType = params.thumbnailType != null ? params.thumbnailType : "png"
+                            String thumbnailStretchType = params.thumbnailStretchType != null ? params.thumbnailStretchType : "auto-minmax"
                             imageStager.setEntry(it)
                             imageStager.setDefaults()
+
+                            imageStager.setThumbnailStagingFlag( buildThumbnails, thumbnailSize )
+                            imageStager.setThumbnailType( thumbnailType )
+                            imageStager.setThumbnailStretchType( thumbnailStretchType )
+
                             imageStager.setHistogramStagingFlag(buildHistograms)
                             imageStager.setOverviewStagingFlag(buildOverviews)
                             if (params.overviewCompressionType != null) imageStager.setCompressionType(params.overviewCompressionType)
@@ -298,12 +325,11 @@ class SqsStagerService
 
                                 imageStager.setHistogramStagingFlag(false)
                                 imageStager.stage()
-                                println "staged histograms"
 
                                 imageStager.setHistogramStagingFlag(true)
                                 imageStager.setOverviewStagingFlag(false)
-                                println "staged overviews"
                             }
+
                             imageStager.stage()
                         }
                     }
