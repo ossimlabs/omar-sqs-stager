@@ -213,7 +213,6 @@ class SqsStagerJob {
                   // Calculate secondsBeforeQueue
                   Date acquisitionDate = messageInfo.acquisitionDate
                   messageInfo.secondsBeforeQueue = (sqsTimestampDate.time - acquisitionDate.time) / 1000 // Converted to seconds.
-                  println "DEBUG: Seconds before queue: ${messageInfo.secondsBeforeQueue}"
 
                   messageInfo = indexRaster(messageInfo)
 
