@@ -2,6 +2,7 @@ package sqs.app
 
 import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper
+import groovy.time.TimeCategory
 import groovy.time.TimeDuration
 import omar.core.DateUtil
 import omar.avro.HttpUtils
@@ -193,6 +194,20 @@ class SqsStagerJob {
             messageInfo.secondsOnQueue = (startTimeDate.time - sqsTimestampDate.time) / 1000.0
             messageInfo.sqsTimestamp = DateUtil.formatUTC(sqsTimestampDate)
             messageInfo.startTime = DateUtil.formatUTC(startTimeDate)
+
+            // Calculate acquisitionToStartTime
+            println("DEBUG: acquisitionDates = ${json?."${OmarAvroUtils.avroConfig.dateField}"}")
+            Date acquisitionDate = DateUtil.parseDate(json?."${OmarAvroUtils.avroConfig.dateField}")
+            println("DEBUG: Acq date = $acquisitionDate")
+            TimeDuration acquisitionToStartTime = null
+            if (acquisitionDate instanceof Date) {
+              use(TimeCategory) {
+                acquisitionToStartTime = new Date() - acquisitionDate
+              }
+            }
+            println("DEBUG: Diff in millis = ${acquisitionToStartTime.toMilliseconds()}")
+            println("DEBUG: Diff pretty = ${acquisitionToStartTime}")
+            messageInfo.acquisitionToStartTime = acquisitionToStartTime.toMilliseconds()
 
             // if the flag is not set then delete immediately
             if(!deleteMessageIfNoError) sqsStagerService.deleteMessages(SqsUtils.sqsConfig.reader.queue, [message])

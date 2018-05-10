@@ -163,7 +163,6 @@ class SqsStagerService
                           destination  : "",
                           startTime    : new Date(),
                           endTime      : null,
-                          acquisitionToStartTime: null,
                           duration     : 0]
         def jsonObj = message
         String location
@@ -174,19 +173,6 @@ class SqsStagerService
             {
                 jsonObj = parseMessage(message)
             }
-
-            println("DEBUG: acquisitionDates = ${jsonObj?."${OmarAvroUtils.avroConfig.dateField}"}")
-            Date acquisitionDate = DateUtil.parseDate(jsonObj?."${OmarAvroUtils.avroConfig.dateField}")
-            println("DEBUG: Acq date = $acquisitionDate")
-            TimeDuration acquisitionToStartTime = null
-            if (acquisitionDate instanceof Date) {
-                use(TimeCategory) {
-                    acquisitionToStartTime = new Date() - acquisitionDate
-                }
-            }
-            println("DEBUG: Diff in millis = ${acquisitionToStartTime.toMilliseconds()}")
-            println("DEBUG: Diff pretty = ${acquisitionToStartTime}")
-            result["acquisitionToStartTime"] = acquisitionToStartTime.toMilliseconds()
 
             String sourceURI = jsonObj?."${OmarAvroUtils.avroConfig.sourceUriField}" ?: ""
             if (sourceURI)
@@ -247,7 +233,7 @@ class SqsStagerService
             }
 
         }
-        catch (e)  // FIXME: Bad catch-all. Catches everything and silently continues on.
+        catch (e)
         {
             result.status = HttpStatus.NOT_FOUND
             result.message = e.toString()
