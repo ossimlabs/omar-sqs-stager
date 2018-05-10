@@ -37,7 +37,7 @@ class SqsStagerJob {
       result.sourceUri         = downloadResult.source
       result.filename          = downloadResult.destination
       result.fileSize          = downloadResult.fileSize?:0
-      result.acquisionToStartTime = downloadResult.acquisionToStartTime
+      result.acquisitionToStartTime = downloadResult.acquisitionToStartTime
       log.info "MessageId: ${messageInfo.messageId}: Downloaded ${downloadResult.source} to ${downloadResult.destination}: ${downloadResult.message}"
     }
     catch(e)
