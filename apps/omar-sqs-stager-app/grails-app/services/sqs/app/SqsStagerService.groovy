@@ -257,6 +257,7 @@ class SqsStagerService
         println("DEBUG: Diff in millis = ${acquisitionToStartTime.toMilliseconds()}")
         println("DEBUG: Diff pretty = ${acquisitionToStartTime}")
         result.acquisitionToStartTime = (acquisitionToStartTime.toMilliseconds() / 1000) // Convert to seconds.
+        result.acquisitionDate = acquisitionDate
 
         return result
     }
