@@ -37,7 +37,6 @@ class SqsStagerJob {
       result.sourceUri         = downloadResult.source
       result.filename          = downloadResult.destination
       result.fileSize          = downloadResult.fileSize?:0
-      result.acquisitionToStartTime = downloadResult.acquisitionToStartTime
       result.acquisitionDate = downloadResult.acquisitionDate
       log.info "MessageId: ${messageInfo.messageId}: Downloaded ${downloadResult.source} to ${downloadResult.destination}: ${downloadResult.message}"
     }
@@ -180,7 +179,7 @@ class SqsStagerJob {
         messages?.each{message->
           Boolean okToDelete = true
           messageInfo = newMessageInfo()
-          def startTimeDate = new Date()
+          Date startTimeDate = new Date()
           try{
             messageInfo.messageId = message?.messageId
             def json = new JsonSlurper().parseText(message?.body?:"")
@@ -207,10 +206,14 @@ class SqsStagerJob {
               if(messageInfo.downloadStatus == HttpStatus.FOUND ||
                  messageInfo.downloadStatus == HttpStatus.OK)
               {
-              // log message parsed
+                // log message parsed
                 messageInfo = stageFile(messageInfo)
                 if(messageInfo.stageStatus != HttpStatus.UNSUPPORTED_MEDIA_TYPE)
                 {
+                  // Calculate secondsBeforeQueue
+                  Date acquisitionDate = messageInfo.acquisitionDate
+                  messageInfo.secondsBeforeQueue = (sqsTimestampDate.time - acquisitionDate.time) / 1000 // Converted to seconds.
+
                   messageInfo = indexRaster(messageInfo)
 
                   def addMetadataURL = OmarAvroUtils.avroConfig?.metadata?.addMetadataEndPoint

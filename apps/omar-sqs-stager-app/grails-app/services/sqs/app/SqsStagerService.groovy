@@ -244,19 +244,8 @@ class SqsStagerService
 
         result.duration = (result.endTime.time - result.startTime.time)
 
-        // Calculate acquisitionToStartTime
-        println("DEBUG: acquisitionDates = ${jsonObj?."${OmarAvroUtils.avroConfig.dateField}"}")
+        // Include acquisition date in result so SqsStagerJob can use it.
         Date acquisitionDate = DateUtil.parseDate(jsonObj?."${OmarAvroUtils.avroConfig.dateField}")
-        println("DEBUG: Acq date = $acquisitionDate")
-        TimeDuration acquisitionToStartTime = null
-        if (acquisitionDate instanceof Date) {
-            use(TimeCategory) {
-                acquisitionToStartTime = new Date() - acquisitionDate
-            }
-        }
-        println("DEBUG: Diff in millis = ${acquisitionToStartTime.toMilliseconds()}")
-        println("DEBUG: Diff pretty = ${acquisitionToStartTime}")
-        result.acquisitionToStartTime = (acquisitionToStartTime.toMilliseconds() / 1000) // Convert to seconds.
         result.acquisitionDate = acquisitionDate
 
         return result
