@@ -212,8 +212,14 @@ class SqsStagerJob {
                 {
                   // Calculate secondsBeforeQueue
                   Date acquisitionDate = messageInfo.acquisitionDate
-                  messageInfo.secondsBeforeQueue = (sqsTimestampDate.time - acquisitionDate.time) / 1000 // Converted to seconds.
-
+                  if(acquisitionDate)
+                  {
+                    messageInfo.secondsBeforeQueue = (sqsTimestampDate.time - acquisitionDate.time) / 1000 // Converted to seconds.
+                  }
+                  else
+                  {
+                    messageInfo.secondsBeforeQueue = 0
+                  }
                   messageInfo = indexRaster(messageInfo)
 
                   def addMetadataURL = OmarAvroUtils.avroConfig?.metadata?.addMetadataEndPoint
