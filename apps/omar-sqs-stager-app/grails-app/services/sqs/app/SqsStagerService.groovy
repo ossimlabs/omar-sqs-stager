@@ -245,7 +245,7 @@ class SqsStagerService
         result.duration = (result.endTime.time - result.startTime.time)
 
         // Include acquisition date in result so SqsStagerJob can use it.
-        Date acquisitionDate = DateUtil.parseDate(jsonObj?."${OmarAvroUtils.avroConfig.dateField}")
+        Date acquisitionDate = AvroMessageUtils.parseObservationDate(jsonObj)//DateUtil.parseDate(jsonObj?."${OmarAvroUtils.avroConfig.dateField}")
         result.acquisitionDate = acquisitionDate
 
         return result
