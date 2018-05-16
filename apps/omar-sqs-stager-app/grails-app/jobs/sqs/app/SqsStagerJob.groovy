@@ -214,11 +214,14 @@ class SqsStagerJob {
                   Date acquisitionDate = messageInfo.acquisitionDate
                   if(acquisitionDate)
                   {
-                    messageInfo.secondsBeforeQueue = (sqsTimestampDate.time - acquisitionDate.time) / 1000 // Converted to seconds.
+                    // Convert to seconds. if the acquisition date was found
+                    messageInfo.secondsBeforeQueue = (sqsTimestampDate.time - 
+                                                      acquisitionDate.time) / 1000 
                   }
                   else
                   {
-                    messageInfo.secondsBeforeQueue = 0
+                     log.error "Acquisition date was not found/parsed."
+
                   }
                   messageInfo = indexRaster(messageInfo)
 
