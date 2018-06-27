@@ -59,12 +59,10 @@ class SqsStagerJobUtil
             String fileOnly = file.name.lastIndexOf('.').with {it != -1 ? file.name[0..<it] : file.name}
             if(parent && fileOnly)
             {
-               new FileNameByRegexFinder().getFileNames(parent,"${file}*").each{
-                  File testFile = new File(it)
-                  if(testFile.exists())
-                  {
-                     testFile.delete()
-                  }
+               def filenames = new FileNameByRegexFinder().getFileNames(parent,"${file}*")
+               log.info "Cleaning filenames: ${filenames}"
+               filenames.each{tempFile->
+                  new File(tempFile).delete()
                }
             }
          }
@@ -189,6 +187,7 @@ class SqsStagerJobUtil
                         {
                            messageInfo.httpStatus = HttpStatus.UNSUPPORTED_MEDIA_TYPE
                            messageInfo.statusMessage = messageInfo.stageMessage
+                           needToCleanup = true
                         }
                      }
                      else
