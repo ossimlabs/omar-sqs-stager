@@ -139,7 +139,7 @@ class SqsStagerJobUtil
                      {
                         // log message parsed
                         stageFile()
-                        if(messageInfo.stageStatus != HttpStatus.BAD_REQUEST)
+                        if(isCanceled())
                         {
                           needToCleanup = true
                           messageInfo.httpStatus = HttpStatus.BAD_REQUEST
@@ -209,7 +209,7 @@ class SqsStagerJobUtil
                   {
 
                      messageInfo.httpStatus = HttpStatus.BAD_REQUEST
-                     if(!needToCleanup)
+                     if(!isCanceled())
                      {
                         messageInfo.statusMessage = "MessageId: ${messageInfo.messageId} ERROR: BAD MD5 Checksum For Message: ${messageBody}"
                         log.error "MessageId: ${messageInfo.messageId} ERROR: BAD MD5 Checksum For Message: ${messageBody}"
