@@ -41,6 +41,7 @@ class SqsStagerJobService implements InitializingBean {
         if(!params) params = [:]
         params.id = UUID.randomUUID().toString()
         SqsStagerJobUtil result = new SqsStagerJobUtil(params)
+        result.cancelled = false
         if(!result.messageInfo)
         {
            result.resetMessageInfo()
@@ -74,7 +75,10 @@ class SqsStagerJobService implements InitializingBean {
       }
       result
     } 
-
+   String getDiscoveryUri(def discoveryUri)
+   {
+      "${discoveryUri.uri}${grailsApplication.config.server.contextPath?:'/'}"
+   }
     HashMap stop(SqsStagerCommand cmd)
     {
       HashMap result = [
@@ -90,7 +94,7 @@ class SqsStagerJobService implements InitializingBean {
          {
             cmd.recurseFlag = true
             discoveryClient.getInstances(sqsStagerInstanceName)?.each{it->
-               String value = new URL("${it.uri}/sqsStager/stop?${cmd.toUrlQuery()}").text
+               String value = new URL("${getDiscoveryUri(it)}/sqsStager/stop?${cmd.toUrlQuery()}").text
             } 
          }
       }
@@ -115,7 +119,7 @@ class SqsStagerJobService implements InitializingBean {
          {
             cmd.recurseFlag = true
             discoveryClient.getInstances(sqsStagerInstanceName)?.each{it->
-               String value = new URL("${it.uri}/sqsStager/pause?${cmd.toUrlQuery()}").text
+               String value = new URL("${getDiscoveryUri(it)}/sqsStager/pause?${cmd.toUrlQuery()}").text
             } 
          }
       }
@@ -140,7 +144,7 @@ class SqsStagerJobService implements InitializingBean {
          {
             cmd.recurseFlag = true
             discoveryClient.getInstances(sqsStagerInstanceName)?.each{it->
-               String value = new URL("${it.uri}/sqsStager/start?${cmd.toUrlQuery()}").text
+               String value = new URL("${getDiscoveryUri(it)}/sqsStager/start?${cmd.toUrlQuery()}").text
             } 
          }
      }
@@ -160,7 +164,7 @@ class SqsStagerJobService implements InitializingBean {
        // if the recurse is set then we are already looping just return my result
       cmd.recurseFlag = true
       discoveryClient.getInstances(sqsStagerInstanceName)?.each{it->
-         String value = new URL("${it.uri}${path}?${cmd.toUrlQuery()}").text
+         String value = new URL("${getDiscoveryUri(it)}${path}?${cmd.toUrlQuery()}").text
          if(value)
          {
             try{
