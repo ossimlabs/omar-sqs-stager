@@ -26,8 +26,9 @@ import groovy.util.XmlSlurper
 
 class SqsStagerService
 {
-    def avroService
-    AmazonSQSClient sqs
+   def avroService
+   AmazonSQSClient sqs
+   def grailsApplication  
 
     static Boolean checkMd5(String messageBodyMd5, String message)
     {
@@ -259,7 +260,17 @@ class SqsStagerService
                       startTime    : new Date(),
                       endTime      : null,
                       duration     : 0]
-        ImageStager imageStager = new ImageStager()
+        ImageStager imageStager
+        Boolean deleteStager = true
+        if(params.imageStager)
+        {
+            imageStager = params.imageStager
+            deleteStager = false
+        }
+        else
+        {
+            imageStager = new ImageStager()
+        }
         String filename = params.filename
 
         try
@@ -324,7 +335,10 @@ class SqsStagerService
                         }
                     }
                 result.message = "Staged file ${filename}"
-                imageStager.delete()
+                if(deleteStager)
+                {
+                    imageStager.delete()
+                }
                 imageStager = null
             }
             else
@@ -344,11 +358,13 @@ class SqsStagerService
         }
         finally
         {
-            imageStager?.delete()
+            if(deleteStager)
+            {
+                imageStager?.delete()
+            }
             imageStager = null
-
         }
-        println result
+        //println result
         result
     }
 

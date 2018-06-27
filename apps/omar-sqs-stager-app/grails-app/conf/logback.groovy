@@ -15,8 +15,9 @@ appender('NO_HEADER', ConsoleAppender) {
     }
 }
 
+
 root(ERROR, ['STDOUT'])
-logger("sqs.app.SqsStagerJob",INFO,['NO_HEADER'], false)
+logger("sqs.app",INFO,['NO_HEADER'], false)
 
 def targetDir = BuildSettings.TARGET_DIR
 if (Environment.isDevelopmentMode() && targetDir) {
