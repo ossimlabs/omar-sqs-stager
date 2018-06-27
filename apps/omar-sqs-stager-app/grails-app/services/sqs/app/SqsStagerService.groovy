@@ -294,47 +294,56 @@ class SqsStagerService
                 }
 
                 Integer nEntries = imageStager.getNumberOfEntries()
-                (0..<nEntries).each
+                Integer idx = 0
+                for(idx = 0; (idx < nEntries)&&!(imageStager?.isCancelled()); ++idx)
+                {
+                    if (idx == 0 || !(entryImageRepresentations[idx]?.equalsIgnoreCase("NODISPLY")?:false))
                     {
-                        if (it == 0 || !(entryImageRepresentations[it]?.equalsIgnoreCase("NODISPLY")?:false))
+                        Boolean buildHistogramsWithR0 = params.buildHistogramsWithR0 != null ? params.buildHistogramsWithR0.toBoolean() : false
+                        Boolean buildHistograms = params.buildHistograms != null ? params.buildHistograms.toBoolean() : false
+                        Boolean buildOverviews = params.buildOverviews != null ? params.buildOverviews.toBoolean() : false
+                        Boolean useFastHistogramStaging = params.useFastHistogramStaging != null ? params.useFastHistogramStaging.toBoolean() : false
+                        Boolean buildThumbnails = params.buildThumbnails != null ? params.buildThumbnails.toBoolean() : true
+                        Integer thumbnailSize = params.thumbnailSize != null ? params.thumbnailSize : 256
+                        String thumbnailType = params.thumbnailType != null ? params.thumbnailType : "png"
+                        String thumbnailStretchType = params.thumbnailStretchType != null ? params.thumbnailStretchType : "auto-minmax"
+                        imageStager.setEntry(idx)
+                        imageStager.setDefaults()
+
+                        imageStager.setThumbnailStagingFlag( buildThumbnails, thumbnailSize )
+                        imageStager.setThumbnailType( thumbnailType )
+                        imageStager.setThumbnailStretchType( thumbnailStretchType )
+
+                        imageStager.setHistogramStagingFlag(buildHistograms)
+                        imageStager.setOverviewStagingFlag(buildOverviews)
+                        if (params.overviewCompressionType != null) imageStager.setCompressionType(params.overviewCompressionType)
+                        if (params.overviewType != null) imageStager.setOverviewType(params.overviewType)
+                        if (params.useFastHistogramStaging != null) imageStager.setUseFastHistogramStagingFlag(useFastHistogramStaging)
+                        imageStager.setQuietFlag(true)
+
+                        if (buildHistograms && buildOverviews
+                                && imageStager.hasOverviews() && buildHistogramsWithR0)
                         {
-                            Boolean buildHistogramsWithR0 = params.buildHistogramsWithR0 != null ? params.buildHistogramsWithR0.toBoolean() : false
-                            Boolean buildHistograms = params.buildHistograms != null ? params.buildHistograms.toBoolean() : false
-                            Boolean buildOverviews = params.buildOverviews != null ? params.buildOverviews.toBoolean() : false
-                            Boolean useFastHistogramStaging = params.useFastHistogramStaging != null ? params.useFastHistogramStaging.toBoolean() : false
-                            Boolean buildThumbnails = params.buildThumbnails != null ? params.buildThumbnails.toBoolean() : true
-                            Integer thumbnailSize = params.thumbnailSize != null ? params.thumbnailSize : 256
-                            String thumbnailType = params.thumbnailType != null ? params.thumbnailType : "png"
-                            String thumbnailStretchType = params.thumbnailStretchType != null ? params.thumbnailStretchType : "auto-minmax"
-                            imageStager.setEntry(it)
-                            imageStager.setDefaults()
 
-                            imageStager.setThumbnailStagingFlag( buildThumbnails, thumbnailSize )
-                            imageStager.setThumbnailType( thumbnailType )
-                            imageStager.setThumbnailStretchType( thumbnailStretchType )
-
-                            imageStager.setHistogramStagingFlag(buildHistograms)
-                            imageStager.setOverviewStagingFlag(buildOverviews)
-                            if (params.overviewCompressionType != null) imageStager.setCompressionType(params.overviewCompressionType)
-                            if (params.overviewType != null) imageStager.setOverviewType(params.overviewType)
-                            if (params.useFastHistogramStaging != null) imageStager.setUseFastHistogramStagingFlag(useFastHistogramStaging)
-                            imageStager.setQuietFlag(true)
-
-                            if (buildHistograms && buildOverviews
-                                    && imageStager.hasOverviews() && buildHistogramsWithR0)
-                            {
-
-                                imageStager.setHistogramStagingFlag(false)
-                                imageStager.stage()
-
-                                imageStager.setHistogramStagingFlag(true)
-                                imageStager.setOverviewStagingFlag(false)
-                            }
-
+                            imageStager.setHistogramStagingFlag(false)
                             imageStager.stage()
+
+                            imageStager.setHistogramStagingFlag(true)
+                            imageStager.setOverviewStagingFlag(false)
                         }
+
+                        imageStager.stage()
                     }
-                result.message = "Staged file ${filename}"
+                }
+                if(imageStager?.isCancelled())
+                {
+                    result.message = "Staging cancelled for ${filename}"
+                    result.status = HttpStatus.BAD_REQUEST
+                }
+                else
+                {
+                    result.message = "Staged file ${filename}"
+                }
                 if(deleteStager)
                 {
                     imageStager.delete()
