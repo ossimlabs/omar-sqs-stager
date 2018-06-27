@@ -241,6 +241,7 @@ class SqsStagerJobUtil
                }
                if(isCancelled())
                {
+                 sqsStagerJobService.jobFinished(this)
                  return
                }
             } // end for each message
