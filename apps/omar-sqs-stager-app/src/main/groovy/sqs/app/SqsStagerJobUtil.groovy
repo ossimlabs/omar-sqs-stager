@@ -187,6 +187,7 @@ class SqsStagerJobUtil
                         {
                            messageInfo.httpStatus = HttpStatus.UNSUPPORTED_MEDIA_TYPE
                            messageInfo.statusMessage = messageInfo.stageMessage
+                           needToCleanup = true
                         }
                      }
                      else
