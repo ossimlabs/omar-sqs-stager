@@ -181,7 +181,7 @@ class SqsStagerJobService implements InitializingBean {
                        ]
       try{
          def quartzScheduler = grailsApplication.mainContext.getBean('quartzScheduler')
-         quartzScheduler?.startAll()
+         quartzScheduler?.resumeAll()
          if(!cmd.recurseFlag)
          {
           result = queryBoolean("/sqsStager/start", cmd, true)
