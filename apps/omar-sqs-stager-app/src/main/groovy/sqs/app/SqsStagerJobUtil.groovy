@@ -59,7 +59,7 @@ class SqsStagerJobUtil
             String fileOnly = file.name.lastIndexOf('.').with {it != -1 ? file.name[0..<it] : file.name}
             if(parent && fileOnly)
             {
-               def filenames = new FileNameByRegexFinder().getFileNames(parent,"${fileOnly}.*")
+               def filenames = new FileNameByRegexFinder().getFileNames(parent,"${fileOnly}*")
                log.info "Cleaning filenames: ${filenames}"
                filenames.each{tempFile->
                   new File(tempFile).delete()
