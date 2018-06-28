@@ -83,12 +83,14 @@ class SqsStagerJobUtil
       def config = SqsUtils.sqsConfig
       try
       {
-          GetQueueAttributesResult getQueueAttributesRequest = new GetQueueAttributesResult(new GetQueueAttributesRequest(config.reader.queue))
-                          .withAttributeNames(ApproximateNumberOfMessages, ApproximateNumberOfMessagesDelayed, ApproximateNumberOfMessagesNotVisible)
+          GetQueueAttributesResult sqsQueueAttributes = sqs.getQueueAttributes(
+              new GetQueueAttributesRequest()
+              .withQueueUrl(config.reader.queue)
+              .withAttributeNames(QueueAttributeName.ApproximateNumberOfMessages, QueueAttributeName.ApproximateNumberOfMessagesDelayed, QueueAttributeName.ApproximateNumberOfMessagesNotVisible))
 
-         messageInfo.approximateNumberOfMessages = sqs.getQueueAttributes(getQueueAttributesRequest).getAttributes().ApproximateNumberOfMessages
-         messageInfo.aproximateNumberOfMessagesDelayed = sqs.getQueueAttributes(getQueueAttributesRequest).getAttributes().ApproximateNumberOfMessagesDelayed
-         messageInfo.approximateNumberOfMessagesNotVisible = sqs.getQueueAttributes(getQueueAttributesRequest).getAttributes().ApproximateNumberOfMessagesNotVisible
+         messageInfo.approximateNumberOfMessages = sqsQueueAttributes.getAttributes().get(QueueAttributeName.ApproximateNumberOfMessages)
+         messageInfo.aproximateNumberOfMessagesDelayed = sqsQueueAttributes.getAttributes().get(QueueAttributeName.ApproximateNumberOfMessagesDelayed)
+         messageInfo.approximateNumberOfMessagesNotVisible = sqsQueueAttributes.getAttributes().get(QueueAttributeName.ApproximateNumberOfMessagesNotVisible)
       }
       catch (e)
       {
