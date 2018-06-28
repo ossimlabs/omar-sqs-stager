@@ -173,7 +173,7 @@ class SqsStagerJobService implements InitializingBean {
        else
        {
           // all must have a successful start in order to return true
-          result = queryBoolean("/sqsStager/start", cmd, true)
+          result = queryBoolean("/sqsStager/pause", cmd, true)
        }
 
        result
