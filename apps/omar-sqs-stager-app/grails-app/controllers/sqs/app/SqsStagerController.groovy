@@ -1,6 +1,7 @@
 package sqs.app
 import omar.core.BindUtil
 import grails.converters.JSON
+import io.swagger.annotations.*
 
 @Api( value = "/sqsStager",
       description = "API operations for SQS Stager"
