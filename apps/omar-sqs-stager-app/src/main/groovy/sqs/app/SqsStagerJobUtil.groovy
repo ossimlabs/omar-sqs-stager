@@ -13,6 +13,10 @@ import groovy.json.JsonBuilder
 import groovy.transform.Synchronized
 import joms.oms.ImageStager
 import java.time.Duration
+import com.amazonaws.services.sqs.AmazonSQSClient
+import com.amazonaws.services.sqs.model.QueueAttributeName
+import com.amazonaws.services.sqs.model.GetQueueAttributesRequest
+import com.amazonaws.services.sqs.model.GetQueueAttributesResult
 
 @Slf4j
 class SqsStagerJobUtil
@@ -72,6 +76,26 @@ class SqsStagerJobUtil
          log.error e.toString()
       }
    }
+
+  void getRemainingMessages()
+  {
+      AmazonSQSClient sqs = sqsStagerService.sqs
+      def config = SqsUtils.sqsConfig
+      try
+      {
+          GetQueueAttributesResult getQueueAttributesRequest = new GetQueueAttributesResult(new GetQueueAttributesRequest(config.reader.queue))
+                          .withAttributeNames(ApproximateNumberOfMessages, ApproximateNumberOfMessagesDelayed, ApproximateNumberOfMessagesNotVisible)
+
+         messageInfo.approximateNumberOfMessages = sqs.getQueueAttributes(getQueueAttributesRequest).getAttributes().ApproximateNumberOfMessages
+         messageInfo.aproximateNumberOfMessagesDelayed = sqs.getQueueAttributes(getQueueAttributesRequest).getAttributes().ApproximateNumberOfMessagesDelayed
+         messageInfo.approximateNumberOfMessagesNotVisible = sqs.getQueueAttributes(getQueueAttributesRequest).getAttributes().ApproximateNumberOfMessagesNotVisible
+      }
+      catch (e)
+      {
+          log.error("ERROR: Unable to get queue atrributes.")
+      }
+  }
+
    void execute()
    {
       def config = SqsUtils.sqsConfig
@@ -201,6 +225,8 @@ class SqsStagerJobUtil
                      messageInfo.endTime = DateUtil.formatUTC(new Date())
                      messageInfo.totalDurationSinceAcquisition = messageInfo.duration + messageInfo.secondsBeforeQueue + messageInfo.secondsOnQueue
 
+                     if(!deleteMessageIfNoError) getRemainingMessages()
+
                      log.info "MessageId: ${messageInfo.messageId}: Finished processing..."
                      log.info new JsonBuilder(messageInfo).toString()
                   }
@@ -232,6 +258,7 @@ class SqsStagerJobUtil
                if(deleteMessageIfNoError&&okToDelete)
                {
                   sqsStagerService.deleteMessages(config.reader.queue, [message])
+                  getRemainingMessages()
                }
                // if we are cancelled and the flag to delete the message is not true then we need to cleanup
                if(needToCleanup)
@@ -282,12 +309,13 @@ class SqsStagerJobUtil
                      indexStartTime: null,
                      indexEndTime: null,
                      indexDuration: 0,
-                     duration:0,
-                     totalDurationSinceAcquisition: 0
+                     duration: 0,
+                     totalDurationSinceAcquisition: 0,
+                     approximateNumberOfMessages: 0,
+                     approximateNumberOfMessagesDelayed: 0,
+                     approximateNumberOfMessagesNotVisible: 0
                      ]
    }
-
-
 
   private void downloadFile(def jsonMessage)
   {

@@ -6,7 +6,7 @@ omar:
   sqs:
     reader:
       # Defines an Amazon SQS endpoint for access.
-      queue: "https://sqs.us-east-1.amazonaws.com/320588532383/gpotts"
+      queue: ""
       # This value can be between 1 and 20 and can not exceed 20 or you get errors and the service will not start proeprly.
       # This value is used by the AWS API to wait for a maximum time for a message to occur before returning.
       waitTimeSeconds: 20
