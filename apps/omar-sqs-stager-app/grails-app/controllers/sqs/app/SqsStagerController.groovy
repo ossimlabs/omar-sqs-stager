@@ -14,7 +14,8 @@ class SqsStagerController {
                 produces="application/json",
                 httpMethod="GET",
                 notes = """
-                """
+                Will stop the processing of jobs and will pause the queue
+                """)
     def stop()
     {
         def jsonData = request.JSON?request.JSON as HashMap:null
@@ -33,7 +34,8 @@ class SqsStagerController {
                 produces="application/json",
                 httpMethod="GET",
                 notes = """
-                """
+                Will only pauses the pullling of messages of the SQS queue
+                """)
     def pause()
     {
         def jsonData = request.JSON?request.JSON as HashMap:null
@@ -54,7 +56,7 @@ class SqsStagerController {
                 produces="application/json",
                 httpMethod="GET",
                 notes = """
-                """
+                """)
     def start()
     {
         def jsonData = request.JSON?request.JSON as HashMap:null
@@ -73,9 +75,9 @@ class SqsStagerController {
                 produces="application/json",
                 httpMethod="GET",
                 notes = """
-                This endpoint will return {result:true} if the queu has been paused by either a previous call to 
+                This endpoint will return {result:true} if the queue has been paused by either a previous call to 
                 **sqsStager/pause** or to **sqsStager/stop**. Will return {result:false} otherwise.
-                """
+                """)
     def isPaused()
     {
         def jsonData = request.JSON?request.JSON as HashMap:null
@@ -96,7 +98,7 @@ class SqsStagerController {
                 notes = """
                 This endpoint will return {result:true} if the queue has not been paused or stopped 
                 or if there are any currently running jobs.
-                """
+                """)
     def isProcessing()
     {
         def jsonData = request.JSON?request.JSON as HashMap:null
@@ -116,7 +118,7 @@ class SqsStagerController {
                 httpMethod="GET",
                 notes = """
                 This endpoint will return {result:true} if there are any currently running jobs.
-                """
+                """)
     def isProcessingJobs()
     {
         def jsonData = request.JSON?request.JSON as HashMap:null
