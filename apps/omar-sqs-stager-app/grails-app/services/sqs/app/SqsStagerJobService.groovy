@@ -107,55 +107,6 @@ class SqsStagerJobService implements InitializingBean {
       result
     }
 
-    HashMap pause(SqsStagerCommand cmd)
-    {
-      HashMap result = [
-                        result: true
-                       ]
-      def quartzScheduler = grailsApplication.mainContext.getBean('quartzScheduler')
-      quartzScheduler?.pauseAll()
-      try{
-         if(!cmd.recurseFlag)
-         {
-            cmd.recurseFlag = true
-            discoveryClient.getInstances(sqsStagerInstanceName)?.each{it->
-               String value = new URL("${getDiscoveryUri(it)}/sqsStager/pause?${cmd.toUrlQuery()}").text
-            } 
-         }
-      }
-      catch(e)
-      {
-         result.result = false
-         result.message = e.toString()
-      }
-
-      result
-    }
-
-    HashMap start(SqsStagerCommand cmd)
-    {
-      HashMap result = [
-                        result:true
-                     ]
-      def quartzScheduler = grailsApplication.mainContext.getBean('quartzScheduler')
-      quartzScheduler?.resumeAll()
-      try{
-         if(!cmd.recurseFlag)
-         {
-            cmd.recurseFlag = true
-            discoveryClient.getInstances(sqsStagerInstanceName)?.each{it->
-               String value = new URL("${getDiscoveryUri(it)}/sqsStager/start?${cmd.toUrlQuery()}").text
-            } 
-         }
-     }
-      catch(e)
-      {
-         result.result = false
-         result.message = e.toString()
-      }
-
-      result
-    }
 
     private HashMap queryBoolean(String path, SqsStagerCommand cmd, Boolean andOperation = false)
     {
@@ -170,12 +121,15 @@ class SqsStagerJobService implements InitializingBean {
             try{
                JsonSlurper slurper = new JsonSlurper()
                def jsonRoot = slurper.parseText(value)
-               
+               if(jsonRoot?.message)
+               {
+                  result.message = jsonRoot.message
+               }
                if(andOperation)
                {
                   if(!jsonRoot?.result)
                   {
-                     result = [result : false]
+                     result.result=false
                      return result
                   }
                }
@@ -183,20 +137,71 @@ class SqsStagerJobService implements InitializingBean {
                {
                   if(jsonRoot?.result)
                   {
-                     result = [result : true]
+                     result.result=true
                      return result
                   }
                }
             }
             catch(e)
             {
+               result = [result : false, message: toString()]
 
             }
          }
       }
 
-       result
+      result
 
+    }
+
+    HashMap pause(SqsStagerCommand cmd)
+    {
+       HashMap result = [result: false]
+       // if the recurse is set then we are already looping just return my result
+       if(cmd.recurseFlag)
+       {
+         try{
+            def quartzScheduler = grailsApplication.mainContext.getBean('quartzScheduler')
+            quartzScheduler?.pauseAll()
+             result = [result: true]
+         }
+         catch(e)
+         {
+             result = [result: false, message:e.toString()]
+         }
+       }
+       else
+       {
+          // all must have a successful start in order to return true
+          result = queryBoolean("/sqsStager/start", cmd, true)
+       }
+
+       result
+    }
+
+    HashMap start(SqsStagerCommand cmd)
+    {
+       HashMap result = [result: false]
+       // if the recurse is set then we are already looping just return my result
+       if(cmd.recurseFlag)
+       {
+         try{
+            def quartzScheduler = grailsApplication.mainContext.getBean('quartzScheduler')
+            quartzScheduler?.resumeAll()
+             result = [result: true]
+         }
+         catch(e)
+         {
+             result = [result: false, message:e.toString()]
+         }
+       }
+       else
+       {
+          // all must have a successful start in order to return true
+          result = queryBoolean("/sqsStager/start", cmd, true)
+       }
+
+       result
     }
 
     HashMap isPaused(SqsStagerCommand cmd)
