@@ -88,9 +88,9 @@ class SqsStagerJobUtil
               .withQueueUrl(config.reader.queue)
               .withAttributeNames(QueueAttributeName.ApproximateNumberOfMessages, QueueAttributeName.ApproximateNumberOfMessagesDelayed, QueueAttributeName.ApproximateNumberOfMessagesNotVisible))
 
-         messageInfo.approximateNumberOfMessages = sqsQueueAttributes.getAttributes().get(QueueAttributeName.ApproximateNumberOfMessages)
-         messageInfo.aproximateNumberOfMessagesDelayed = sqsQueueAttributes.getAttributes().get(QueueAttributeName.ApproximateNumberOfMessagesDelayed)
-         messageInfo.approximateNumberOfMessagesNotVisible = sqsQueueAttributes.getAttributes().get(QueueAttributeName.ApproximateNumberOfMessagesNotVisible)
+         messageInfo.approximateNumberOfMessages = sqsQueueAttributes.getAttributes().ApproximateNumberOfMessages
+         messageInfo.aproximateNumberOfMessagesDelayed = sqsQueueAttributes.getAttributes().ApproximateNumberOfMessagesDelayed
+         messageInfo.approximateNumberOfMessagesNotVisible = sqsQueueAttributes.getAttributes().ApproximateNumberOfMessagesNotVisible
       }
       catch (e)
       {
