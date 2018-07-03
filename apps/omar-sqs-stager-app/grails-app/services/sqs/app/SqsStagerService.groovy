@@ -130,7 +130,7 @@ class SqsStagerService
                 .withAttributeNames(QueueAttributeName.ApproximateNumberOfMessages, QueueAttributeName.ApproximateNumberOfMessagesDelayed, QueueAttributeName.ApproximateNumberOfMessagesNotVisible))
 
             messageRemainingInfo.approximateNumberOfMessages = sqsQueueAttributes.getAttributes().ApproximateNumberOfMessages
-            messageRemainingInfo.aproximateNumberOfMessagesDelayed = sqsQueueAttributes.getAttributes().ApproximateNumberOfMessagesDelayed
+            messageRemainingInfo.approximateNumberOfMessagesDelayed = sqsQueueAttributes.getAttributes().ApproximateNumberOfMessagesDelayed
             messageRemainingInfo.approximateNumberOfMessagesNotVisible = sqsQueueAttributes.getAttributes().ApproximateNumberOfMessagesNotVisible
 
             log.info new JsonBuilder(messageRemainingInfo).toString()
