@@ -98,7 +98,6 @@ class SqsStagerJobUtil
             sqsStagerJobService.jobStarted(this)
 
             messages?.each{message->
-               sqsStagerService?.getRemainingMessages()
                Boolean okToDelete = true
                resetMessageInfo()
                Date startTimeDate = new Date()
