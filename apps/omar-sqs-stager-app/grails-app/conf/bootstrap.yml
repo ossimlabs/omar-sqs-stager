@@ -6,7 +6,7 @@ spring:
       enabled: false
       uri: http://localhost:8888/omar-config-server
     discovery:
-      enabled: true
+      enabled: false
 ---
 spring:
   profiles: production

@@ -19,7 +19,7 @@ class SqsStagerJobService implements InitializingBean {
    def grailsApplication
    def discoveryClient  
    String sqsStagerInstanceName="omar-sqs-stager"
-
+   String contextPath="/"
 
    /** 
    * seems that there is a quartz problem so I added a synchronize here to do an 
@@ -77,25 +77,70 @@ class SqsStagerJobService implements InitializingBean {
     } 
    String getDiscoveryUri(def discoveryUri)
    {
-      "${discoveryUri.uri}${grailsApplication.config.server.contextPath?:'/'}"
+      "${discoveryUri.uri}${contextPath}"
    }
+
+
+    private HashMap queryBoolean(String path, SqsStagerCommand cmd, Boolean andOperation = false)
+    {
+       HashMap result = [result: andOperation]
+
+       // if the recurse is set then we are already looping just return my result
+      cmd.recurseFlag = true
+      discoveryClient.getInstances(sqsStagerInstanceName)?.each{it->
+         String value = new URL("${getDiscoveryUri(it)}${path}?${cmd.toUrlQuery()}").text
+         if(value)
+         {
+            try{
+               JsonSlurper slurper = new JsonSlurper()
+               def jsonRoot = slurper.parseText(value)
+               if(jsonRoot?.message)
+               {
+                  result.message = jsonRoot.message
+               }
+               if(andOperation)
+               {
+                  if(!jsonRoot?.result)
+                  {
+                     result.result=false
+                     return result
+                  }
+               }
+               else
+               {
+                  if(jsonRoot?.result)
+                  {
+                     result.result=true
+                     return result
+                  }
+               }
+            }
+            catch(e)
+            {
+               result = [result : false, message: toString()]
+
+            }
+         }
+      }
+
+      result
+
+    }
+
     HashMap stop(SqsStagerCommand cmd)
     {
       HashMap result = [
                         result: true
                        ]
-      def quartzScheduler = grailsApplication.mainContext.getBean('quartzScheduler')
-      quartzScheduler?.pauseAll()
       try{
+         def quartzScheduler = grailsApplication.mainContext.getBean('quartzScheduler')
+         quartzScheduler?.pauseAll()
          currentJobs.each{k,v->
             v?.cancel()
          }
          if(!cmd.recurseFlag)
          {
-            cmd.recurseFlag = true
-            discoveryClient.getInstances(sqsStagerInstanceName)?.each{it->
-               String value = new URL("${getDiscoveryUri(it)}/sqsStager/stop?${cmd.toUrlQuery()}").text
-            } 
+          result = queryBoolean("/sqsStager/stop", cmd, true)
          }
       }
       catch(e)
@@ -112,15 +157,12 @@ class SqsStagerJobService implements InitializingBean {
       HashMap result = [
                         result: true
                        ]
-      def quartzScheduler = grailsApplication.mainContext.getBean('quartzScheduler')
-      quartzScheduler?.pauseAll()
       try{
+         def quartzScheduler = grailsApplication.mainContext.getBean('quartzScheduler')
+         quartzScheduler?.pauseAll()
          if(!cmd.recurseFlag)
          {
-            cmd.recurseFlag = true
-            discoveryClient.getInstances(sqsStagerInstanceName)?.each{it->
-               String value = new URL("${getDiscoveryUri(it)}/sqsStager/pause?${cmd.toUrlQuery()}").text
-            } 
+          result = queryBoolean("/sqsStager/pause", cmd, true)
          }
       }
       catch(e)
@@ -135,19 +177,16 @@ class SqsStagerJobService implements InitializingBean {
     HashMap start(SqsStagerCommand cmd)
     {
       HashMap result = [
-                        result:true
-                     ]
-      def quartzScheduler = grailsApplication.mainContext.getBean('quartzScheduler')
-      quartzScheduler?.resumeAll()
+                        result: true
+                       ]
       try{
+         def quartzScheduler = grailsApplication.mainContext.getBean('quartzScheduler')
+         quartzScheduler?.resumeAll()
          if(!cmd.recurseFlag)
          {
-            cmd.recurseFlag = true
-            discoveryClient.getInstances(sqsStagerInstanceName)?.each{it->
-               String value = new URL("${getDiscoveryUri(it)}/sqsStager/start?${cmd.toUrlQuery()}").text
-            } 
+          result = queryBoolean("/sqsStager/start", cmd, true)
          }
-     }
+      }
       catch(e)
       {
          result.result = false
@@ -157,57 +196,10 @@ class SqsStagerJobService implements InitializingBean {
       result
     }
 
-    private HashMap queryBoolean(String path, SqsStagerCommand cmd, Boolean andOperation = false)
-    {
-       HashMap result = [result: andOperation]
-
-       // if the recurse is set then we are already looping just return my result
-      cmd.recurseFlag = true
-      discoveryClient.getInstances(sqsStagerInstanceName)?.each{it->
-         String value = new URL("${getDiscoveryUri(it)}${path}?${cmd.toUrlQuery()}").text
-         if(value)
-         {
-            try{
-               JsonSlurper slurper = new JsonSlurper()
-               def jsonRoot = slurper.parseText(value)
-               
-               if(andOperation)
-               {
-                  if(!jsonRoot?.result)
-                  {
-                     result = [result : false]
-                     return result
-                  }
-               }
-               else
-               {
-                  if(jsonRoot?.result)
-                  {
-                     result = [result : true]
-                     return result
-                  }
-               }
-            }
-            catch(e)
-            {
-
-            }
-         }
-      }
-
-       result
-
-    }
-
     HashMap isPaused(SqsStagerCommand cmd)
     {
-       HashMap result = [result: false]
-       // if the recurse is set then we are already looping just return my result
-       if(cmd.recurseFlag)
-       {
-          result = [result: isQuartzQueuePaused()]
-       }
-       else
+       HashMap result = [result: isQuartzQueuePaused()]
+       if(!cmd.recurseFlag)
        {
           // all must be paused in order to return true
           result = queryBoolean("/sqsStager/isPaused", cmd, true)
@@ -218,13 +210,9 @@ class SqsStagerJobService implements InitializingBean {
 
     HashMap isProcessingJobs(SqsStagerCommand cmd)
     {
-       HashMap result = [result: false]
+       HashMap result = [result: currentJobs.size()>0]
        // if the recurse is set then we are already looping just return my result
-       if(cmd.recurseFlag)
-       {
-          result = [result: currentJobs.size()>0]
-       }
-       else
+       if(!cmd.recurseFlag)
        {
           result = queryBoolean("/sqsStager/isProcessingJobs", cmd, false)
        }
@@ -235,16 +223,12 @@ class SqsStagerJobService implements InitializingBean {
     {
        HashMap result = [result: false]
        // if the recurse is set then we are already looping just return my result
-       if(cmd.recurseFlag)
-       {
-          Boolean value = ((currentJobs.size()>0)||!isQuartzQueuePaused())
-          result = [result: value]
-       }
-       else
-       {
-          // if any are not processing I think we should return false
-          result = queryBoolean("/sqsStager/isProcessing", cmd, true)
-       }
+      Boolean value = ((currentJobs.size()>0)||!isQuartzQueuePaused())
+      result = [result: value]
+      if(!cmd.recurseFlag)
+      {
+         result = queryBoolean("/sqsStager/isProcessing", cmd, true)
+      }
 
        result
     }
@@ -253,6 +237,10 @@ class SqsStagerJobService implements InitializingBean {
       if(grailsApplication.config.spring.application.name)
       {
          sqsStagerInstanceName = grailsApplication.config.spring.application.name
+      }
+      if(grailsApplication.config.server.contextPath)
+      {
+         contextPath = grailsApplication.config.server.contextPath
       }
     }
 }

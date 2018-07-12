@@ -23,12 +23,16 @@ import org.apache.http.client.methods.HttpPost
 import org.apache.http.entity.StringEntity
 import org.apache.http.impl.client.DefaultHttpClient
 import groovy.util.XmlSlurper
+import groovy.json.JsonBuilder
+import com.amazonaws.services.sqs.model.QueueAttributeName
+import com.amazonaws.services.sqs.model.GetQueueAttributesRequest
+import com.amazonaws.services.sqs.model.GetQueueAttributesResult
 
 class SqsStagerService
 {
    def avroService
    AmazonSQSClient sqs
-   def grailsApplication  
+   def grailsApplication
 
     static Boolean checkMd5(String messageBodyMd5, String message)
     {
@@ -110,6 +114,33 @@ class SqsStagerService
         }
     }
 
+    void getRemainingMessages()
+    {
+        AmazonSQSClient sqs = getSqs()
+        def config = SqsUtils.sqsConfig
+        HashMap messageRemainingInfo = [approximateNumberOfMessages: 0,
+                     approximateNumberOfMessagesDelayed: 0,
+                     approximateNumberOfMessagesNotVisible: 0
+                     ]
+        try
+        {
+            GetQueueAttributesResult sqsQueueAttributes = sqs.getQueueAttributes(
+                new GetQueueAttributesRequest()
+                .withQueueUrl(config.reader.queue)
+                .withAttributeNames(QueueAttributeName.ApproximateNumberOfMessages, QueueAttributeName.ApproximateNumberOfMessagesDelayed, QueueAttributeName.ApproximateNumberOfMessagesNotVisible))
+
+            messageRemainingInfo.approximateNumberOfMessages = sqsQueueAttributes.getAttributes().ApproximateNumberOfMessages
+            messageRemainingInfo.approximateNumberOfMessagesDelayed = sqsQueueAttributes.getAttributes().ApproximateNumberOfMessagesDelayed
+            messageRemainingInfo.approximateNumberOfMessagesNotVisible = sqsQueueAttributes.getAttributes().ApproximateNumberOfMessagesNotVisible
+
+            log.info new JsonBuilder(messageRemainingInfo).toString()
+        }
+        catch (e)
+        {
+            log.error("ERROR: Unable to get queue atrributes.")
+        }
+    }
+
     def receiveMessages()
     {
         log.trace "receiveMessages: Entered........"
@@ -125,14 +156,13 @@ class SqsStagerService
                             .withWaitTimeSeconds(config.reader.waitTimeSeconds)
                             .withMaxNumberOfMessages(config.reader.maxNumberOfMessages)
             messages = sqs.receiveMessage(receiveMessageRequest).messages
-
-//         messages = sqs.receiveMessage(config.reader.queue).messages
-
         }
         catch (e)
         {
             log.error("ERROR: Unable to receive message for queue: ${config.reader.queue}\n${e.toString()}")
         }
+        
+        getRemainingMessages()
         log.trace "receiveMessages: Leaving........"
 
         messages

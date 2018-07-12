@@ -8,7 +8,6 @@ import omar.core.DateUtil
 import omar.avro.HttpUtils
 import omar.core.HttpStatus
 import omar.avro.OmarAvroUtils
-import groovy.json.JsonBuilder
 import groovy.transform.Synchronized
 
 import java.time.Duration

@@ -9,7 +9,6 @@ import omar.core.DateUtil
 import omar.avro.HttpUtils
 import omar.core.HttpStatus
 import omar.avro.OmarAvroUtils
-import groovy.json.JsonBuilder
 import groovy.transform.Synchronized
 import joms.oms.ImageStager
 import java.time.Duration
@@ -59,7 +58,7 @@ class SqsStagerJobUtil
             String fileOnly = file.name.lastIndexOf('.').with {it != -1 ? file.name[0..<it] : file.name}
             if(parent && fileOnly)
             {
-               def filenames = new FileNameByRegexFinder().getFileNames(parent,"${fileOnly}.*")
+               def filenames = new FileNameByRegexFinder().getFileNames(parent,"${fileOnly}*")
                log.info "Cleaning filenames: ${filenames}"
                filenames.each{tempFile->
                   new File(tempFile).delete()
@@ -72,6 +71,7 @@ class SqsStagerJobUtil
          log.error e.toString()
       }
    }
+
    void execute()
    {
       def config = SqsUtils.sqsConfig
@@ -282,12 +282,10 @@ class SqsStagerJobUtil
                      indexStartTime: null,
                      indexEndTime: null,
                      indexDuration: 0,
-                     duration:0,
+                     duration: 0,
                      totalDurationSinceAcquisition: 0
                      ]
    }
-
-
 
   private void downloadFile(def jsonMessage)
   {
