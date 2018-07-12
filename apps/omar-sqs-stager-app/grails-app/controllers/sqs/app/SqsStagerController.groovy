@@ -12,7 +12,7 @@ class SqsStagerController {
 
   @ApiOperation(value = "Allows one to stop the pulling of the SQS queue and will try to stop any running jobs",
                 produces="application/json",
-                httpMethod="GET",
+                httpMethod="POST",
                 notes = """
                 Will stop the processing of jobs and will pause the queue
                 """)
@@ -32,7 +32,7 @@ class SqsStagerController {
     }
     @ApiOperation(value = "Allows one to pause the pulling of the SQS queue and will allow any current jobs to continue running",
                 produces="application/json",
-                httpMethod="GET",
+                httpMethod="POST",
                 notes = """
                 Will only pauses the pullling of messages of the SQS queue
                 """)
@@ -54,7 +54,7 @@ class SqsStagerController {
 
     @ApiOperation(value = "Will restart a paused or stopped queue",
                 produces="application/json",
-                httpMethod="GET",
+                httpMethod="POST",
                 notes = """
                 """)
     def start()
