@@ -19,7 +19,7 @@ class SqsStagerJob {
    def rasterDataSetService
    static def concurrent = false
    static triggers = {
-      simple repeatInterval: 1000l, name: 'SqsReaderTrigger', group: 'SqsReaderGroup'
+      simple startDelay: 1000l, repeatInterval: 1000l, name: 'SqsReaderTrigger', group: 'SqsReaderGroup'
    }
 
 
