@@ -87,7 +87,7 @@ class SqsStagerJobService implements InitializingBean {
 
        // if the recurse is set then we are already looping just return my result
       cmd.recurseFlag = true
-      discoveryClient.getInstances(sqsStagerInstanceName)?.each{it->
+      discoveryClient?.getInstances(sqsStagerInstanceName)?.each{it->
          String value = new URL("${getDiscoveryUri(it)}${path}?${cmd.toUrlQuery()}").text
          if(value)
          {
