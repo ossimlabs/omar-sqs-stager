@@ -24,6 +24,7 @@ class SqsStagerJob {
   private HashMap downloadFile(HashMap messageInfo, def jsonMessage)
   {
     HashMap result = new HashMap(messageInfo)
+    log.info "${ new Date() }"
     log.info "MessageId: ${messageInfo.messageId}: Downloading...."
     try{
       HashMap downloadResult   = sqsStagerService.downloadFile(jsonMessage)
