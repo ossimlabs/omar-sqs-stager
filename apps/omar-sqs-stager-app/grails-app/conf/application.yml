@@ -5,6 +5,10 @@ logging:
 omar:
   sqs:
     reader:
+      #
+      # Allows one to enable and disable the queue processing
+      enabled: true
+
       # Defines an Amazon SQS endpoint for access.
       queue: ""
       # This value can be between 1 and 20 and can not exceed 20 or you get errors and the service will not start proeprly.
@@ -13,7 +17,7 @@ omar:
       # Value can only be between 1 and 10.
       # Any other value will give errors and the service will not start properly.
       # This defines the maximum number of messages to pop off the queue during a single read request to the service.
-      maxNumberOfMessages: 5
+      maxNumberOfMessages: 1
       # This can be any value and defines the number of second to "SLEEP" the background process between each call to the read request.
       # By default it will keep calling the read request until no messages are found.
       # After no messages are found the backgroun process will then "SLEEP" for "pollingIntervalSeconds".
@@ -26,6 +30,10 @@ omar:
       # settings are too short then it runs a risk of adding back to the queue from in flight status to ready
       # and be processed again.
       deleteMessageIfNoError: false
+
+      # If this is true the queue will come up paused
+      #
+      pauseOnStart: false
     stager:
       # If a file is not supported you can set this option to true
       # and will delete the file.
@@ -78,6 +86,7 @@ omar:
 
 quartz:
   jdbcStore:   false
+
 
 # Set the context path for the application.
 #server:

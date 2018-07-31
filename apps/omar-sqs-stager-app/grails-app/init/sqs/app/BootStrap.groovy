@@ -39,6 +39,10 @@ class BootStrap {
             Date nextFireTime=quartzScheduler?.rescheduleJob(triggerKey, trigger)
          }
       }
+      if(SqsUtils.sqsConfig.reader.pauseOnStart)
+      {
+        quartzScheduler?.pauseAll()
+      }
     }
     def destroy = {
     }

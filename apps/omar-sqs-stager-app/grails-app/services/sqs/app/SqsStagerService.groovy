@@ -23,11 +23,16 @@ import org.apache.http.client.methods.HttpPost
 import org.apache.http.entity.StringEntity
 import org.apache.http.impl.client.DefaultHttpClient
 import groovy.util.XmlSlurper
+import groovy.json.JsonBuilder
+import com.amazonaws.services.sqs.model.QueueAttributeName
+import com.amazonaws.services.sqs.model.GetQueueAttributesRequest
+import com.amazonaws.services.sqs.model.GetQueueAttributesResult
 
 class SqsStagerService
 {
-    def avroService
-    AmazonSQSClient sqs
+   def avroService
+   AmazonSQSClient sqs
+   def grailsApplication
 
     static Boolean checkMd5(String messageBodyMd5, String message)
     {
@@ -109,6 +114,33 @@ class SqsStagerService
         }
     }
 
+    void getRemainingMessages()
+    {
+        AmazonSQSClient sqs = getSqs()
+        def config = SqsUtils.sqsConfig
+        HashMap messageRemainingInfo = [approximateNumberOfMessages: 0,
+                     approximateNumberOfMessagesDelayed: 0,
+                     approximateNumberOfMessagesNotVisible: 0
+                     ]
+        try
+        {
+            GetQueueAttributesResult sqsQueueAttributes = sqs.getQueueAttributes(
+                new GetQueueAttributesRequest()
+                .withQueueUrl(config.reader.queue)
+                .withAttributeNames(QueueAttributeName.ApproximateNumberOfMessages, QueueAttributeName.ApproximateNumberOfMessagesDelayed, QueueAttributeName.ApproximateNumberOfMessagesNotVisible))
+
+            messageRemainingInfo.approximateNumberOfMessages = sqsQueueAttributes.getAttributes().ApproximateNumberOfMessages
+            messageRemainingInfo.approximateNumberOfMessagesDelayed = sqsQueueAttributes.getAttributes().ApproximateNumberOfMessagesDelayed
+            messageRemainingInfo.approximateNumberOfMessagesNotVisible = sqsQueueAttributes.getAttributes().ApproximateNumberOfMessagesNotVisible
+
+            log.info new JsonBuilder(messageRemainingInfo).toString()
+        }
+        catch (e)
+        {
+            log.error("ERROR: Unable to get queue atrributes.")
+        }
+    }
+
     def receiveMessages()
     {
         log.trace "receiveMessages: Entered........"
@@ -124,14 +156,13 @@ class SqsStagerService
                             .withWaitTimeSeconds(config.reader.waitTimeSeconds)
                             .withMaxNumberOfMessages(config.reader.maxNumberOfMessages)
             messages = sqs.receiveMessage(receiveMessageRequest).messages
-
-//         messages = sqs.receiveMessage(config.reader.queue).messages
-
         }
         catch (e)
         {
             log.error("ERROR: Unable to receive message for queue: ${config.reader.queue}\n${e.toString()}")
         }
+        
+        getRemainingMessages()
         log.trace "receiveMessages: Leaving........"
 
         messages
@@ -163,7 +194,6 @@ class SqsStagerService
                           destination  : "",
                           startTime    : new Date(),
                           endTime      : null,
-                          acquisitionToStartTime: null,
                           duration     : 0]
         def jsonObj = message
         String location
@@ -174,19 +204,6 @@ class SqsStagerService
             {
                 jsonObj = parseMessage(message)
             }
-
-            println("DEBUG: acquisitionDates = ${jsonObj?."${OmarAvroUtils.avroConfig.dateField}"}")
-            Date acquisitionDate = DateUtil.parseDate(jsonObj?."${OmarAvroUtils.avroConfig.dateField}")
-            println("DEBUG: Acq date = $acquisitionDate")
-            TimeDuration acquisitionToStartTime = null
-            if (acquisitionDate instanceof Date) {
-                use(TimeCategory) {
-                    acquisitionToStartTime = new Date() - acquisitionDate
-                }
-            }
-            println("DEBUG: Diff in millis = ${acquisitionToStartTime.toMilliseconds()}")
-            println("DEBUG: Diff pretty = ${acquisitionToStartTime}")
-            result["acquisitionToStartTime"] = acquisitionToStartTime.toMilliseconds()
 
             String sourceURI = jsonObj?."${OmarAvroUtils.avroConfig.sourceUriField}" ?: ""
             if (sourceURI)
@@ -247,7 +264,7 @@ class SqsStagerService
             }
 
         }
-        catch (e)  // FIXME: Bad catch-all. Catches everything and silently continues on.
+        catch (e)
         {
             result.status = HttpStatus.NOT_FOUND
             result.message = e.toString()
@@ -258,7 +275,11 @@ class SqsStagerService
 
         result.duration = (result.endTime.time - result.startTime.time)
 
-        result
+        // Include acquisition date in result so SqsStagerJob can use it.
+        Date acquisitionDate = AvroMessageUtils.parseObservationDate(jsonObj)//DateUtil.parseDate(jsonObj?."${OmarAvroUtils.avroConfig.dateField}")
+        result.acquisitionDate = acquisitionDate
+
+        return result
     }
 
     static HashMap stageFileJni(HashMap params)
@@ -269,7 +290,17 @@ class SqsStagerService
                       startTime    : new Date(),
                       endTime      : null,
                       duration     : 0]
-        ImageStager imageStager = new ImageStager()
+        ImageStager imageStager
+        Boolean deleteStager = true
+        if(params.imageStager)
+        {
+            imageStager = params.imageStager
+            deleteStager = false
+        }
+        else
+        {
+            imageStager = new ImageStager()
+        }
         String filename = params.filename
 
         try
@@ -293,48 +324,60 @@ class SqsStagerService
                 }
 
                 Integer nEntries = imageStager.getNumberOfEntries()
-                (0..<nEntries).each
+                Integer idx = 0
+                for(idx = 0; (idx < nEntries)&&!(imageStager?.isCancelled()); ++idx)
+                {
+                    if (idx == 0 || !(entryImageRepresentations[idx]?.equalsIgnoreCase("NODISPLY")?:false))
                     {
-                        if (it == 0 || !(entryImageRepresentations[it]?.equalsIgnoreCase("NODISPLY")?:false))
+                        Boolean buildHistogramsWithR0 = params.buildHistogramsWithR0 != null ? params.buildHistogramsWithR0.toBoolean() : false
+                        Boolean buildHistograms = params.buildHistograms != null ? params.buildHistograms.toBoolean() : false
+                        Boolean buildOverviews = params.buildOverviews != null ? params.buildOverviews.toBoolean() : false
+                        Boolean useFastHistogramStaging = params.useFastHistogramStaging != null ? params.useFastHistogramStaging.toBoolean() : false
+                        Boolean buildThumbnails = params.buildThumbnails != null ? params.buildThumbnails.toBoolean() : true
+                        Integer thumbnailSize = params.thumbnailSize != null ? params.thumbnailSize : 256
+                        String thumbnailType = params.thumbnailType != null ? params.thumbnailType : "png"
+                        String thumbnailStretchType = params.thumbnailStretchType != null ? params.thumbnailStretchType : "auto-minmax"
+                        imageStager.setEntry(idx)
+                        imageStager.setDefaults()
+
+                        imageStager.setThumbnailStagingFlag( buildThumbnails, thumbnailSize )
+                        imageStager.setThumbnailType( thumbnailType )
+                        imageStager.setThumbnailStretchType( thumbnailStretchType )
+
+                        imageStager.setHistogramStagingFlag(buildHistograms)
+                        imageStager.setOverviewStagingFlag(buildOverviews)
+                        if (params.overviewCompressionType != null) imageStager.setCompressionType(params.overviewCompressionType)
+                        if (params.overviewType != null) imageStager.setOverviewType(params.overviewType)
+                        if (params.useFastHistogramStaging != null) imageStager.setUseFastHistogramStagingFlag(useFastHistogramStaging)
+                        imageStager.setQuietFlag(true)
+
+                        if (buildHistograms && buildOverviews
+                                && imageStager.hasOverviews() && buildHistogramsWithR0)
                         {
-                            Boolean buildHistogramsWithR0 = params.buildHistogramsWithR0 != null ? params.buildHistogramsWithR0.toBoolean() : false
-                            Boolean buildHistograms = params.buildHistograms != null ? params.buildHistograms.toBoolean() : false
-                            Boolean buildOverviews = params.buildOverviews != null ? params.buildOverviews.toBoolean() : false
-                            Boolean useFastHistogramStaging = params.useFastHistogramStaging != null ? params.useFastHistogramStaging.toBoolean() : false
-                            Boolean buildThumbnails = params.buildThumbnails != null ? params.buildThumbnails.toBoolean() : true
-                            Integer thumbnailSize = params.thumbnailSize != null ? params.thumbnailSize : 256
-                            String thumbnailType = params.thumbnailType != null ? params.thumbnailType : "png"
-                            String thumbnailStretchType = params.thumbnailStretchType != null ? params.thumbnailStretchType : "auto-minmax"
-                            imageStager.setEntry(it)
-                            imageStager.setDefaults()
 
-                            imageStager.setThumbnailStagingFlag( buildThumbnails, thumbnailSize )
-                            imageStager.setThumbnailType( thumbnailType )
-                            imageStager.setThumbnailStretchType( thumbnailStretchType )
-
-                            imageStager.setHistogramStagingFlag(buildHistograms)
-                            imageStager.setOverviewStagingFlag(buildOverviews)
-                            if (params.overviewCompressionType != null) imageStager.setCompressionType(params.overviewCompressionType)
-                            if (params.overviewType != null) imageStager.setOverviewType(params.overviewType)
-                            if (params.useFastHistogramStaging != null) imageStager.setUseFastHistogramStagingFlag(useFastHistogramStaging)
-                            imageStager.setQuietFlag(true)
-
-                            if (buildHistograms && buildOverviews
-                                    && imageStager.hasOverviews() && buildHistogramsWithR0)
-                            {
-
-                                imageStager.setHistogramStagingFlag(false)
-                                imageStager.stage()
-
-                                imageStager.setHistogramStagingFlag(true)
-                                imageStager.setOverviewStagingFlag(false)
-                            }
-
+                            imageStager.setHistogramStagingFlag(false)
                             imageStager.stage()
+
+                            imageStager.setHistogramStagingFlag(true)
+                            imageStager.setOverviewStagingFlag(false)
                         }
+
+                        imageStager.stage()
                     }
-                result.message = "Staged file ${filename}"
-                imageStager.delete()
+                }
+                if(imageStager?.isCancelled())
+                {
+                    result.message = "Staging cancelled for ${filename}"
+                    result.status = HttpStatus.BAD_REQUEST
+                }
+                else
+                {
+                    result.message = "Staged file ${filename}"
+                }
+                if(deleteStager)
+                {
+                    imageStager.delete()
+                }
                 imageStager = null
             }
             else
@@ -354,11 +397,13 @@ class SqsStagerService
         }
         finally
         {
-            imageStager?.delete()
+            if(deleteStager)
+            {
+                imageStager?.delete()
+            }
             imageStager = null
-
         }
-        println result
+        //println result
         result
     }
 
