@@ -334,6 +334,7 @@ class SqsStagerJobUtil
       log.info "MessageId: ${messageInfo.messageId}: Staging file ${messageInfo.filename}"
       imageStager = new ImageStager()
       stagerParams.imageStager = imageStager
+      stagerParams.failIfNoGeom = true
       def stageFileResult        = sqsStagerService.stageFileJni(stagerParams)
       if(stageFileResult.status != HttpStatus.OK) log.error stageFileResult.message
       result.stageStartTime = DateUtil.formatUTC(stageFileResult.startTime)

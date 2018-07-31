@@ -306,7 +306,7 @@ class SqsStagerService
         try
         {
 
-            if (imageStager.open(filename))
+            if (imageStager.open(filename, params.failIfNoGeom?:false))
             {
                 URI uri = new URI(filename)
 
