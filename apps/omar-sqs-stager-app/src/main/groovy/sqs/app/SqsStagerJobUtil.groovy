@@ -82,7 +82,6 @@ class SqsStagerJobUtil
       //
       Boolean okToProceed = true
       Boolean deleteMessageIfNoError = config.reader.deleteMessageIfNoError?:false
-      Boolean needToCleanup = false
       if(!config?.reader?.queue)
       {
       // need to log error
@@ -98,6 +97,7 @@ class SqsStagerJobUtil
             sqsStagerJobService.jobStarted(this)
 
             messages?.each{message->
+               Boolean needToCleanup = false
                Boolean okToDelete = true
                resetMessageInfo()
                Date startTimeDate = new Date()
