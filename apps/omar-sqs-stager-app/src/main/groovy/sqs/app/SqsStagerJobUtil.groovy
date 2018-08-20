@@ -135,13 +135,22 @@ class SqsStagerJobUtil
                      else if(messageInfo.downloadStatus == HttpStatus.FOUND ||
                              messageInfo.downloadStatus == HttpStatus.OK)
                      {
+                        HashMap dataInfoResult = sqsStagerService.getDataInfo(messageInfo.filename)
+                        if(dataInfoResult)
+                        {
+                          stageFile()
+                        }
+                        else
+                        {
+                          messageInfo.stageStatus = HttpStatus.UNSUPPORTED_MEDIA_TYPE
+                          messageInfo.stageMessage = "Unable to get DataInfo from File ${messageInfo.filename}"
+                        }
                         // log message parsed
-                        stageFile()
                         if(isCancelled())
                         {
                           needToCleanup = true
                           messageInfo.httpStatus = HttpStatus.BAD_REQUEST
-                          messageInfo.statusMessage = JOB_CANCELLED_MESSAGE
+                          messageInfo.stageMessage = JOB_CANCELLED_MESSAGE
                         }
                         else if(messageInfo.stageStatus != HttpStatus.UNSUPPORTED_MEDIA_TYPE)
                         {
@@ -325,6 +334,7 @@ class SqsStagerJobUtil
       log.info "MessageId: ${messageInfo.messageId}: Staging file ${messageInfo.filename}"
       imageStager = new ImageStager()
       stagerParams.imageStager = imageStager
+      stagerParams.failIfNoGeom = true
       def stageFileResult        = sqsStagerService.stageFileJni(stagerParams)
       if(stageFileResult.status != HttpStatus.OK) log.error stageFileResult.message
       result.stageStartTime = DateUtil.formatUTC(stageFileResult.startTime)

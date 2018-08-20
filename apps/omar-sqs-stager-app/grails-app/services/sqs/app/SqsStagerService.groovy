@@ -305,8 +305,7 @@ class SqsStagerService
 
         try
         {
-
-            if (imageStager.open(filename))
+            if (imageStager.open(filename, params.failIfNoGeom?:false))
             {
                 URI uri = new URI(filename)
 
@@ -337,32 +336,35 @@ class SqsStagerService
                         Integer thumbnailSize = params.thumbnailSize != null ? params.thumbnailSize : 256
                         String thumbnailType = params.thumbnailType != null ? params.thumbnailType : "png"
                         String thumbnailStretchType = params.thumbnailStretchType != null ? params.thumbnailStretchType : "auto-minmax"
-                        imageStager.setEntry(idx)
-                        imageStager.setDefaults()
-
-                        imageStager.setThumbnailStagingFlag( buildThumbnails, thumbnailSize )
-                        imageStager.setThumbnailType( thumbnailType )
-                        imageStager.setThumbnailStretchType( thumbnailStretchType )
-
-                        imageStager.setHistogramStagingFlag(buildHistograms)
-                        imageStager.setOverviewStagingFlag(buildOverviews)
-                        if (params.overviewCompressionType != null) imageStager.setCompressionType(params.overviewCompressionType)
-                        if (params.overviewType != null) imageStager.setOverviewType(params.overviewType)
-                        if (params.useFastHistogramStaging != null) imageStager.setUseFastHistogramStagingFlag(useFastHistogramStaging)
-                        imageStager.setQuietFlag(true)
-
-                        if (buildHistograms && buildOverviews
-                                && imageStager.hasOverviews() && buildHistogramsWithR0)
+                        if(imageStager.setEntry(idx))
                         {
+                            imageStager.setDefaults()
+                            if(imageStager.hasProjection())
+                            {
+                                imageStager.setThumbnailStagingFlag( buildThumbnails, thumbnailSize )
+                                imageStager.setThumbnailType( thumbnailType )
+                                imageStager.setThumbnailStretchType( thumbnailStretchType )
 
-                            imageStager.setHistogramStagingFlag(false)
-                            imageStager.stage()
+                                imageStager.setHistogramStagingFlag(buildHistograms)
+                                imageStager.setOverviewStagingFlag(buildOverviews)
+                                if (params.overviewCompressionType != null) imageStager.setCompressionType(params.overviewCompressionType)
+                                if (params.overviewType != null) imageStager.setOverviewType(params.overviewType)
+                                if (params.useFastHistogramStaging != null) imageStager.setUseFastHistogramStagingFlag(useFastHistogramStaging)
+                                imageStager.setQuietFlag(true)
 
-                            imageStager.setHistogramStagingFlag(true)
-                            imageStager.setOverviewStagingFlag(false)
+                                if (buildHistograms && buildOverviews
+                                        && imageStager.hasOverviews() && buildHistogramsWithR0)
+                                {
+                                    imageStager.setHistogramStagingFlag(false)
+                                    imageStager.stage()
+
+                                    imageStager.setHistogramStagingFlag(true)
+                                    imageStager.setOverviewStagingFlag(false)
+                                }
+
+                                imageStager.stage()
+                            }
                         }
-
-                        imageStager.stage()
                     }
                 }
                 if(imageStager?.isCancelled())
