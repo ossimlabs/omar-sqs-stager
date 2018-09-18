@@ -16,14 +16,21 @@ if [ -z $MOUNT_POINT ] ; then
   export MOUNT_POINT=/s3
 fi
 
-if [ ! -z $BUCKETS ] ; then
-   #!/bin/bash
-   SPLIT_BUCKET=${BUCKETS//\,/ }
-
-   for BUCKET in $SPLIT_BUCKET ; do
-      mkdir -p /s3/$BUCKET
-      goofys -f -o allow_other $BUCKET $MOUNT_POINT/$BUCKET &
-   done
+# force to forground
+#  we are taking a comma separated list of buckets in the form of
+#  AWS  <bucket>:<prefix-path>,.....
+#  where :<prefix-path> is optional.  
+#  we will mount to the location <mount-point>/<prefix-path>
+# 
+GOOFY_OPTS="-f ${GOOFY_OPTS}"
+if [ ! -z "${BUCKETS}" ] ; then
+  SPLIT_BUCKET=${BUCKETS//\,/ }
+  
+  for BUCKET in ${SPLIT_BUCKET} ; do
+    BUCKET_PATH="${MOUNT_POINT}/${BUCKET//://}"
+    mkdir -p $BUCKET_PATH
+    goofys ${GOOFY_OPTS} ${BUCKET} ${BUCKET_PATH} &
+  done
 fi
 
 if [ "${JAVA_ARGS}" == "" ] ; then
