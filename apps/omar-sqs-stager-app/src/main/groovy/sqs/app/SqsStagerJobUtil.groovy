@@ -304,6 +304,7 @@ class SqsStagerJobUtil
       HashMap downloadResult   = sqsStagerService.downloadFile(jsonMessage)
       result.downloadStartTime = DateUtil.formatUTC(downloadResult.startTime)
       result.downloadEndTime   = DateUtil.formatUTC(downloadResult.endTime)
+      result.receiveDate       = result.downloadEndTime
       result.downloadDuration  = downloadResult.duration/1000
       result.downloadStatus    = downloadResult.status
       result.downloadMessage   = downloadResult.message
@@ -382,8 +383,13 @@ class SqsStagerJobUtil
   void indexRaster()
   {
     HashMap result = new HashMap(messageInfo)
-
+    HashMap overrides = []
     try{
+      if(messageInfo.receiveDate)
+      {
+        overrides.receiveDate = DateUtil.parseDate(messageInfo.receiveDate.toString())
+      }
+
       log.info "MessageId: ${messageInfo.messageId}: Getting XML from file ${messageInfo.filename}"
       HashMap dataInfoResult = sqsStagerService.getDataInfo(messageInfo.filename)
       result.dataInfoStartTime = DateUtil.formatUTC(dataInfoResult.startTime)
@@ -400,7 +406,7 @@ class SqsStagerJobUtil
       else if(dataInfoResult.status == HttpStatus.OK)
       {
         log.info "MessageId: ${messageInfo.messageId}: Indexing file ${messageInfo.filename}"
-        HashMap addRasterResult = rasterDataSetService.addRasterXml(dataInfoResult?.xml)
+        HashMap addRasterResult = rasterDataSetService.addRasterXml(dataInfoResult?.xml, overrides)
         result.indexStartTime  = DateUtil.formatUTC(addRasterResult.startTime)
         result.indexEndTime    = DateUtil.formatUTC(addRasterResult.endTime)
         result.indexDuration   = addRasterResult.duration/1000

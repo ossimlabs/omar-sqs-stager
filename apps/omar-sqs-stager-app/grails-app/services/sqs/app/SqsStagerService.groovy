@@ -194,6 +194,7 @@ class SqsStagerService
                           destination  : "",
                           startTime    : new Date(),
                           endTime      : null,
+                          receiveDate  : null,
                           duration     : 0]
         def jsonObj = message
         String location
