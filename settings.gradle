@@ -7,7 +7,7 @@ pluginManagement {
 def final O2_DEV_HOME = System.getenv('O2_DEV_HOME')
 
 if ( O2_DEV_HOME ) {
-   include 'omar-sqs-stager',
+   include 'omar-sqs-stager-app',
         'omar-hibernate-spatial-plugin',
         'omar-core-plugin',
         'omar-avro-plugin',
@@ -15,7 +15,7 @@ if ( O2_DEV_HOME ) {
         'omar-raster-plugin',
         'omar-stager-plugin'
 
-   project(':omar-sqs-stager').projectDir = "${O2_DEV_HOME}/omar-sqs-stager/apps/omar-sqs-stager" as File
+   project(':omar-sqs-stager-app').projectDir = "${O2_DEV_HOME}/omar-sqs-stager/apps/omar-sqs-stager-app" as File
    project(':omar-avro-plugin').projectDir = "${O2_DEV_HOME}/omar-avro/plugins/omar-avro-plugin" as File
    project(':omar-core-plugin').projectDir = "${O2_DEV_HOME}/omar-core/plugins/omar-core-plugin" as File
    project(':omar-hibernate-spatial-plugin').projectDir = "${O2_DEV_HOME}/omar-hibernate-spatial/plugins/omar-hibernate-spatial-plugin" as File
