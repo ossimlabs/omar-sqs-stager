@@ -47,7 +47,7 @@ omar:
 ---
 omar:
   avro:
-    # The a post to the stager fails, this is the number of miliseconds to wait before trying again.
+    # The a post to the stager fails, this is the number of milliseconds to wait before trying again.
     attemptDelay: 5000
     # If a post to the stager fails, this is how many times it will trtry.
     nAttempts: 10
