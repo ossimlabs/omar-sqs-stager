@@ -211,16 +211,16 @@ class SqsStagerService
         /**
          * The string of black list files passed in from the configuraiton .yml
          */
-        String [] blackListFiles = "${OmarAvroUtils.avroConfig.download.blackList.filters}".split(",")
+        String [] blackListFiles = "${OmarAvroUtils?.avroConfig?.download?.blackList?.filters}".split(",")
 
         matches = blackListFiles.any{
             imageId.trim().toLowerCase().contains(it.trim().toLowerCase())
         }
+
         if(matches){
             log.info("${imageId} is on the black list\n")
         }
-
-        if(!matches){
+        else {
             log.info "${imageId} is not on the black list\n"
         }
 
@@ -250,20 +250,20 @@ class SqsStagerService
             /**
              * Checks if the black list has been enabled in the configs
               */
-            if(OmarAvroUtils.avroConfig.download.blackList.enabled) {
+            if(OmarAvroUtils?.avroConfig?.download?.blackList?.enabled) {
                 /**
                  * Verify the image against the black list, and use the imageIdField parameter passed in
                  * from the application.yml as the object key
                  */
-                if (checkDownloadBlackList(jsonObj?."${OmarAvroUtils.avroConfig.imageIdField}"))
+                if (checkDownloadBlackList(jsonObj?."${OmarAvroUtils?.avroConfig?.imageIdField}"))
                 {
                     /**
                      * Uses the blackList.testMode configuration parameter to allow for a "Dry Run", and verify whether
                      * or not the filters are working as desired.  Test mode will still allow the image to be downloaded
                      * as normal, but will log if it was found on the black list.
                      */
-                    if(OmarAvroUtils.avroConfig.download.blackList.testMode) {
-                        log.info "BLACKLIST TEST MODE: Confirming that ${jsonObj.imageId} is on the black list, and should not be downloaded."
+                    if(OmarAvroUtils?.avroConfig?.download?.blackList?.testMode) {
+                        log.info "BLACKLIST TEST MODE: Confirming that ${jsonObj?.imageId} is on the black list, and should not be downloaded."
                     } else {
                         result.status = HttpStatus.METHOD_NOT_ALLOWED
                         result.message = "Image type not allowed to be downloaded (Black listed)"
@@ -278,7 +278,6 @@ class SqsStagerService
             if (sourceURI)
 
             {
-                log.info("")
 
                 String prefixPath = "${OmarAvroUtils.avroConfig.download.directory}"
                 File fullPathLocation = avroService.getFullPathFromMessage(jsonObj)
