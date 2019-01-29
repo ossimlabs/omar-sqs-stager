@@ -11,3 +11,5 @@ build/
 .settings
 .classpath
 .vscode
+
+out/

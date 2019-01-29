@@ -1,0 +1,25 @@
+---
+
+# Note:  This application.yml file is only used when the Spock unit tests are run.
+#        Currently, these are the only parameters that are being used in the unit
+#        tests.
+
+omar:
+  avro:
+    download:
+      # Provide a list of image types that should be excluded from downloading
+      blackList:
+        # Enables/Disables the black list
+        enabled: true
+        # A comma separated list of partial imageIds that can be used to for the black list.  The
+        # items can be partial terms in the imagId.  Case does not matter.
+        # Example: sicd  This will exclude images with ids like "SICD 123456789"
+        filters: sicd, bar, 16mAy
+        # Allows the ability to see via logging what will be filtered out
+        testMode: false
+    imageIdField: "imageId"
+    # Allows one to specify a path separated by "." to the submessage to where all the image information resides.
+    # For example, if you pass a Message wrapped within the SNS notification it will be a subfield of the SNS message.
+    # This allows one to specify a path to the message to be handled.
+    jsonSubFieldPath: "Message"
+

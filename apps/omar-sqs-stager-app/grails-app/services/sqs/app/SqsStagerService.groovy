@@ -12,6 +12,7 @@ import groovy.time.TimeDuration
 import joms.oms.DataInfo
 import joms.oms.ImageStager
 import omar.avro.AvroMessageUtils
+import omar.avro.AvroService
 import omar.avro.HttpUtils
 import omar.avro.OmarAvroUtils
 import omar.core.HttpStatus
@@ -28,9 +29,10 @@ import com.amazonaws.services.sqs.model.QueueAttributeName
 import com.amazonaws.services.sqs.model.GetQueueAttributesRequest
 import com.amazonaws.services.sqs.model.GetQueueAttributesResult
 
+
 class SqsStagerService
 {
-   def avroService
+   AvroService avroService
    AmazonSQSClient sqs
    def grailsApplication
 
@@ -161,7 +163,7 @@ class SqsStagerService
         {
             log.error("ERROR: Unable to receive message for queue: ${config.reader.queue}\n${e.toString()}")
         }
-        
+
         getRemainingMessages()
         log.trace "receiveMessages: Leaving........"
 
@@ -170,19 +172,59 @@ class SqsStagerService
 
     def parseMessage(def message)
     {
+
         def jsonObj
 
         try
         {
             jsonObj = avroService.convertMessageToJsonWithSubField(message)
+
         }
-        catch (e)
+        catch (Exception e)
         {
             jsonObj = null
             log.error e
         }
 
-        jsonObj
+        return jsonObj
+    }
+
+    /**
+     * Takes a partial part of an imageId, and verifies whether or not it
+     * it present in the current black list passed in from application.yml
+     * Example imageId: SICD 123456789
+     *
+     * @param imageId
+     * @return matches
+     */
+    Boolean checkDownloadBlackList(String imageId )
+    {
+
+        boolean matches
+
+        if(imageId == null){
+        println "Null!"
+            return matches = false
+        }
+        log.info "Checking ${imageId} against black list"
+
+        /**
+         * The string of black list files passed in from the configuraiton .yml
+         */
+        String [] blackListFiles = "${OmarAvroUtils.avroConfig.download.blackList.filters}".split(",")
+
+        matches = blackListFiles.any{
+            imageId.trim().toLowerCase().contains(it.trim().toLowerCase())
+        }
+        if(matches){
+            log.info("${imageId} is on the black list\n")
+        }
+
+        if(!matches){
+            log.info "${imageId} is not on the black list\n"
+        }
+
+        return matches
     }
 
     HashMap downloadFile(def message)
@@ -197,7 +239,6 @@ class SqsStagerService
                           receiveDate  : null,
                           duration     : 0]
         def jsonObj = message
-        String location
 
         try
         {
@@ -206,9 +247,39 @@ class SqsStagerService
                 jsonObj = parseMessage(message)
             }
 
+            /**
+             * Checks if the black list has been enabled in the configs
+              */
+            if(OmarAvroUtils.avroConfig.download.blackList.enabled) {
+                /**
+                 * Verify the image against the black list, and use the imageIdField parameter passed in
+                 * from the application.yml as the object key
+                 */
+                if (checkDownloadBlackList(jsonObj?."${OmarAvroUtils.avroConfig.imageIdField}"))
+                {
+                    /**
+                     * Uses the blackList.testMode configuration parameter to allow for a "Dry Run", and verify whether
+                     * or not the filters are working as desired.  Test mode will still allow the image to be downloaded
+                     * as normal, but will log if it was found on the black list.
+                     */
+                    if(OmarAvroUtils.avroConfig.download.blackList.testMode) {
+                        log.info "BLACKLIST TEST MODE: Confirming that ${jsonObj.imageId} is on the black list, and should not be downloaded."
+                    } else {
+                        result.status = HttpStatus.METHOD_NOT_ALLOWED
+                        result.message = "Image type not allowed to be downloaded (Black listed)"
+                        log.info('Image was on the black list, and was not downloaded\n')
+                        return result
+                    }
+                }
+            }
+
             String sourceURI = jsonObj?."${OmarAvroUtils.avroConfig.sourceUriField}" ?: ""
+            println "This is the source URI: ${sourceURI}"
             if (sourceURI)
+
             {
+                log.info("")
+
                 String prefixPath = "${OmarAvroUtils.avroConfig.download.directory}"
                 File fullPathLocation = avroService.getFullPathFromMessage(jsonObj)
 
