@@ -190,38 +190,37 @@ class SqsStagerService
     }
 
     /**
-     * Takes a partial part of an imageId, and verifies whether or not it
-     * it present in the current black list passed in from application.yml
-     * Example imageId: SICD 123456789
+     * Verifies if A 'term'  is on the image download black list
+     * Example abstract: SICD 123456789
      *
-     * @param imageId
+     * @param term
      * @return matches
      */
-    Boolean checkDownloadBlackList(String imageId )
+    Boolean checkDownloadBlackList(String term )
     {
 
         boolean matches
 
-        if(imageId == null){
-        println "Null!"
+        if(term == null){
+            log.info ("metadataField is null!")
             return matches = false
         }
-        log.info "Checking ${imageId} against black list"
+        log.info "Checking ${term} against black list"
 
         /**
-         * The string of black list files passed in from the configuraiton .yml
+         * The string of black list files passed in from the configuration .yml
          */
-        String [] blackListFiles = "${OmarAvroUtils?.avroConfig?.download?.blackList?.filters}".split(",")
+        String [] blackListFiles = "${OmarAvroUtils?.avroConfig?.download?.blackList?.excludedTerms}".split(",")
 
         matches = blackListFiles.any{
-            imageId.trim().toLowerCase().contains(it.trim().toLowerCase())
+            term.trim().toLowerCase().contains(it.trim().toLowerCase())
         }
 
         if(matches){
-            log.info("${imageId} is on the black list\n")
+            log.info("${term} is on the black list\n")
         }
         else {
-            log.info "${imageId} is not on the black list\n"
+            log.info "${term} is not on the black list\n"
         }
 
         return matches
@@ -251,19 +250,22 @@ class SqsStagerService
              * Checks if the black list has been enabled in the configs
               */
             if(OmarAvroUtils?.avroConfig?.download?.blackList?.enabled) {
+                log.info ("Checking the following field against download blacklist: ${OmarAvroUtils?.avroConfig?.download?.blackList?.metadataField}")
+
                 /**
-                 * Verify the image against the black list, and use the imageIdField parameter passed in
-                 * from the application.yml as the object key
+                 * Use the associated avro metadata field passed in from the config
+                 * to verify if the image is on the black list
                  */
-                if (checkDownloadBlackList(jsonObj?."${OmarAvroUtils?.avroConfig?.imageIdField}"))
+                if (checkDownloadBlackList(jsonObj?."${OmarAvroUtils?.avroConfig?.download?.blackList?.metadataField}"))
                 {
                     /**
-                     * Uses the blackList.testMode configuration parameter to allow for a "Dry Run", and verify whether
-                     * or not the filters are working as desired.  Test mode will still allow the image to be downloaded
+                     * Uses the blackList.testMode configuration parameter to allow for a "Dry Run" to verify whether
+                     * or not the excludedTerms are working as desired.  Test mode will still allow the image to be downloaded
                      * as normal, but will log if it was found on the black list.
                      */
                     if(OmarAvroUtils?.avroConfig?.download?.blackList?.testMode) {
-                        log.info "BLACKLIST TEST MODE: Confirming that ${jsonObj?.imageId} is on the black list, and should not be downloaded."
+                        log.info "BLACK LIST TEST MODE: Confirming that " + jsonObj?."${OmarAvroUtils?.avroConfig?.download?.blackList?.metadataField}" +
+                                 " is on the black list, and should not be downloaded."
                     } else {
                         result.status = HttpStatus.METHOD_NOT_ALLOWED
                         result.message = "Image type not allowed to be downloaded (Black listed)"
@@ -274,7 +276,7 @@ class SqsStagerService
             }
 
             String sourceURI = jsonObj?."${OmarAvroUtils.avroConfig.sourceUriField}" ?: ""
-            println "This is the source URI: ${sourceURI}"
+            //println "This is the source URI: ${sourceURI}"
             if (sourceURI)
 
             {

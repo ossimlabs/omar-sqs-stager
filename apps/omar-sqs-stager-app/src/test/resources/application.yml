@@ -6,16 +6,36 @@
 
 omar:
   avro:
+    # The a post to the stager fails, this is the number of milliseconds to wait before trying again.
+    attemptDelay: 5000
+    # If a post to the stager fails, this is how many times it will trtry.
+    nAttempts: 10
+    # The source URI field name in the JSON Avro record.
+    sourceUriField: "uRL"
+    # Is the date field in the JSON Avro Record.
+    # This field is optional and is used as a way to encode the "directory" for storing the image.
+    # If this is not given then the directory suffix will be the path of the "sourceUriField"
+    dateField: "observationDateTime"
+    # Is the format of the date field.
+    # If you leave this blank "" then it will default to parsing an ISO8601 date.
+    # Typically left blank.
+    dateFieldFormat: ""
+    destination:
+      type: ""
+    # This is the download specifications
     download:
-      # Provide a list of image types that should be excluded from downloading
+      # A list of image types that should be excluded from downloading
       blackList:
         # Enables/Disables the black list
         enabled: true
-        # A comma separated list of partial imageIds that can be used to for the black list.  The
-        # items can be partial terms in the imagId.  Case does not matter.
-        # Example: sicd  This will exclude images with ids like "SICD 123456789"
-        filters: sicd, bar, 16mAy
-        # Allows the ability to see via logging what will be filtered out
+        # The avro metadata field "key" to check the black list against
+        # Example: abstract
+        metadataField: dataType
+        # A comma separated list of terms that can be used for the black list.
+        # Searches are case insensitive
+        # Example: sicd, bar, 16mAy, sidd  This would exclude images like "SICD 123456789"
+        excludedTerms: sicd, bar, 16mAy, sidd
+        # Allows the ability to see what will be filtered out in the logs
         testMode: false
     imageIdField: "imageId"
     # Allows one to specify a path separated by "." to the submessage to where all the image information resides.
