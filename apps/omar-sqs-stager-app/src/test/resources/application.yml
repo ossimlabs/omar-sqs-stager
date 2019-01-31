@@ -36,7 +36,7 @@ omar:
         # Example: sicd, bar, 16mAy, sidd  This would exclude images like "SICD 123456789"
         excludedTerms: sicd, bar, 16mAy, sidd
         # Allows the ability to see what will be filtered out in the logs
-        testMode: false
+        testMode: true
     imageIdField: "imageId"
     # Allows one to specify a path separated by "." to the submessage to where all the image information resides.
     # For example, if you pass a Message wrapped within the SNS notification it will be a subfield of the SNS message.

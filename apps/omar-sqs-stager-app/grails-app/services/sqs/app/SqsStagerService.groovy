@@ -205,7 +205,7 @@ class SqsStagerService
             log.info ("metadataField is null!")
             return matches = false
         }
-        log.info "Checking ${term} against black list"
+        log.info "Checking if ${term} against black list."
 
         /**
          * The string of black list files passed in from the configuration .yml
@@ -217,10 +217,10 @@ class SqsStagerService
         }
 
         if(matches){
-            log.info("${term} is on the black list\n")
+            log.info("${term} is on the black list.")
         }
         else {
-            log.info "${term} is not on the black list\n"
+            log.info "${term} is not on the black list."
         }
 
         return matches
@@ -250,7 +250,8 @@ class SqsStagerService
              * Checks if the black list has been enabled in the configs
               */
             if(OmarAvroUtils?.avroConfig?.download?.blackList?.enabled) {
-                log.info ("Checking the following field against download blacklist: ${OmarAvroUtils?.avroConfig?.download?.blackList?.metadataField}")
+                log.info("-"*75)
+                log.info ("Using the '${OmarAvroUtils?.avroConfig?.download?.blackList?.metadataField}' avro metadata field for black list")
 
                 /**
                  * Use the associated avro metadata field passed in from the config
@@ -265,11 +266,13 @@ class SqsStagerService
                      */
                     if(OmarAvroUtils?.avroConfig?.download?.blackList?.testMode) {
                         log.info "BLACK LIST TEST MODE: Confirming that " + jsonObj?."${OmarAvroUtils?.avroConfig?.download?.blackList?.metadataField}" +
-                                 " is on the black list, and should not be downloaded."
+                                 " *is* on the black list, and would not be downloaded."
+                        log.info("-"*75)
                     } else {
                         result.status = HttpStatus.METHOD_NOT_ALLOWED
                         result.message = "Image type not allowed to be downloaded (Black listed)"
                         log.info('Image was on the black list, and was not downloaded\n')
+                        log.info("-"*75)
                         return result
                     }
                 }
