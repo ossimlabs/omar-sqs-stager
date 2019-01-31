@@ -235,7 +235,7 @@ class SqsStagerService
                           source       : "",
                           destination  : "",
                           startTime    : new Date(),
-                          endTime      : null,
+                          endTime      : new Date(),
                           receiveDate  : null,
                           duration     : 0]
         def jsonObj = message
@@ -272,6 +272,7 @@ class SqsStagerService
                     } else {
                         result.status = HttpStatus.METHOD_NOT_ALLOWED
                         result.message = "Image type not allowed to be downloaded (Black listed)"
+                        result.endTime = new Date()
                         log.info('Image was on the black list, and was not downloaded\n')
                         log.info("-"*75)
                         return result
@@ -282,7 +283,6 @@ class SqsStagerService
             String sourceURI = jsonObj?."${OmarAvroUtils.avroConfig.sourceUriField}" ?: ""
             //println "This is the source URI: ${sourceURI}"
             if (sourceURI)
-
             {
 
                 String prefixPath = "${OmarAvroUtils.avroConfig.download.directory}"
