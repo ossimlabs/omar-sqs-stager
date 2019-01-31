@@ -221,6 +221,7 @@ class SqsStagerService
         }
         else {
             log.info "${term} is not on the black list."
+            log.info("-"*75)
         }
 
         return matches
