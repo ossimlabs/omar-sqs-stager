@@ -78,17 +78,13 @@ dependencyManagement {
   }
   applyMavenExclusions false
 }
-grails {
-  plugins {
-    compile project(':omar-core-plugin')
-    compile project(':omar-avro-plugin')
-    compile project(':omar-oms-plugin')
-    compile project(':omar-raster-plugin')
-    compile project(':omar-stager-plugin')
-  }
-}
 
 dependencies {
+  compile "io.ossim.omar.plugins:omar-core-plugin:+"
+  compile "io.ossim.omar.plugins:omar-avro-plugin:+"
+  compile "io.ossim.omar.plugins:omar-oms-plugin:+"
+  compile "io.ossim.omar.plugins:omar-raster-plugin:+"
+  compile "io.ossim.omar.plugins:omar-stager-plugin:+"
 
   compile "de.codecentric:spring-boot-admin-starter-client:1.5.4"
 
@@ -121,7 +117,6 @@ dependencies {
   compile "org.springframework.boot:spring-boot-starter-tomcat"
   compile "org.springframework.cloud:spring-cloud-starter-config"
   compile "org.springframework.cloud:spring-cloud-starter-eureka"
-  //compile "org.springframework.cloud:spring-cloud-starter-zipkin"
   compile "org.ossim:joms:1.9.0-${buildVersionTag}"
 
   console "org.grails:grails-console"
