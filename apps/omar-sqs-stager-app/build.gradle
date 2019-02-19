@@ -1,34 +1,14 @@
 buildscript {
-  ext {
-    grailsVersion = project.grailsVersion
-    baseImage = "omar-ossim-base"
-    dockerFile ="docker/Dockerfile"
-    //  dockerStatementsOverride = {
-    //    [
-    //       "FROM ${project.dockerNamespaceUrl}${project.ext.baseImage}:${project.dockerAppTag}",
-    //       """ENV SPRING_CLOUD_CONFIG_ENABLED=true \\
-    // SPRING_CLOUD_DISCOVERY_ENABLED=true \\
-    // HOME=/home/omar""",
-    //       "USER root",
-    //       "USER 1001",
-    //       "WORKDIR \$HOME",
-    //       "EXPOSE 8080",
-    //       "CMD \$HOME/run.sh"
-    //    ]
-    //  }
-  }
-  if (System.env.OMAR_COMMON_PROPERTIES)
-  {
-    apply from: System.env.OMAR_COMMON_PROPERTIES
-  }
   repositories {
     mavenLocal()
-    maven { url "${ossimMavenProxy}" }
+    maven { url ossimMavenProxy }
   }
   dependencies {
     classpath "org.grails:grails-gradle-plugin:$grailsVersion"
     classpath "com.bertramlabs.plugins:asset-pipeline-gradle:2.14.2"
     classpath "org.grails.plugins:hibernate5:${gormVersion-".RELEASE"}"
+    classpath 'com.bmuschko:gradle-docker-plugin:3.0.12'
+    classpath 'io.ossim:gradleDefaults:1.4-SNAPSHOT'
   }
 }
 
@@ -46,13 +26,6 @@ apply plugin: "asset-pipeline"
 apply plugin: "java"
 apply plugin: "maven-publish"
 
-group "io.ossim.omar.apps"
-
-ext {
-  grailsVersion = project.grailsVersion
-  gradleWrapperVersion = project.gradleWrapperVersion
-}
-
 assets {
   minifyJs = true
   minifyCss = true
@@ -63,8 +36,18 @@ assets {
 
 repositories {
   mavenLocal()
-  maven { url "${ossimMavenProxy}" }
+  maven { url ossimMavenProxy }
 }
+
+io.ossim.gradleDefaults.Variables.setAdditionalVariables(project)
+io.ossim.gradleDefaults.Variables.setVersionVariables(project)
+dockerBuildDir="${rootProject.projectDir}/docker"
+version "${buildVersion}-${buildVersionTag}"
+jarDestination = "${projectDir}/build/libs/${project.name}-${version}.jar"
+io.ossim.gradleDefaults.Publications.addPublication(project, groupName, name, "${buildVersion}-${buildVersionTag}")
+io.ossim.gradleDefaults.Publications.addRepository(project, mavenPublishUrl, mavenRepoUsername, mavenRepoPassword)
+io.ossim.gradleDefaults.Docker.addDockerTasks(project, dockerRegistryUrl, dockerRegistryUsername, dockerRegistryPassword, name, dockerImageTag, dockerBuildDir, jarDestination, ["BASE_IMAGE": dockerBaseImage])
+io.ossim.gradleDefaults.Openshift.addOpenshiftTasks(project, openshiftUrl, openshiftUsername, openshiftPassword, openshiftProjectName, openshiftServiceName,  dockerRegistryUrl, name, dockerImageTag)
 
 dependencyManagement {
   imports {
@@ -74,11 +57,13 @@ dependencyManagement {
 }
 
 dependencies {
-  compile "io.ossim.omar.plugins:omar-core-plugin:+"
-  compile "io.ossim.omar.plugins:omar-avro-plugin:+"
-  compile "io.ossim.omar.plugins:omar-oms-plugin:+"
-  compile "io.ossim.omar.plugins:omar-raster-plugin:+"
-  compile "io.ossim.omar.plugins:omar-stager-plugin:+"
+  compile "io.ossim.omar.plugins:omar-core-plugin:${latestGradleIdentifier}"
+  compile "io.ossim.omar.plugins:omar-avro-plugin:${latestGradleIdentifier}"
+  compile "io.ossim.omar.plugins:omar-oms-plugin:${latestGradleIdentifier}"
+  compile "io.ossim.omar.plugins:omar-raster-plugin:${latestGradleIdentifier}"
+  compile "io.ossim.omar.plugins:omar-stager-plugin:${latestGradleIdentifier}"
+
+  compile "io.swagger:swagger-annotations:1.5.15"
 
   compile "de.codecentric:spring-boot-admin-starter-client:1.5.4"
 
@@ -121,17 +106,9 @@ dependencies {
   runtime "com.bertramlabs.plugins:asset-pipeline-grails:2.14.2"
   testCompile "org.grails:grails-gorm-testing-support"
   testCompile "org.grails.plugins:geb"
-  testCompile "org.grails:grails-web-testing-support"
+  testCompile "org.grails:grails-web-testing-support:3.2.7"
   testRuntime "org.seleniumhq.selenium:selenium-htmlunit-driver:2.47.1"
   testRuntime "net.sourceforge.htmlunit:htmlunit:2.18"
-}
-
-publishing {
-  publications {
-    mavenJava(MavenPublication) {
-      from components.java
-    }
-  }
 }
 
 bootRun {
