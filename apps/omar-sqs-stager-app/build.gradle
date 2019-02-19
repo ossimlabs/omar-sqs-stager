@@ -68,6 +68,7 @@ dependencies {
   compile "org.grails.plugins:actuator-ui:1.1"
   compile group: 'com.vividsolutions', name: 'jts', version: '1.13'
   compile 'org.postgresql:postgresql:42.2.1'
+  compile "commons-pool:commons-pool:1.6"
 
   compile "de.codecentric:spring-boot-admin-starter-client:1.5.4"
 
