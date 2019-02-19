@@ -64,6 +64,7 @@ dependencies {
   compile "io.ossim.omar.plugins:omar-stager-plugin:${latestGradleIdentifier}"
 
   compile "io.swagger:swagger-annotations:1.5.15"
+  compile "io.swagger:swagger-models:1.5.15"
 
   compile "de.codecentric:spring-boot-admin-starter-client:1.5.4"
 
