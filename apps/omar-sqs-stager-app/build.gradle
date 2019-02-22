@@ -62,6 +62,7 @@ dependencies {
   compile "io.ossim.omar.plugins:omar-oms-plugin:${latestGradleIdentifier}"
   compile "io.ossim.omar.plugins:omar-raster-plugin:${latestGradleIdentifier}"
   compile "io.ossim.omar.plugins:omar-stager-plugin:${latestGradleIdentifier}"
+  compile "io.ossim.omar.plugins:omar-hibernate-spatial-plugin:${latestGradleIdentifier}"
 
   compile "io.swagger:swagger-annotations:1.5.15"
   compile "io.swagger:swagger-models:1.5.15"
