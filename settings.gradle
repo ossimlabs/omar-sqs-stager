@@ -10,8 +10,12 @@ project(':omar-sqs-stager-app').projectDir = "${rootProject.projectDir}/apps/oma
 
 if ( System.getenv('O2_INLINE_BUILD')) {
   def modules = [
+      "omar-avro",
       "omar-core",
-      "omar-hibernate-spatial"
+      "omar-hibernate-spatial",
+      "omar-oms",
+      "omar-raster",
+      "omar-stager"
   ]
 
   modules.each { module ->
