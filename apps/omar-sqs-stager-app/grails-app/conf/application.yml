@@ -30,6 +30,7 @@ omar:
       # settings are too short then it runs a risk of adding back to the queue from in flight status to ready
       # and be processed again.
       deleteMessageIfNoError: false
+      test: true
 
       # If this is true the queue will come up paused
       #
@@ -47,7 +48,7 @@ omar:
 ---
 omar:
   avro:
-    # The a post to the stager fails, this is the number of miliseconds to wait before trying again.
+    # The a post to the stager fails, this is the number of milliseconds to wait before trying again.
     attemptDelay: 5000
     # If a post to the stager fails, this is how many times it will trtry.
     nAttempts: 10
@@ -65,6 +66,19 @@ omar:
       type: ""
     # This is the download specifications
     download:
+      # A list of image types that should be excluded from downloading
+      blackList:
+        # Enables/Disables the black list
+        enabled: false
+        # The avro metadata field "key" to check the black list against
+        # Example: abstract
+        metadataField: abstract
+        # A comma separated list of terms that can be used for the black list.
+        # Searches are case insensitive
+        # Example: bar, 16mAy, sidd  This would exclude images like "SIDD 123456789"
+        excludedTerms: foo, bar, baz
+        # Allows the ability to see what will be filtered out in the logs
+        testMode: true
       # This is the directory prefix where the file will be downloaded.
       # For example, if we have the "sourceUriField" given as http://[path]/[to]/[image]/foo.tif and the date field content has for a value of 20090215011010 with a dateField format the directory structure will be \<yyyy>/\<mm>/\<dd>/\<hh> where "*yyyy" is a 4 character year and the "mm" is the two character month and the "dd" is the two character day and the "hh" is a two character hour.
       # If the datefield is not specified then we use the path in the URI as a suffix to the local directory defined in the "directory" field above: /data/s3/[path]/[to]/[image]/foo.tif

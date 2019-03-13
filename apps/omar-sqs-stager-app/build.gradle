@@ -1,37 +1,14 @@
 buildscript {
-  ext {
-    grailsVersion = project.grailsVersion
-    baseImage = "omar-ossim-base"
-    dockerFile ="docker/Dockerfile"
-    //  dockerStatementsOverride = {
-    //    [
-    //       "FROM ${project.dockerNamespaceUrl}${project.ext.baseImage}:${project.dockerAppTag}",
-    //       """ENV SPRING_CLOUD_CONFIG_ENABLED=true \\
-    // SPRING_CLOUD_DISCOVERY_ENABLED=true \\
-    // HOME=/home/omar""",
-    //       "USER root",
-    //       "USER 1001",
-    //       "WORKDIR \$HOME",
-    //       "EXPOSE 8080",
-    //       "CMD \$HOME/run.sh"
-    //    ]
-    //  }
-  }
-  if (System.env.OMAR_COMMON_PROPERTIES)
-  {
-    apply from: System.env.OMAR_COMMON_PROPERTIES
-  }
   repositories {
-    maven { url "${ossimMavenProxy}" }
-    if( !System.env.WWW_CONNECTED || Boolean.parseBoolean( System.env.WWW_CONNECTED ) ) {
-        mavenLocal()
-        maven { url "https://repo.grails.org/grails/core" }
-    }
+    mavenLocal()
+    maven { url ossimMavenProxy }
   }
   dependencies {
     classpath "org.grails:grails-gradle-plugin:$grailsVersion"
     classpath "com.bertramlabs.plugins:asset-pipeline-gradle:2.14.2"
     classpath "org.grails.plugins:hibernate5:${gormVersion-".RELEASE"}"
+    classpath 'com.bmuschko:gradle-docker-plugin:3.0.12'
+    classpath 'io.ossim:gradleDefaults:1.6-SNAPSHOT'
   }
 }
 
@@ -47,14 +24,6 @@ apply plugin: "org.grails.grails-gsp"
 apply plugin: "asset-pipeline"
 
 apply plugin: "java"
-apply plugin: "maven-publish"
-
-group "io.ossim.omar.apps"
-
-ext {
-  grailsVersion = project.grailsVersion
-  gradleWrapperVersion = project.gradleWrapperVersion
-}
 
 assets {
   minifyJs = true
@@ -65,12 +34,17 @@ assets {
 }
 
 repositories {
-  maven { url "${ossimMavenProxy}" }
-  if( !System.env.WWW_CONNECTED || Boolean.parseBoolean( System.env.WWW_CONNECTED ) ) {
-    mavenLocal()
-    maven { url "https://repo.grails.org/grails/core" }
-  }
+  mavenLocal()
+  maven { url ossimMavenProxy }
 }
+
+io.ossim.gradleDefaults.Variables.setAdditionalVariables(project)
+io.ossim.gradleDefaults.Variables.setVersionVariables(project)
+dockerBuildDir="${rootProject.projectDir}/docker"
+version "${buildVersion}-${buildVersionTag}"
+jarDestination = "${projectDir}/build/libs/${project.name}-${version}.jar"
+io.ossim.gradleDefaults.Docker.addDockerTasks(project, dockerRegistryUrl, dockerRegistryUsername, dockerRegistryPassword, name, dockerImageTag, dockerBuildDir, jarDestination, ["BASE_IMAGE": "${dockerRegistryUrl}/${dockerBaseImage}"])
+io.ossim.gradleDefaults.Openshift.addOpenshiftTasks(project, openshiftUrl, openshiftUsername, openshiftPassword, openshiftProjectName, openshiftServiceName,  dockerRegistryUrl, name, dockerImageTag)
 
 dependencyManagement {
   imports {
@@ -78,17 +52,37 @@ dependencyManagement {
   }
   applyMavenExclusions false
 }
-grails {
-  plugins {
-    compile project(':omar-core-plugin')
-    compile project(':omar-avro-plugin')
-    compile project(':omar-oms-plugin')
-    compile project(':omar-raster-plugin')
-    compile project(':omar-stager-plugin')
-  }
+
+if ( System.getenv('O2_INLINE_BUILD')) {
+  grails {
+    plugins {
+      compile project(":omar-core-plugin")
+      compile project(":omar-avro-plugin")
+      compile project(":omar-oms-plugin")
+      compile project(":omar-raster-plugin")
+      compile project(":omar-stager-plugin")
+      compile project(":omar-hibernate-spatial-plugin")
+    }
+  }  
 }
 
 dependencies {
+  if ( ! System.getenv('O2_INLINE_BUILD')) {
+    compile "io.ossim.omar.plugins:omar-core-plugin:${latestGradleIdentifier}"
+    compile "io.ossim.omar.plugins:omar-avro-plugin:${latestGradleIdentifier}"
+    compile "io.ossim.omar.plugins:omar-oms-plugin:${latestGradleIdentifier}"
+    compile "io.ossim.omar.plugins:omar-raster-plugin:${latestGradleIdentifier}"
+    compile "io.ossim.omar.plugins:omar-stager-plugin:${latestGradleIdentifier}"
+    compile "io.ossim.omar.plugins:omar-hibernate-spatial-plugin:${latestGradleIdentifier}"
+  }
+  compile "io.swagger:swagger-annotations:1.5.15"
+  compile "io.swagger:swagger-models:1.5.15"
+  compile "org.webjars:swagger-ui:3.20.5"
+  compile 'org.grails.plugins:swagger:1.0.0'
+  compile "org.grails.plugins:actuator-ui:1.1"
+  compile group: 'com.vividsolutions', name: 'jts', version: '1.13'
+  compile 'org.postgresql:postgresql:42.2.1'
+  compile "commons-pool:commons-pool:1.6"
 
   compile "de.codecentric:spring-boot-admin-starter-client:1.5.4"
 
@@ -96,7 +90,6 @@ dependencies {
   compile "org.grails.plugins:quartz-monitor:1.3"
   compile "org.codehaus.groovy.modules.http-builder:http-builder:0.7.1"
   compile "com.amazonaws:aws-java-sdk:1.11.259"
-
 
   compile "org.grails:grails-core"
   compile "org.grails:grails-web-boot"
@@ -121,7 +114,6 @@ dependencies {
   compile "org.springframework.boot:spring-boot-starter-tomcat"
   compile "org.springframework.cloud:spring-cloud-starter-config"
   compile "org.springframework.cloud:spring-cloud-starter-eureka"
-  //compile "org.springframework.cloud:spring-cloud-starter-zipkin"
   compile "org.ossim:joms:1.9.0-${buildVersionTag}"
 
   console "org.grails:grails-console"
@@ -135,14 +127,6 @@ dependencies {
   testCompile "org.grails:grails-web-testing-support"
   testRuntime "org.seleniumhq.selenium:selenium-htmlunit-driver:2.47.1"
   testRuntime "net.sourceforge.htmlunit:htmlunit:2.18"
-}
-
-publishing {
-  publications {
-    mavenJava(MavenPublication) {
-      from components.java
-    }
-  }
 }
 
 bootRun {
