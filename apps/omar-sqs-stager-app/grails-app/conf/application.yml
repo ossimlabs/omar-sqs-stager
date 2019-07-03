@@ -103,8 +103,8 @@ quartz:
 
 
 # Set the context path for the application.
-#server:
-#  contextPath: /omar-sqs
+server:
+  contextPath: /omar-sqs-stager
 
 ---
 grails:
