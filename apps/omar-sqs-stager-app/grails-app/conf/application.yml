@@ -39,12 +39,20 @@ omar:
       # If a file is not supported you can set this option to true
       # and will delete the file.
       deleteIfNotSupported: false
-      # These are the paramters used for building overviews and histograms
+      # These are the parameters used for building overviews and histograms
+      # uncomment the ones you want
       params:
+        buildThumbnails: "true"
         buildHistograms: "true"
         buildOverviews: "true"
         overviewCompressionType: "NONE"
         overviewType: "ossim_tiff_box"
+        # thumbnailSize: 256
+        # thumbnailType: "png"
+        # thumbnailStretchType: "auto-minmax"
+        # buildHistogramsWithR0: "true"
+        # useFastHistogramStaging: "true"
+
 ---
 omar:
   avro:
