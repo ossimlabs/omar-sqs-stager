@@ -428,15 +428,20 @@ class SqsStagerService
                                 if (params.overviewType != null) imageStager.setOverviewType(params.overviewType)
                                 if (params.useFastHistogramStaging != null) imageStager.setUseFastHistogramStagingFlag(useFastHistogramStaging)
                                 imageStager.setQuietFlag(true)
-
-                                if (buildHistograms && buildOverviews
-                                        && imageStager.hasOverviews() && buildHistogramsWithR0)
+                                // we only need to test the Build R0 if we already have overviews.  Images
+                                // such as J2K have embedded overviews so we will need to build from R0 for those
+                                // or our histograms do not come out properly
+                                if(imageStager.hasOverviews())
                                 {
-                                    imageStager.setHistogramStagingFlag(false)
-                                    imageStager.stage()
+                                    if (buildHistograms && buildOverviews
+                                            && buildHistogramsWithR0)
+                                    {
+                                        imageStager.setHistogramStagingFlag(false)
+                                        imageStager.stage()
 
-                                    imageStager.setHistogramStagingFlag(true)
-                                    imageStager.setOverviewStagingFlag(false)
+                                        imageStager.setHistogramStagingFlag(true)
+                                        imageStager.setOverviewStagingFlag(false)
+                                    }
                                 }
 
                                 imageStager.stage()
