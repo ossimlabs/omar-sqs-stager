@@ -1,131 +1,8 @@
 ---
-logging:
-  config: "classpath:logback.groovy"
-
-omar:
-  sqs:
-    reader:
-      #
-      # Allows one to enable and disable the queue processing
-      enabled: true
-
-      # Defines an Amazon SQS endpoint for access.
-      queue: ""
-      # This value can be between 1 and 20 and can not exceed 20 or you get errors and the service will not start proeprly.
-      # This value is used by the AWS API to wait for a maximum time for a message to occur before returning.
-      waitTimeSeconds: 20
-      # Value can only be between 1 and 10.
-      # Any other value will give errors and the service will not start properly.
-      # This defines the maximum number of messages to pop off the queue during a single read request to the service.
-      maxNumberOfMessages: 1
-      # This can be any value and defines the number of second to "SLEEP" the background process between each call to the read request.
-      # By default it will keep calling the read request until no messages are found.
-      # After no messages are found the backgroun process will then "SLEEP" for "pollingIntervalSeconds".
-      pollingIntervalSeconds: 3
-      # Looks in the message body for a field specified by timestampName to retrieve the time the message was placed on the queue.
-      timestampName: ""
-      # If you want to only delete a message if no errors then set this flag
-      # Warning...You must have your SQS settings to allow the message to stay in flight long enough to be processed.  
-      # for if it doesn't delete then the message will be added back to the sqs queue.  If the queue
-      # settings are too short then it runs a risk of adding back to the queue from in flight status to ready
-      # and be processed again.
-      deleteMessageIfNoError: false
-      test: true
-
-      # If this is true the queue will come up paused
-      #
-      pauseOnStart: false
-    stager:
-      # If a file is not supported you can set this option to true
-      # and will delete the file.
-      deleteIfNotSupported: false
-      # These are the parameters used for building overviews and histograms
-      # uncomment the ones you want
-      params:
-        buildThumbnails: "true"
-        buildHistograms: "true"
-        buildOverviews: "true"
-        overviewCompressionType: "NONE"
-        overviewType: "ossim_tiff_box"
-        # thumbnailSize: 256
-        # thumbnailType: "png"
-        # thumbnailStretchType: "auto-minmax"
-        # buildHistogramsWithR0: "true"
-        # useFastHistogramStaging: "true"
-
----
-omar:
-  avro:
-    # The a post to the stager fails, this is the number of milliseconds to wait before trying again.
-    attemptDelay: 5000
-    # If a post to the stager fails, this is how many times it will trtry.
-    nAttempts: 10
-    # The source URI field name in the JSON Avro record.
-    sourceUriField: "uRL"
-    # Is the date field in the JSON Avro Record.
-    # This field is optional and is used as a way to encode the "directory" for storing the image.
-    # If this is not given then the directory suffix will be the path of the "sourceUriField"
-    dateField: "observationDateTime"
-    # Is the format of the date field.
-    # If you leave this blank "" then it will default to parsing an ISO8601 date.
-    # Typically left blank.
-    dateFieldFormat: ""
-    destination:
-      type: ""
-    # This is the download specifications
-    download:
-      # A list of image types that should be excluded from downloading
-      blackList:
-        # Enables/Disables the black list
-        enabled: false
-        # The avro metadata field "key" to check the black list against
-        # Example: abstract
-        metadataField: abstract
-        # A comma separated list of terms that can be used for the black list.
-        # Searches are case insensitive
-        # Example: bar, 16mAy, sidd  This would exclude images like "SIDD 123456789"
-        excludedTerms: foo, bar, baz
-        # Allows the ability to see what will be filtered out in the logs
-        testMode: true
-      # This is the directory prefix where the file will be downloaded.
-      # For example, if we have the "sourceUriField" given as http://[path]/[to]/[image]/foo.tif and the date field content has for a value of 20090215011010 with a dateField format the directory structure will be \<yyyy>/\<mm>/\<dd>/\<hh> where "*yyyy" is a 4 character year and the "mm" is the two character month and the "dd" is the two character day and the "hh" is a two character hour.
-      # If the datefield is not specified then we use the path in the URI as a suffix to the local directory defined in the "directory" field above: /data/s3/[path]/[to]/[image]/foo.tif
-      directory: "/data/s3"
-      # If you do not want the standard HTTP connect to be used in java then you can pass a shell command: ex. `wget -O <destination> <source>` we use where the "source" and "*destination" are replaced internally with the proper values.
-      command: "wget --no-check-certificate -O <destination> <source>"
-    # Is the image Id field used to identify the image
-    imageIdField: "imageId"
-    # Allows one to specify a path separated by "." to the submessage to where all the image information resides.
-    # For example, if you pass a Message wrapped within the SNS notification it will be a subfield of the SNS message.
-    # This allows one to specify a path to the message to be handled.
-    jsonSubFieldPath: "Message"
-    metadata:
-      # Add metadata url.  Just so we can null it out this will have to be
-      # set on environments that support it
-      # You should just have to add the url:
-      # http://omar-avro-metadata-app:8080/omar-avro-metadata/avroMetadata/add
-      addMetadataEndPoint: ""
-
-quartz:
-  jdbcStore:   false
-
-
-# Set the context path for the application.
-server:
-  contextPath: /omar-sqs-stager
-
----
 grails:
-    cors:
-      enabled: true
-    resources:
-        pattern: '/**'
     profile: web
     codegen:
-        defaultPackage: omar.sqs
-    spring:
-        transactionManagement:
-            proxies: false
+        defaultPackage: omar.sqs.stager.app
     gorm:
         reactor:
             # Whether to translate GORM events into Reactor events
@@ -137,31 +14,26 @@ info:
         version: '@info.app.version@'
         grailsVersion: '@info.app.grailsVersion@'
 spring:
+    jmx:
+        unique-names: true
     main:
         banner-mode: "off"
     groovy:
         template:
             check-template-location: false
+    devtools:
+        restart:
+            additional-exclude:
+                - '*.gsp'
+                - '**/*.gsp'
+                - '*.gson'
+                - '**/*.gson'
+                - 'logback.groovy'
+                - '*.properties'
+management:
+    endpoints:
+        enabled-by-default: false
 
-# Spring Actuator Endpoints are Disabled by Default
-endpoints:
-  enabled: true
-  health:
-    enabled: true
-  actuator:
-    sensitive: false
-  beans:
-    sensitive: false
-  metrics:
-    sensitive: false
-  configprops:
-    sensitive: false
-  trace:
-    sensitive: false
-  mappings:
-    sensitive: false
-  env:
-    sensitive: false
 ---
 grails:
     mime:
@@ -211,12 +83,13 @@ grails:
             htmlcodec: xml
             codecs:
                 expression: html
-                scriptlets: html
+                scriptlet: html
                 taglib: none
                 staticparts: none
-endpoints:
-    jmx:
-        unique-names: true
+management:
+    endpoints:
+        jmx:
+            unique-names: true
 
 ---
 hibernate:
@@ -242,7 +115,7 @@ environments:
             url: jdbc:h2:mem:testDb;MVCC=TRUE;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE
     production:
         dataSource:
-            dbCreate: update
+            dbCreate: none
             url: jdbc:h2:./prodDb;MVCC=TRUE;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE
             properties:
                 jmxEnabled: true
@@ -262,9 +135,45 @@ environments:
                 testOnReturn: false
                 jdbcInterceptors: ConnectionState
                 defaultTransactionIsolation: 2 # TRANSACTION_READ_COMMITTED
+---
+server:
+    servlet:
+        context-path: /omar-sqs-stager
+    contextPath: ${server.servlet.context-path}
 
-# Define the http protocols that swagger can use
-swagger:
-  schemes:
-    - HTTPS
-    - HTTP
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    env:
+      enabled: true
+      sensitive: fasle
+    health:
+      enabled: true
+    
+grails:
+    cors:
+        enabled: true
+    resources:
+        pattern: '/**'
+    servlet:
+        version: 3.0
+---
+spring:
+  application:
+    name: omar-sqs-stager
+  cloud:
+    discovery:
+      enabled: ${SPRING_CLOUD_DISCOVERY_ENABLED:false}
+    service-registry:
+      auto-registration:
+        enabled: ${spring.cloud.discovery.enabled}
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: ${EUREKA_URI:http://omar-eureka-server:8761/omar-eureka-server/eureka}
+  instance:
+    preferIpAddress: true
