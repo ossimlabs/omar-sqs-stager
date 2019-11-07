@@ -119,7 +119,9 @@ class SqsStagerService
     void getRemainingMessages()
     {
         AmazonSQSClient sqs = getSqs()
-        def config = SqsUtils.sqsConfig
+        // def config = SqsUtils.sqsConfig
+        def config = grailsApplication.config.omar.sqs
+
         HashMap messageRemainingInfo = [approximateNumberOfMessages: 0,
                      approximateNumberOfMessagesDelayed: 0,
                      approximateNumberOfMessagesNotVisible: 0
@@ -146,7 +148,8 @@ class SqsStagerService
     def receiveMessages()
     {
         log.trace "receiveMessages: Entered........"
-        def config = SqsUtils.sqsConfig
+        // def config = SqsUtils.sqsConfig
+        def config = grailsApplication.config.omar.sqs
 
         def messages
         try
@@ -550,7 +553,9 @@ class SqsStagerService
                       duration     : 0]
         try
         {
-            def config = SqsUtils.sqsConfig
+            // def config = SqsUtils.sqsConfig
+            def config = grailsApplication.config.omar.sqs
+
             HashMap postResult = HttpUtils.postData(url,
                     xml,
                     "application/xml")

@@ -20,7 +20,7 @@ class SqsStagerJobUtil
    Boolean cancelled = false
    HashMap messageInfo
 
-
+   def grailsApplication
 
    private def sqsStagerService
    private def sqsStagerJobService
@@ -74,7 +74,9 @@ class SqsStagerJobUtil
 
    void execute()
    {
-      def config = SqsUtils.sqsConfig
+      // def config = SqsUtils.sqsConfig
+      def config = grailsApplication.config.omar.sqs
+
       def messages
       // do some validation
       // if these are not set then let's not pop any messages off and just
@@ -118,7 +120,8 @@ class SqsStagerJobUtil
                   messageInfo.startTime = DateUtil.formatUTC(startTimeDate)
 
                   // if the flag is not set then delete immediately
-                  if(!deleteMessageIfNoError&&!isCancelled()) sqsStagerService.deleteMessages(SqsUtils.sqsConfig.reader.queue, [message])
+                  // if(!deleteMessageIfNoError&&!isCancelled()) sqsStagerService.deleteMessages(SqsUtils.sqsConfig.reader.queue, [message])
+                  if(!deleteMessageIfNoError&&!isCancelled()) sqsStagerService.deleteMessages(grailsApplication.config.omar.sqs.reader.queue, [message])
                   if((!isCancelled())&&sqsStagerService.checkMd5(message.mD5OfBody, message.body))
                   {
                      // log message start
@@ -327,7 +330,8 @@ class SqsStagerJobUtil
 
   void stageFile()
   {
-    def config = SqsUtils.sqsConfig
+   //  def config = SqsUtils.sqsConfig
+    def config = grailsApplication.config.omar.sqs
     HashMap result = new HashMap(messageInfo)
     HashMap stagerParams = config.stager?.params as HashMap
     try{

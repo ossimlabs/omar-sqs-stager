@@ -9,10 +9,10 @@ class BootStrap {
    def grailsApplication
     def init = { servletContext ->
       Init.instance().initialize()
-      grailsApplication = Holders.grailsApplication
-      SqsConfig.application = grailsApplication
-      SqsUtils.resetSqsConfig()
-      SqsUtils.sqsConfig
+      // grailsApplication = Holders.grailsApplication
+      // SqsConfig.application = grailsApplication
+      // SqsUtils.resetSqsConfig()
+      // SqsUtils.sqsConfig
       def jobKeys = []
       def quartzScheduler = grailsApplication.mainContext.getBean('quartzScheduler')
 
@@ -31,15 +31,18 @@ class BootStrap {
           quartzScheduler?.deleteJob(it)
         }
       }
-      if(SqsUtils.sqsConfig.reader.enabled)
+      // if(SqsUtils.sqsConfig.reader.enabled)
+      if(grailsApplication.config.omar.sqs.reader.enabled)
       {
          if(trigger)
          {
-            trigger.repeatInterval = SqsUtils.sqsConfig.reader.pollingIntervalSeconds*1000 as Long
+            // trigger.repeatInterval = SqsUtils.sqsConfig.reader.pollingIntervalSeconds*1000 as Long
+            trigger.repeatInterval = grailsApplication.config.omar.sqs.reader.pollingIntervalSeconds?.toLong() * 1000 
             Date nextFireTime=quartzScheduler?.rescheduleJob(triggerKey, trigger)
          }
       }
-      if(SqsUtils.sqsConfig.reader.pauseOnStart)
+      // if(SqsUtils.sqsConfig.reader.pauseOnStart)
+      if(grailsApplication.config.omar.sqs.reader.pauseOnStart)
       {
         quartzScheduler?.pauseAll()
       }
