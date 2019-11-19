@@ -39,7 +39,7 @@ class SqsStagerJob {
     }
     catch(e)
     {
-      
+      e.printStackTrace()
     }
 
     sqsStagerJobService?.setAndCheckJobScheduled(false)
