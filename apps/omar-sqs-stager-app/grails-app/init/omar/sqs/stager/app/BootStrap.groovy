@@ -1,12 +1,14 @@
-package sqs.app
+package omar.sqs.stager.app
 
 import grails.util.Holders
 import org.quartz.TriggerKey
 import org.quartz.JobKey
 import org.quartz.impl.matchers.GroupMatcher
 import joms.oms.Init
+
 class BootStrap {
    def grailsApplication
+
     def init = { servletContext ->
       Init.instance().initialize()
       grailsApplication = Holders.grailsApplication
@@ -42,7 +44,7 @@ class BootStrap {
       if(SqsUtils.sqsConfig.reader.pauseOnStart)
       {
         quartzScheduler?.pauseAll()
-      }
+      }    
     }
     def destroy = {
     }
