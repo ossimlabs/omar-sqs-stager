@@ -1,4 +1,4 @@
-package sqs.app
+package omar.sqs.stager.app
 import groovy.util.logging.Slf4j
 import grails.util.Environment
 

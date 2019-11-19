@@ -1,4 +1,4 @@
-package sqs.app
+package omar.sqs.stager.app
 import omar.core.BindUtil
 import grails.converters.JSON
 import io.swagger.annotations.*

@@ -1,5 +1,4 @@
-package sqs.app
-
+package omar.sqs.stager.app
 import grails.validation.Validateable
 import groovy.transform.ToString
 

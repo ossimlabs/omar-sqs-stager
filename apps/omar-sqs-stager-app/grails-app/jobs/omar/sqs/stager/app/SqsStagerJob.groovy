@@ -1,4 +1,4 @@
-package sqs.app
+package omar.sqs.stager.app
 
 import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper

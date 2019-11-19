@@ -1,4 +1,4 @@
-package sqs.app
+package omar.sqs.stager.app
 
 import com.amazonaws.AmazonClientException
 import com.amazonaws.auth.AWSCredentials
