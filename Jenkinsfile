@@ -115,25 +115,47 @@ podTemplate(
       }
     }
 
-    stage('Docker build') {
+	    stage('Docker build') {
       container('docker') {
-        withDockerRegistry(credentialsId: 'dockerCredentials', url: "https://${DOCKER_REGISTRY_DOWNLOAD_URL}") {
-          sh """
-            docker build --build-arg BASE_IMAGE=${DOCKER_REGISTRY_DOWNLOAD_URL}/ossim-alpine-runtime:dev --network=host -t "${DOCKER_REGISTRY_PUBLIC_UPLOAD_URL}"/omar-sqs-stager:"${VERSION}" ./docker
-          """
+        withDockerRegistry(credentialsId: 'dockerCredentials', url: "https://${DOCKER_REGISTRY_DOWNLOAD_URL}") {  //TODO
+          if (BRANCH_NAME == 'master'){
+                sh """
+                    docker build --build-arg BASE_IMAGE=${DOCKER_REGISTRY_DOWNLOAD_URL}/ossim-alpine-runtime:dev --network=host -t "${DOCKER_REGISTRY_PUBLIC_UPLOAD_URL}"/omar-sqs-stager-app:"${VERSION}" ./docker
+
+                """
+          }
+          else {
+                sh """
+                    docker build --build-arg BASE_IMAGE=${DOCKER_REGISTRY_DOWNLOAD_URL}/ossim-alpine-runtime:dev --network=host -t "${DOCKER_REGISTRY_PUBLIC_UPLOAD_URL}"/omar-sqs-stager-app:"${VERSION}".a ./docker
+                """
+          }
         }
       }
     }
-
-    stage('Docker push'){
+	
+	    stage('Docker push'){
         container('docker') {
-            withDockerRegistry(credentialsId: 'dockerCredentials', url: "https://${DOCKER_REGISTRY_PUBLIC_UPLOAD_URL}") {
-            sh """
-                docker push "${DOCKER_REGISTRY_PUBLIC_UPLOAD_URL}"/omar-sqs-stager:"${VERSION}"
-            """
+          withDockerRegistry(credentialsId: 'dockerCredentials', url: "https://${DOCKER_REGISTRY_PUBLIC_UPLOAD_URL}") {
+            if (BRANCH_NAME == 'master'){
+                sh """
+                    docker push "${DOCKER_REGISTRY_PUBLIC_UPLOAD_URL}"/omar-sqs-stager-app:"${VERSION}"
+                """
             }
+            else if (BRANCH_NAME == 'dev') {
+                sh """
+                    docker tag "${DOCKER_REGISTRY_PUBLIC_UPLOAD_URL}"/omar-sqs-stager-app:"${VERSION}".a "${DOCKER_REGISTRY_PUBLIC_UPLOAD_URL}"/omar-sqs-stager-app:dev
+                    docker push "${DOCKER_REGISTRY_PUBLIC_UPLOAD_URL}"/omar-sqs-stager-app:"${VERSION}".a
+                    docker push "${DOCKER_REGISTRY_PUBLIC_UPLOAD_URL}"/omar-sqs-stager-app:dev
+                """
+            }
+            else {
+                sh """
+                    docker push "${DOCKER_REGISTRY_PUBLIC_UPLOAD_URL}"/omar-sqs-stager-app:"${VERSION}".a           
+                """
+            }
+          }
         }
-    }
+      }
 
     stage('Package chart'){
       container('helm') {
