@@ -270,7 +270,7 @@ omar:
       # If the datefield is not specified then we use the path in the URI as a suffix to the local directory defined in the "directory" field above: /data/s3/[path]/[to]/[image]/foo.tif
       directory: "/data/s3"
       # If you do not want the standard HTTP connect to be used in java then you can pass a shell command: ex. `curl -k <source> -o <destination>` we use where the "source" and "*destination" are replaced internally with the proper values.
-      command: "curl -k <source> -o <destination>
+      command: "curl -k <source> -o <destination>"
     # Is the image Id field used to identify the image
     imageIdField: "imageId"
     # Allows one to specify a path separated by "." to the submessage to where all the image information resides.
