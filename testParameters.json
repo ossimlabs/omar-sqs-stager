@@ -12,34 +12,291 @@
     }
   },
   "tests": {
-    "minKmlQuery": {
+    "updateAccessDates": {
       "method": "get",
-      "endpoint": "/superOverlay/kmlQuery",
+      "endpoint": "/dataManager/updateAccessDates",
       "in": "query",
       "expected": "good",
       "parameters": {
+        "rasterEntries": "test"
       }
     },
-    "maxKmlQuery": {
+    "badUpdateAccessDates": {
       "method": "get",
-      "endpoint": "/superOverlay/kmlQuery",
-      "in": "query",
-      "expected": "good",
-      "parameters": {
-        "BBOX": "0,0,10,10",
-        "footprints": "on",
-        "maxFeatures": "10"
-      }
-    },
-    "badKmlQuery": {
-      "method": "get",
-      "endpoint": "/superOverlay/kmlQuery",
+      "endpoint": "/dataManager/updateAccessDates",
       "in": "query",
       "expected": "bad",
       "parameters": {
-        "BBOX": "0,0,10,10",
-        "footprints": "on",
-        "maxFeatures": "-5"
+      }
+    },
+    "minAddRaster": {
+      "method": "post",
+      "endpoint": "/dataManager/addRaster",
+      "in": "query",
+      "expected": "good",
+      "parameters": {
+        "filename": "test.tif"
+      }
+    },
+    "maxAddRaster": {
+      "method": "post",
+      "endpoint": "/dataManager/addRaster",
+      "in": "query",
+      "expected": "good",
+      "parameters": {
+        "filename": "test.tif",
+        "background": "true",
+        "buildThumbnails": "true",
+        "buildOverviews": "true",
+        "buildHistograms": "true",
+        "buildHistogramsWithR0": "false",
+        "useFastHistogramStaging": "false",
+        "overviewType": "ossim_tiff_box",
+        "overviewCompressionType": "JPEG",
+        "thumbnailSize": "512",
+        "thumbnailStretchType": "auto-minmax"
+      }
+    },
+    "badAddRaster": {
+      "method": "post",
+      "endpoint": "/dataManager/addRaster",
+      "in": "query",
+      "expected": "bad",
+      "parameters": {
+        "background": "maybe"
+      }
+    },
+    "minRemoveRaster": {
+      "method": "post",
+      "endpoint": "/dataManager/removeRaster",
+      "in": "query",
+      "expected": "good",
+      "parameters": {
+        "filename": "test.tif"
+      }
+    },
+    "maxRemoveRaster": {
+      "method": "post",
+      "endpoint": "/dataManager/removeRaster",
+      "in": "query",
+      "expected": "good",
+      "parameters": {
+        "filename": "test.tif",
+        "deleteFiles": "false"
+      }
+    },
+    "badRemoveRaster": {
+      "method": "post",
+      "endpoint": "/dataManager/removeRaster",
+      "in": "query",
+      "expected": "bad",
+      "parameters": {
+        "filename": "test.tif",
+        "deleteFiles": "maybe"
+      }
+    },
+    "minGetRasterFilesProcessing": {
+      "method": "get",
+      "endpoint": "/dataManager/getRasterFilesProcessing",
+      "in": "query",
+      "expected": "good",
+      "parameters": {
+      }
+    },
+    "maxGetRasterFilesProcessing": {
+      "method": "get",
+      "endpoint": "/dataManager/getRasterFilesProcessing",
+      "in": "query",
+      "expected": "good",
+      "parameters": {
+        "offset": "1",
+        "limit": "1"
+      }
+    },
+    "badGetRasterFilesProcessing": {
+      "method": "get",
+      "endpoint": "/dataManager/getRasterFilesProcessing",
+      "in": "query",
+      "expected": "bad",
+      "parameters": {
+        "offset": "-5",
+        "limit": "-5"
+      }
+    },
+    "minGetRasterFiles": {
+      "method": "get",
+      "endpoint": "/dataManager/getRasterFiles",
+      "in": "query",
+      "expected": "good",
+      "parameters": {
+      }
+    },
+    "maxGetRasterFiles": {
+      "method": "get",
+      "endpoint": "/dataManager/getRasterFiles",
+      "in": "query",
+      "expected": "good",
+      "parameters": {
+        "id": "1"
+      }
+    },
+    "badGetRasterFiles": {
+      "method": "get",
+      "endpoint": "/dataManager/getRasterFiles",
+      "in": "query",
+      "expected": "bad",
+      "parameters": {
+        "id": "-5"
+      }
+    },
+    "getDistinctValues": {
+      "method": "get",
+      "endpoint": "/dataManager/getDistinctValues",
+      "in": "query",
+      "expected": "good",
+      "parameters": {
+        "property": "countryCode"
+      }
+    },
+    "badGetDistinctValues": {
+      "method": "get",
+      "endpoint": "/dataManager/getDistinctValues",
+      "in": "query",
+      "expected": "bad",
+      "parameters": {
+        "property": "fakeId"
+      }
+    },
+    "minGetInfo": {
+      "method": "get",
+      "endpoint": "/dataInfo/getInfo",
+      "in": "query",
+      "expected": "good",
+      "parameters": {
+        "filename": "/data/harvey/2017-08-31/105001000B95E200/3020113.tif"
+      }
+    },
+    "maxGetInfo": {
+      "method": "get",
+      "endpoint": "/dataInfo/getInfo",
+      "in": "query",
+      "expected": "good",
+      "parameters": {
+        "filename": "/data/harvey/2017-08-31/105001000B95E200/3020113.tif",
+        "entry": "0"
+      }
+    },
+    "badGetInfo": {
+      "method": "get",
+      "endpoint": "/dataInfo/getInfo",
+      "in": "query",
+      "expected": "bad",
+      "parameters": {
+        "entry": "-5"
+      }
+    },
+    "pause": {
+      "method": "post",
+      "endpoint": "/sqsStager/pause",
+      "in": "query",
+      "expected": "good",
+      "parameters": {
+      }
+    },
+    "isPaused": {
+      "method": "get",
+      "endpoint": "/sqsStager/isPaused",
+      "in": "query",
+      "expected": "good",
+      "parameters": {
+      }
+    },
+    "isProcessing": {
+      "method": "get",
+      "endpoint": "/sqsStager/isProcessing",
+      "in": "query",
+      "expected": "good",
+      "parameters": {
+      }
+    },
+    "isProcessingJobs": {
+      "method": "get",
+      "endpoint": "/sqsStager/isProcessingJobs",
+      "in": "query",
+      "expected": "good",
+      "parameters": {
+      }
+    },
+    "start": {
+      "method": "post",
+      "endpoint": "/sqsStager/start",
+      "in": "query",
+      "expected": "good",
+      "parameters": {
+      }
+    },
+    "stop": {
+      "method": "post",
+      "endpoint": "/sqsStager/stop",
+      "in": "query",
+      "expected": "good",
+      "parameters": {
+      }
+    },
+    "minListMessages": {
+      "method": "get",
+      "endpoint": "/Avro/listMessages",
+      "in": "query",
+      "expected": "good",
+      "parameters": {
+      }
+    },
+    "maxListMessages": {
+      "method": "get",
+      "endpoint": "/Avro/listMessages",
+      "in": "query",
+      "expected": "good",
+      "parameters": {
+        "offset": "1",
+        "limit": "1"
+      }
+    },
+    "badListMessages": {
+      "method": "get",
+      "endpoint": "/Avro/listMessages",
+      "in": "query",
+      "expected": "bad",
+      "parameters": {
+        "offset": "-5",
+        "limit": "-5"
+      }
+    },
+    "minListFiles": {
+      "method": "get",
+      "endpoint": "/Avro/listFiles",
+      "in": "query",
+      "expected": "good",
+      "parameters": {
+      }
+    },
+    "maxListFiles": {
+      "method": "get",
+      "endpoint": "/Avro/listFiles",
+      "in": "query",
+      "expected": "good",
+      "parameters": {
+        "offset": "1",
+        "limit": "1"
+      }
+    },
+    "badListFiles": {
+      "method": "get",
+      "endpoint": "/Avro/listFiles",
+      "in": "query",
+      "expected": "bad",
+      "parameters": {
+        "offset": "-5",
+        "limit": "-5"
       }
     }
   }
