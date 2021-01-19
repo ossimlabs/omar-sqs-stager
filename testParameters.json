@@ -1,0 +1,46 @@
+{
+  "info": {
+    "title": "Test Parameters",
+    "format": {
+      "name": {
+        "method": ["get", "post", "delete", "etc..."],
+        "endpoint": "/controller/endpoint",
+        "in": ["query", "body"],
+        "expected": ["good", "bad"],
+        "parameters": [{"parameterName1": "value1", "parameterName2": "value2"}, { "body": {} }]
+      }
+    }
+  },
+  "tests": {
+    "minKmlQuery": {
+      "method": "get",
+      "endpoint": "/superOverlay/kmlQuery",
+      "in": "query",
+      "expected": "good",
+      "parameters": {
+      }
+    },
+    "maxKmlQuery": {
+      "method": "get",
+      "endpoint": "/superOverlay/kmlQuery",
+      "in": "query",
+      "expected": "good",
+      "parameters": {
+        "BBOX": "0,0,10,10",
+        "footprints": "on",
+        "maxFeatures": "10"
+      }
+    },
+    "badKmlQuery": {
+      "method": "get",
+      "endpoint": "/superOverlay/kmlQuery",
+      "in": "query",
+      "expected": "bad",
+      "parameters": {
+        "BBOX": "0,0,10,10",
+        "footprints": "on",
+        "maxFeatures": "-5"
+      }
+    }
+  }
+}
