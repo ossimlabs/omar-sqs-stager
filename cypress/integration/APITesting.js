@@ -41,5 +41,19 @@ describe('Automated tests for the omar-sqs-stager API endpoints', () => {
                 })
             })
         }
+        else if(good) {
+            it(`Should test 200 code for ${test} test values`, () => {
+                cy.request(method, endpoint, innerJson.parameters["body"])
+                    .then((response) => {
+                        expect(response.status).to.eq(200)
+                })
+            })
+            it(`Should test response header for ${test}`, () => {
+                cy.request(method, endpoint, innerJson.parameters["body"])
+                    .then((response) => {
+                        expect(response).to.have.property("headers")
+                })
+            })
+        }
     })
 })

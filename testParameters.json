@@ -3,11 +3,30 @@
     "title": "Test Parameters",
     "format": {
       "name": {
-        "method": ["get", "post", "delete", "etc..."],
+        "method": [
+          "get",
+          "post",
+          "delete",
+          "etc..."
+        ],
         "endpoint": "/controller/endpoint",
-        "in": ["query", "body"],
-        "expected": ["good", "bad"],
-        "parameters": [{"parameterName1": "value1", "parameterName2": "value2"}, { "body": {} }]
+        "in": [
+          "query",
+          "body"
+        ],
+        "expected": [
+          "good",
+          "bad"
+        ],
+        "parameters": [
+          {
+            "parameterName1": "value1",
+            "parameterName2": "value2"
+          },
+          {
+            "body": {}
+          }
+        ]
       }
     }
   },
@@ -243,6 +262,47 @@
       "parameters": {
       }
     },
+    "minResetFileProcessingStatus": {
+      "method": "post",
+      "endpoint": "/Avro/resetFileProcessingStatus",
+      "in": "query",
+      "expected": "good",
+      "parameters": {
+      }
+    },
+    "maxResetFileProcessingStatus": {
+      "method": "post",
+      "endpoint": "/Avro/resetFileProcessingStatus",
+      "in": "query",
+      "expected": "good",
+      "parameters": {
+        "processId": "1",
+        "status": "READY",
+        "whereStatusEquals": "PAUSED"
+      }
+    },
+    "badResetFileProcessingStatus": {
+      "method": "post",
+      "endpoint": "/Avro/resetFileProcessingStatus",
+      "in": "query",
+      "expected": "bad",
+      "parameters": {
+        "processId": "-5",
+        "status": "FAKE",
+        "whereStatusEquals": "FAKE"
+      }
+    },
+    "addMessage": {
+      "method": "post",
+      "endpoint": "/Avro/addMessage",
+      "in": "body",
+      "expected": "good",
+      "parameters": {
+        "body": {
+          "message": "test"
+        }
+      }
+    },
     "minListMessages": {
       "method": "get",
       "endpoint": "/Avro/listMessages",
@@ -269,6 +329,23 @@
       "parameters": {
         "offset": "-5",
         "limit": "-5"
+      }
+    },
+    "addFile": {
+      "method": "post",
+      "endpoint": "/Avro/addFile",
+      "in": "query",
+      "expected": "good",
+      "parameters": {
+        "filename": "test.tif"
+      }
+    },
+    "badAddFile": {
+      "method": "post",
+      "endpoint": "/Avro/addFile",
+      "in": "query",
+      "expected": "bad",
+      "parameters": {
       }
     },
     "minListFiles": {
