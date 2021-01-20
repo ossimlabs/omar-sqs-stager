@@ -17,13 +17,13 @@ describe('Automated tests for the omar-sqs-stager API endpoints', () => {
             })
             request = request.substring(0, request.length - 1);
             it(`Should test 200 code for ${test} test values`, () => {
-                cy.request(method, endpoint + request)
+                cy.request({method: method, url: endpoint + request})
                     .then((response) => {
                         expect(response.status).to.eq(200)
                     })
             })
             it(`Should test response header for ${test}`, () => {
-                cy.request(method, endpoint + request)
+                cy.request({method: method, url: endpoint + request})
                     .then((response) => {
                         expect(response).to.have.property("headers")
                     })
@@ -36,20 +36,21 @@ describe('Automated tests for the omar-sqs-stager API endpoints', () => {
             })
             request = request.substring(0, request.length - 1);
             it(`Should test for a not 200 code for ${test} test values`, () => {
-                cy.request(method, endpoint + request).then((response) => {
-                    expect(response.status).to.not.eq(200)
+                cy.request({method: method, url: endpoint + request})
+                    .then((response) => {
+                        expect(response.status).to.not.eq(200)
                 })
             })
         }
         else if(good) {
             it(`Should test 200 code for ${test} test values`, () => {
-                cy.request(method, endpoint, innerJson.parameters["body"])
+                cy.request({method: method, url: endpoint, body: innerJson.parameters["body"]})
                     .then((response) => {
                         expect(response.status).to.eq(200)
                 })
             })
             it(`Should test response header for ${test}`, () => {
-                cy.request(method, endpoint, innerJson.parameters["body"])
+                cy.request({method: method, url: endpoint, body: innerJson.parameters["body"]})
                     .then((response) => {
                         expect(response).to.have.property("headers")
                 })
