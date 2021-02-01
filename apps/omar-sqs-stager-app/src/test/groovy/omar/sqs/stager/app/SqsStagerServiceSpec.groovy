@@ -1,4 +1,4 @@
-package sqs.app
+package omar.sqs.stager.app
 
 import grails.testing.services.ServiceUnitTest
 import omar.avro.AvroService
