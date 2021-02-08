@@ -145,13 +145,13 @@ podTemplate(
         withDockerRegistry(credentialsId: 'dockerCredentials', url: "https://${DOCKER_REGISTRY_DOWNLOAD_URL}") {  //TODO
           if (BRANCH_NAME == 'master'){
                 sh """
-                    docker build --build-arg BASE_IMAGE=${DOCKER_REGISTRY_DOWNLOAD_URL}/ossim-alpine-jdk11-runtime:1.2 --network=host -t "${DOCKER_REGISTRY_PUBLIC_UPLOAD_URL}"/omar-sqs-stager:"${VERSION}" ./docker
+                    docker build --build-arg BASE_IMAGE=${DOCKER_REGISTRY_DOWNLOAD_URL}/ossim-alpine-jdk11-runtime:1.3 --network=host -t "${DOCKER_REGISTRY_PUBLIC_UPLOAD_URL}"/omar-sqs-stager:"${VERSION}" ./docker
 
                 """
           }
           else {
                 sh """
-                    docker build --build-arg BASE_IMAGE=${DOCKER_REGISTRY_DOWNLOAD_URL}/ossim-alpine-jdk11-runtime:1.2 --network=host -t "${DOCKER_REGISTRY_PUBLIC_UPLOAD_URL}"/omar-sqs-stager:"${VERSION}".a ./docker
+                    docker build --build-arg BASE_IMAGE=${DOCKER_REGISTRY_DOWNLOAD_URL}/ossim-alpine-jdk11-runtime:1.3 --network=host -t "${DOCKER_REGISTRY_PUBLIC_UPLOAD_URL}"/omar-sqs-stager:"${VERSION}".a ./docker
                 """
           }
         }
