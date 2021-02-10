@@ -34,7 +34,7 @@ class SqsStagerController {
                 produces="application/json",
                 httpMethod="POST",
                 notes = """
-                Will only pauses the pullling of messages of the SQS queue
+                Will only pauses the pulling of messages of the SQS queue
                 """)
     def pause()
     {
