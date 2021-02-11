@@ -272,6 +272,7 @@
       "in": "query",
       "expected": "good",
       "parameters": {
+        "status": "READY"
       }
     },
     "maxResetFileProcessingStatus": {
