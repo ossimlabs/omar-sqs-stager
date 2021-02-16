@@ -388,8 +388,8 @@
       "in": "query",
       "expected": "good",
       "parameters": {
-        "images[0].file": "https://o2-test-data.s3.amazonaws.com/nga-files/AE__SITE78_PS_003983887T_orth.ntf",
-        "outputRadiometry": "ossim_uint8"
+        "images[0].file": "/data/harvey/2017-01-29/1040010027891F00/3020113.tif",
+        "cutBboxXywh": "500,500,500,500"
       }
     },
     "maxChip": {
@@ -398,7 +398,7 @@
       "in": "query",
       "expected": "good",
       "parameters": {
-        "images[0].file": "test.tif",
+        "images[0].file": "/data/harvey/2017-01-29/1040010027891F00/3020113.tif",
         "images[0].entry": "0",
         "images[0].ovr": "here",
         "images[0].hist": "there",
@@ -410,7 +410,7 @@
         "sharpenMode": "light",
         "sharpenPercent": "0",
         "thumbnailResolution": "0",
-        "cutBboxXywh": "5,5,5,5",
+        "cutBboxXywh": "500,500,500,500",
         "rrds": "0",
         "histOp": "linear",
         "histBiasFactor": "1",
@@ -442,10 +442,9 @@
       "in": "query",
       "expected": "good",
       "parameters": {
-        "images[0].file": "test.tif",
-        "brightness": "0",
-        "contrast": "1",
-        "outputRadiometry": "ossim_uint8"
+        "images[0].file": "/data/harvey/2017-01-29/1040010027891F00/3020113.tif",
+        "cutWmsBbox": "-95,29.7,-94.95,29.65",
+        "outputFormat": "image/jpeg"
       }
     },
     "maxOrtho": {
@@ -454,12 +453,12 @@
       "in": "query",
       "expected": "good",
       "parameters": {
-        "images[0].file": "test.tif",
+        "images[0].file": "/data/harvey/2017-01-29/1040010027891F00/3020113.tif",
         "images[0].entry": "0",
         "images[0].ovr": "here",
         "images[0].hist": "there",
         "images[0].geom": "everywhere",
-        "operation": "none",
+        "operation": "ortho",
         "nullPixelFlip": "true",
         "brightness": "0",
         "contrast": "1",
@@ -467,7 +466,7 @@
         "thumbnailResolution": "0",
         "cutWidth": "0",
         "cutHeight": "0",
-        "cutWmsBbox": "5,5,5,5",
+        "cutWmsBbox": "-95,29.7,-94.95,29.65",
         "histOp": "linear",
         "histBiasFactor": "1",
         "histLinearClip": "0,5",
