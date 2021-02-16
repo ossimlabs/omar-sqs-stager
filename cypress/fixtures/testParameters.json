@@ -388,8 +388,8 @@
       "in": "query",
       "expected": "good",
       "parameters": {
-        "images[0].file": "/data/harvey/2017-01-29/1040010027891F00/3020113.tif",
-        "cutBboxXywh": "500,500,500,500"
+        "images%5B0%5D.file": "%2Fdata%2Fharvey%2F2017-01-29%2F1040010027891F00%2F3020113.tif",
+        "cutBboxXywh": "500%2C500%2C500%2C500"
       }
     },
     "maxChip": {
@@ -398,11 +398,8 @@
       "in": "query",
       "expected": "good",
       "parameters": {
-        "images[0].file": "/data/harvey/2017-01-29/1040010027891F00/3020113.tif",
-        "images[0].entry": "0",
-        "images[0].ovr": "here",
-        "images[0].hist": "there",
-        "images[0].geom": "everywhere",
+        "images%5B0%5D.file": "%2Fdata%2Fharvey%2F2017-01-29%2F1040010027891F00%2F3020113.tif",
+        "images%5B0%5D.entry": "0",
         "operation": "chip",
         "nullPixelFlip": "true",
         "brightness": "0",
@@ -410,7 +407,7 @@
         "sharpenMode": "light",
         "sharpenPercent": "0",
         "thumbnailResolution": "0",
-        "cutBboxXywh": "500,500,500,500",
+        "cutBboxXywh": "500%2C500%2C500%2C500",
         "rrds": "0",
         "histOp": "linear",
         "histBiasFactor": "1",
@@ -419,7 +416,6 @@
         "histCenterClip": "0.5",
         "histCenter": "true",
         "outputRadiometry": "ossim_uint8",
-        "bands": "coldplay",
         "resamplerFilter": "cubic",
         "outputFormat": "image/png",
         "keepBands": "false",
@@ -442,9 +438,10 @@
       "in": "query",
       "expected": "good",
       "parameters": {
-        "images[0].file": "/data/harvey/2017-01-29/1040010027891F00/3020113.tif",
-        "cutWmsBbox": "-95,29.7,-94.95,29.65",
-        "outputFormat": "image/jpeg"
+        "images%5B0%5D.file": "%2Fdata%2Fharvey%2F2017-01-29%2F1040010027891F00%2F3020113.tif",
+        "cutWidth": "556",
+        "cutHeight": "556",
+        "cutWmsBbox": "-95%2C29.7%2C-94.95%2C29.65"
       }
     },
     "maxOrtho": {
@@ -453,103 +450,36 @@
       "in": "query",
       "expected": "good",
       "parameters": {
-        "images[0].file": "/data/harvey/2017-01-29/1040010027891F00/3020113.tif",
-        "images[0].entry": "0",
-        "images[0].ovr": "here",
-        "images[0].hist": "there",
-        "images[0].geom": "everywhere",
+        "images%5B0%5D.file": "%2Fdata%2Fharvey%2F2017-01-29%2F1040010027891F00%2F3020113.tif",
+        "images%5B0%5D.entry": "0",
         "operation": "ortho",
         "nullPixelFlip": "true",
         "brightness": "0",
         "contrast": "1",
         "sharpenMode": "light",
-        "thumbnailResolution": "0",
-        "cutWidth": "0",
-        "cutHeight": "0",
-        "cutWmsBbox": "-95,29.7,-94.95,29.65",
+        "thumbnailResolution": "1",
+        "cutWidth": "556",
+        "cutHeight": "556",
+        "cutWmsBbox": "-95%2C29.7%2C-94.95%2C29.65",
         "histOp": "linear",
         "histBiasFactor": "1",
-        "histLinearClip": "0,5",
-        "histLinearNormClip": "0,5",
+        "histLinearClip": "low",
+        "histLinearNormClip": "low",
         "histCenterClip": "0.5",
         "histCenter": "true",
         "srs": "EPSG:4326",
         "outputRadiometry": "ossim_uint8",
-        "bands": "coldplay",
         "resamplerFilter": "cubic",
-        "outputFormat": "image/png",
+        "outputFormat": "image/jpeg",
         "keepBands": "false",
         "padThumbnail": "false",
         "transparent": "true",
-        "gamma": "0"
+        "gamma": "1"
       }
     },
     "badOrtho": {
       "method": "get",
       "endpoint": "/chipper/ortho",
-      "in": "query",
-      "expected": "bad",
-      "parameters": {
-      }
-    },
-    "minPsm": {
-      "method": "get",
-      "endpoint": "/chipper/psm",
-      "in": "query",
-      "expected": "good",
-      "parameters": {
-        "images[0].file": "test.tif",
-        "images[1].file": "test1.tif",
-        "brightness": "0",
-        "contrast": "1",
-        "outputRadiometry": "ossim_uint8"
-      }
-    },
-    "maxPsm": {
-      "method": "get",
-      "endpoint": "/chipper/psm",
-      "in": "query",
-      "expected": "good",
-      "parameters": {
-        "images[0].file": "test.tif",
-        "images[0].entry": "0",
-        "images[0].ovr": "here",
-        "images[0].hist": "there",
-        "images[0].geom": "everywhere",
-        "images[1].file": "test.tif",
-        "images[1].entry": "0",
-        "images[1].ovr": "here",
-        "images[1].hist": "there",
-        "images[1].geom": "everywhere",
-        "operation": "none",
-        "nullPixelFlip": "true",
-        "brightness": "0",
-        "contrast": "1",
-        "sharpenMode": "light",
-        "thumbnailResolution": "0",
-        "cutWidth": "0",
-        "cutHeight": "0",
-        "cutWmsBbox": "5,5,5,5",
-        "histOp": "auto-minmax",
-        "histBiasFactor": "1",
-        "histLinearClip": "0,5",
-        "histLinearNormClip": "0,5",
-        "histCenterClip": "0.5",
-        "histCenter": "true",
-        "srs": "EPSG:4326",
-        "outputRadiometry": "ossim_uint8",
-        "bands": "coldplay",
-        "resamplerFilter": "cubic",
-        "outputFormat": "image/png",
-        "keepBands": "false",
-        "padThumbnail": "false",
-        "transparent": "true",
-        "gamma": "0"
-      }
-    },
-    "badPsm": {
-      "method": "get",
-      "endpoint": "/chipper/psm",
       "in": "query",
       "expected": "bad",
       "parameters": {
