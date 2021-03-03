@@ -136,16 +136,6 @@
         "limit": "1"
       }
     },
-    "badGetRasterFilesProcessing": {
-      "method": "get",
-      "endpoint": "/dataManager/getRasterFilesProcessing",
-      "in": "query",
-      "expected": "bad",
-      "parameters": {
-        "offset": "-5",
-        "limit": "-5"
-      }
-    },
     "minGetRasterFiles": {
       "method": "get",
       "endpoint": "/dataManager/getRasterFiles",
