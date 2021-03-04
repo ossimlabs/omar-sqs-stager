@@ -163,15 +163,6 @@
         "id": "1"
       }
     },
-    "badGetRasterFiles": {
-      "method": "get",
-      "endpoint": "/dataManager/getRasterFiles",
-      "in": "query",
-      "expected": "bad",
-      "parameters": {
-        "id": "-5"
-      }
-    },
     "getDistinctValues": {
       "method": "get",
       "endpoint": "/dataManager/getDistinctValues",
