@@ -208,7 +208,7 @@ podTemplate(
                     //insert future instructions here
                 }
                 else if (BRANCH_NAME == 'dev') {
-                    sh "aws eks --region us-east-1 update-kubeconfig --name gsp-dev-v2 --alias dev"
+                    sh "aws eks --region us-east-1 update-kubeconfig --name iap-dev-v1 --alias dev"
                     sh "kubectl config set-context dev --namespace=omar-dev"
                     sh "kubectl rollout restart deployment/omar-sqs-stager"   
                 }
