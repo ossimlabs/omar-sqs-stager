@@ -1,0 +1,480 @@
+{
+  "info": {
+    "title": "Test Parameters",
+    "format": {
+      "name": {
+        "method": [
+          "get",
+          "post",
+          "delete",
+          "etc..."
+        ],
+        "endpoint": "/controller/endpoint",
+        "in": [
+          "query",
+          "body",
+          "path"
+        ],
+        "expected": [
+          "good",
+          "bad"
+        ],
+        "parameters": [
+          {
+            "parameterName1": "value1",
+            "parameterName2": "value2"
+          },
+          {
+            "body": {}
+          },
+          {
+            "id": "idValue"
+          }
+        ]
+      }
+    }
+  },
+  "tests": {
+    "updateAccessDates": {
+      "method": "get",
+      "endpoint": "/dataManager/updateAccessDates",
+      "in": "query",
+      "expected": "good",
+      "parameters": {
+        "rasterEntries": "1265"
+      }
+    },
+    "badUpdateAccessDates": {
+      "method": "get",
+      "endpoint": "/dataManager/updateAccessDates",
+      "in": "query",
+      "expected": "bad",
+      "parameters": {
+      }
+    },
+    "minAddRaster": {
+      "method": "post",
+      "endpoint": "/dataManager/addRaster",
+      "in": "query",
+      "expected": "good",
+      "parameters": {
+        "filename": "https://o2-test-data.s3.amazonaws.com/Standard_test_imagery_set/very_small/small_sanfran.tif"
+      }
+    },
+    "maxAddRaster": {
+      "method": "post",
+      "endpoint": "/dataManager/addRaster",
+      "in": "query",
+      "expected": "good",
+      "parameters": {
+        "filename": "https://o2-test-data.s3.amazonaws.com/Standard_test_imagery_set/very_small/sanfran_utm_original.tif",
+        "background": "true",
+        "buildThumbnails": "true",
+        "buildOverviews": "true",
+        "buildHistograms": "true",
+        "buildHistogramsWithR0": "false",
+        "useFastHistogramStaging": "false",
+        "overviewType": "ossim_tiff_box",
+        "overviewCompressionType": "JPEG",
+        "thumbnailSize": "512",
+        "thumbnailStretchType": "auto-minmax"
+      }
+    },
+    "badAddRaster": {
+      "method": "post",
+      "endpoint": "/dataManager/addRaster",
+      "in": "query",
+      "expected": "bad",
+      "parameters": {
+        "background": "maybe"
+      }
+    },
+    "minRemoveRaster": {
+      "method": "post",
+      "endpoint": "/dataManager/removeRaster",
+      "in": "query",
+      "expected": "good",
+      "parameters": {
+        "filename": "https://o2-test-data.s3.amazonaws.com/Standard_test_imagery_set/very_small/small_sanfran.tif"
+      }
+    },
+    "maxRemoveRaster": {
+      "method": "post",
+      "endpoint": "/dataManager/removeRaster",
+      "in": "query",
+      "expected": "good",
+      "parameters": {
+        "filename": "https://o2-test-data.s3.amazonaws.com/Standard_test_imagery_set/very_small/sanfran_utm_original.tif",
+        "deleteFiles": "false"
+      }
+    },
+    "badRemoveRaster": {
+      "method": "post",
+      "endpoint": "/dataManager/removeRaster",
+      "in": "query",
+      "expected": "bad",
+      "parameters": {
+        "filename": "test.tif",
+        "deleteFiles": "maybe"
+      }
+    },
+    "minGetRasterFilesProcessing": {
+      "method": "get",
+      "endpoint": "/dataManager/getRasterFilesProcessing",
+      "in": "query",
+      "expected": "good",
+      "parameters": {
+      }
+    },
+    "maxGetRasterFilesProcessing": {
+      "method": "get",
+      "endpoint": "/dataManager/getRasterFilesProcessing",
+      "in": "query",
+      "expected": "good",
+      "parameters": {
+        "offset": "1",
+        "limit": "1"
+      }
+    },
+    "badGetRasterFilesProcessing": {
+      "method": "get",
+      "endpoint": "/dataManager/getRasterFilesProcessing",
+      "in": "query",
+      "expected": "bad",
+      "parameters": {
+        "offset": "-5",
+        "limit": "-5"
+      }
+    },
+    "minGetRasterFiles": {
+      "method": "get",
+      "endpoint": "/dataManager/getRasterFiles",
+      "in": "query",
+      "expected": "bad",
+      "parameters": {
+      }
+    },
+    "maxGetRasterFiles": {
+      "method": "get",
+      "endpoint": "/dataManager/getRasterFiles",
+      "in": "query",
+      "expected": "good",
+      "parameters": {
+        "id": "1"
+      }
+    },
+    "getDistinctValues": {
+      "method": "get",
+      "endpoint": "/dataManager/getDistinctValues",
+      "in": "query",
+      "expected": "good",
+      "parameters": {
+        "property": "countryCode"
+      }
+    },
+    "badGetDistinctValues": {
+      "method": "get",
+      "endpoint": "/dataManager/getDistinctValues",
+      "in": "query",
+      "expected": "bad",
+      "parameters": {
+        "property": "fakeId"
+      }
+    },
+    "minGetInfo": {
+      "method": "get",
+      "endpoint": "/dataInfo/getInfo",
+      "in": "query",
+      "expected": "good",
+      "parameters": {
+        "filename": "/data/harvey/2017-08-31/105001000B95E200/3020113.tif"
+      }
+    },
+    "maxGetInfo": {
+      "method": "get",
+      "endpoint": "/dataInfo/getInfo",
+      "in": "query",
+      "expected": "good",
+      "parameters": {
+        "filename": "/data/harvey/2017-08-31/105001000B95E200/3020113.tif",
+        "entry": "0"
+      }
+    },
+    "badGetInfo": {
+      "method": "get",
+      "endpoint": "/dataInfo/getInfo",
+      "in": "query",
+      "expected": "bad",
+      "parameters": {
+        "entry": "-5"
+      }
+    },
+    "pause": {
+      "method": "post",
+      "endpoint": "/sqsStager/pause",
+      "in": "query",
+      "expected": "good",
+      "parameters": {
+      }
+    },
+    "isPaused": {
+      "method": "get",
+      "endpoint": "/sqsStager/isPaused",
+      "in": "query",
+      "expected": "good",
+      "parameters": {
+      }
+    },
+    "isProcessing": {
+      "method": "get",
+      "endpoint": "/sqsStager/isProcessing",
+      "in": "query",
+      "expected": "good",
+      "parameters": {
+      }
+    },
+    "isProcessingJobs": {
+      "method": "get",
+      "endpoint": "/sqsStager/isProcessingJobs",
+      "in": "query",
+      "expected": "good",
+      "parameters": {
+      }
+    },
+    "start": {
+      "method": "post",
+      "endpoint": "/sqsStager/start",
+      "in": "query",
+      "expected": "good",
+      "parameters": {
+      }
+    },
+    "stop": {
+      "method": "post",
+      "endpoint": "/sqsStager/stop",
+      "in": "query",
+      "expected": "good",
+      "parameters": {
+      }
+    },
+    "minResetFileProcessingStatus": {
+      "method": "post",
+      "endpoint": "/Avro/resetFileProcessingStatus",
+      "in": "query",
+      "expected": "good",
+      "parameters": {
+        "status": "READY"
+      }
+    },
+    "maxResetFileProcessingStatus": {
+      "method": "post",
+      "endpoint": "/Avro/resetFileProcessingStatus",
+      "in": "query",
+      "expected": "good",
+      "parameters": {
+        "status": "READY",
+        "whereStatusEquals": "PAUSED"
+      }
+    },
+    "badResetFileProcessingStatus": {
+      "method": "post",
+      "endpoint": "/Avro/resetFileProcessingStatus",
+      "in": "query",
+      "expected": "bad",
+      "parameters": {
+        "processId": "-5",
+        "status": "FAKE",
+        "whereStatusEquals": "FAKE"
+      }
+    },
+    "addMessage": {
+      "method": "post",
+      "endpoint": "/Avro/addMessage",
+      "in": "body",
+      "expected": "good",
+      "parameters": {
+        "body": {
+          "messageId": "9988",
+          "Message":"{\"abstract\":\"\",\"actualBitCountPerPixel\":0,\"areaTargetId\":\"\",\"bENumber\":\"\",\"bandCountQuantity\":0,\"boundingPolygonTypeCode\":\"\",\"centroidCoordinates\":\"\",\"circularError\":\"\",\"cloudCoverPercentage\":\"\",\"collectionModeCode\":\"\",\"countryCode\":[\"\"],\"dataType\":\"\",\"eDHDataSet\":\"\",\"fileFormatName\":\"\",\"fileName\":\"\",\"fileVersion\":\"\",\"footprintCoordinates\":\"\",\"footprintGeometry\":\"\",\"grazingAngle\":\"\",\"iCEDHAuthorizationReference\":\"\",\"iCEDHClassification\":\"\",\"iCEDHClassificationReason\":\"\",\"iCEDHClassifiedBy\":\"\",\"iCEDHDESVersion\":\"\",\"iCEDHDataItemCreateDateTime\":\"\",\"iCEDHDeclassExceptions\":\"\",\"iCEDHDerivedFrom\":\"\",\"iCEDHDisseminationControls\":\"\",\"iCEDHIdentifier\":\"\",\"iCEDHLAC\":\"\",\"iCEDHMAF\":\"\",\"iCEDHOwnerProducer\":\"\",\"iCEDHReleasableTo\":\"\",\"iCEDHResponsibleEntityCountry\":\"\",\"iCEDHResponsibleEntityOrganization\":\"\",\"iCEDHResponsibleEntitySuborganization\":\"\",\"iCEDHSciControls\":\"\",\"iGEOLO\":\"\",\"imageCenterPoint2D\":\"\",\"imageId\":\"04APR16CS0207001_110646_SM0262R_29N081W_001X___SHH_0101_OBS_IMAG\",\"imagePolarization\":\"\",\"imageQualityRatingScale\":0,\"imageRepresentation\":\"\",\"imageRollAngle\":0,\"imageTypeCode\":\"\",\"jpegReducedResolution\":\"\",\"keyword\":\"\",\"keyword10\":\"\",\"keyword2\":\"\",\"keyword3\":\"\",\"keyword4\":\"\",\"keyword5\":\"\",\"keyword6\":\"\",\"keyword7\":\"\",\"keyword8\":\"\",\"keyword9\":\"\",\"lIMDISCODE\":\"\",\"linearerror\":0.0,\"mBREAST\":0,\"mBRNORTH\":0,\"mBRSOUTH\":0,\"mBRWEST\":0,\"meanGroundSpacingDistance\":0,\"missionID\":\"\",\"oMARURI\":\"\",\"obliquityAngle\":0,\"observationDateTime\":\"2016-04-04T02:07:00.000Z\",\"originationStationId\":\"\",\"platformName\":\"\",\"processingLevel\":\"\",\"producerClass\":\"\",\"producerCode\":\"\",\"productCreationDate\":\"\",\"rapidPositioningCapabilityIndicator\":true,\"referenceImageTypeText\":\"\",\"replayDesignator\":\"\",\"resourceCategoryName\":\"\",\"s3URIAvro\":\"\",\"s3URIEpjeNitf\":\"\",\"s3URINitf\":\"\",\"s3URIOverviewJpeg\":\"\",\"s3URIThumbnailJpeg\":\"\",\"sensorName\":\"\",\"sizeQuantity\":0,\"spectralCoverage\":\"0\",\"spectralCoverageTypeCode\":\"\",\"stereoIdText\":\"\",\"sunAzimuth\":0,\"sunElevation\":0,\"sunElevationDim\":0,\"targetAlternateID\":\"\",\"targetName\":\"\",\"titleText\":\"\",\"uRL\":\"https://s3.amazonaws.com/o2-test-data/Standard_test_imagery_set/Cosmo+SkyMED/NITF/04APR16CS0207001_110646_SM0262R_29N081W_001X___SHH_0101_OBS_IMAG.nitf\",\"version\":\"\",\"xAxisDimension\":0,\"yAxisDimension\":0,\"namespace\":\"\"}",
+          "status": "READY"
+        }
+      }
+    },
+    "minListMessages": {
+      "method": "get",
+      "endpoint": "/Avro/listMessages",
+      "in": "query",
+      "expected": "good",
+      "parameters": {
+      }
+    },
+    "maxListMessages": {
+      "method": "get",
+      "endpoint": "/Avro/listMessages",
+      "in": "query",
+      "expected": "good",
+      "parameters": {
+        "offset": "1",
+        "limit": "1"
+      }
+    },
+    "badListMessages": {
+      "method": "get",
+      "endpoint": "/Avro/listMessages",
+      "in": "query",
+      "expected": "bad",
+      "parameters": {
+        "offset": "-5",
+        "limit": "-5"
+      }
+    },
+    "addFile": {
+      "method": "post",
+      "endpoint": "/Avro/addFile",
+      "in": "query",
+      "expected": "good",
+      "parameters": {
+        "filename": "https://github.com/ossimlabs/omar-avro-metadata/blob/dev/examples/04APR16CS0207001_110646_SM0262R_29N081W_001X___SHH_0101_OBS_IMAG.json"
+      }
+    },
+    "badAddFile": {
+      "method": "post",
+      "endpoint": "/Avro/addFile",
+      "in": "query",
+      "expected": "bad",
+      "parameters": {
+      }
+    },
+    "minListFiles": {
+      "method": "get",
+      "endpoint": "/Avro/listFiles",
+      "in": "query",
+      "expected": "good",
+      "parameters": {
+      }
+    },
+    "maxListFiles": {
+      "method": "get",
+      "endpoint": "/Avro/listFiles",
+      "in": "query",
+      "expected": "good",
+      "parameters": {
+        "offset": "1",
+        "limit": "1"
+      }
+    },
+    "badListFiles": {
+      "method": "get",
+      "endpoint": "/Avro/listFiles",
+      "in": "query",
+      "expected": "bad",
+      "parameters": {
+        "offset": "-5",
+        "limit": "-5"
+      }
+    },
+    "minChip": {
+      "method": "get",
+      "endpoint": "/chipper/chip",
+      "in": "query",
+      "expected": "good",
+      "parameters": {
+        "images%5B0%5D.file": "%2Fdata%2Fharvey%2F2017-01-29%2F1040010027891F00%2F3020113.tif",
+        "cutBboxXywh": "500%2C500%2C500%2C500"
+      }
+    },
+    "maxChip": {
+      "method": "get",
+      "endpoint": "/chipper/chip",
+      "in": "query",
+      "expected": "good",
+      "parameters": {
+        "images%5B0%5D.file": "%2Fdata%2Fharvey%2F2017-01-29%2F1040010027891F00%2F3020113.tif",
+        "images%5B0%5D.entry": "0",
+        "operation": "chip",
+        "nullPixelFlip": "true",
+        "brightness": "0",
+        "contrast": "1",
+        "sharpenMode": "light",
+        "sharpenPercent": "0",
+        "thumbnailResolution": "0",
+        "cutBboxXywh": "500%2C500%2C500%2C500",
+        "rrds": "0",
+        "histOp": "linear",
+        "histBiasFactor": "1",
+        "histLinearClip": "0,5",
+        "histLinearNormClip": "0,5",
+        "histCenterClip": "0.5",
+        "histCenter": "true",
+        "outputRadiometry": "ossim_uint8",
+        "resamplerFilter": "cubic",
+        "outputFormat": "image/png",
+        "keepBands": "false",
+        "padThumbnail": "false",
+        "transparent": "true",
+        "gamma": "0"
+      }
+    },
+    "badChip": {
+      "method": "get",
+      "endpoint": "/chipper/chip",
+      "in": "query",
+      "expected": "bad",
+      "parameters": {
+      }
+    },
+    "minOrtho": {
+      "method": "get",
+      "endpoint": "/chipper/ortho",
+      "in": "query",
+      "expected": "good",
+      "parameters": {
+        "images%5B0%5D.file": "%2Fdata%2Fharvey%2F2017-01-29%2F1040010027891F00%2F3020113.tif",
+        "cutWidth": "556",
+        "cutHeight": "556",
+        "cutWmsBbox": "-95%2C29.7%2C-94.95%2C29.65"
+      }
+    },
+    "maxOrtho": {
+      "method": "get",
+      "endpoint": "/chipper/ortho",
+      "in": "query",
+      "expected": "good",
+      "parameters": {
+        "images%5B0%5D.file": "%2Fdata%2Fharvey%2F2017-01-29%2F1040010027891F00%2F3020113.tif",
+        "images%5B0%5D.entry": "0",
+        "operation": "ortho",
+        "nullPixelFlip": "true",
+        "brightness": "0",
+        "contrast": "1",
+        "sharpenMode": "light",
+        "thumbnailResolution": "1",
+        "cutWidth": "556",
+        "cutHeight": "556",
+        "cutWmsBbox": "-95%2C29.7%2C-94.95%2C29.65",
+        "histOp": "linear",
+        "histBiasFactor": "1",
+        "histLinearClip": "low",
+        "histLinearNormClip": "low",
+        "histCenterClip": "0.5",
+        "histCenter": "true",
+        "srs": "EPSG:4326",
+        "outputRadiometry": "ossim_uint8",
+        "resamplerFilter": "cubic",
+        "outputFormat": "image/jpeg",
+        "keepBands": "false",
+        "padThumbnail": "false",
+        "transparent": "true",
+        "gamma": "1"
+      }
+    },
+    "badOrtho": {
+      "method": "get",
+      "endpoint": "/chipper/ortho",
+      "in": "query",
+      "expected": "bad",
+      "parameters": {
+      }
+    }
+  }
+}
