@@ -10,9 +10,9 @@ grails {
 }
 dependencies {
     if ( ! System.getenv('O2_INLINE_BUILD') ) {
-     compile "io.ossim.omar.plugins:omar-avro-plugin:2.0.0-RELEASE"
-     compile "io.ossim.omar.plugins:omar-stager-core-plugin:2.0.1-RELEASE"
-     compile "io.ossim.omar.plugins:omar-raster-plugin:2.0.4-RELEASE"
+     compile "io.ossim.omar.plugins:omar-avro-plugin:${omarAvroPluginVersion}"
+     compile "io.ossim.omar.plugins:omar-stager-core-plugin:${omarStagerCorePluginVersion}"
+     compile "io.ossim.omar.plugins:omar-raster-plugin:${omarRasterPluginVersion}"
     }
 
   compile "com.amazonaws:aws-java-sdk:1.11.662"
