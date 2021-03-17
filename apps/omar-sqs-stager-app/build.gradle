@@ -25,7 +25,7 @@ dependencies {
     if ( ! System.getenv('O2_INLINE_BUILD') ) {
      compile "io.ossim.omar.plugins:omar-avro-plugin:+"
      compile "io.ossim.omar.plugins:omar-stager-core-plugin:+"
-     compile "io.ossim.omar.plugins:omar-raster-plugin:+"
+     compile "io.ossim.omar.plugins:omar-raster-plugin:${omarRasterPluginVersion}"
     }
 
   compile "com.amazonaws:aws-java-sdk:1.11.662"
