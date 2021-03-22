@@ -1,33 +1,35 @@
-grails {
-    plugins {
-        //compile project( ":${ rootProject.name }-plugin" )
-        if ( System.getenv('O2_INLINE_BUILD') ) {
-            compile project(":omar-avro-plugin")
-            compile project(":omar-stager-core-plugin")
-            compile project(":omar-raster-plugin")
+buildscript {
+    grails {
+        plugins {
+            //compile project( ":${ rootProject.name }-plugin" )
+            if ( System.getenv('O2_INLINE_BUILD') ) {
+                compile project(":omar-avro-plugin")
+                compile project(":omar-stager-core-plugin")
+                compile project(":omar-raster-plugin")
+            }
         }
     }
-}
-configurations {
-    targetConfig {
-        resolutionStrategy {
-            componentSelection {
-                all { ComponentSelection selection ->
-                    if (selection.candidate.version.contains("SNAPSHOT")) {
-                        selection.reject("Version was rejected since it was a SNAPSHOT")
+    configurations {
+        targetConfig {
+            resolutionStrategy {
+                componentSelection {
+                    all { ComponentSelection selection ->
+                        if (selection.candidate.version.contains("SNAPSHOT")) {
+                            selection.reject("Version was rejected since it was a SNAPSHOT")
+                        }
                     }
                 }
             }
         }
     }
-}
-dependencies {
-    if ( ! System.getenv('O2_INLINE_BUILD') ) {
-        targetConfig "io.ossim.omar.plugins:omar-avro-plugin:+"
-        targetConfig "io.ossim.omar.plugins:omar-stager-core-plugin:+"
-        targetConfig "io.ossim.omar.plugins:omar-raster-plugin:+"
+    dependencies {
+        if ( ! System.getenv('O2_INLINE_BUILD') ) {
+            targetConfig "io.ossim.omar.plugins:omar-avro-plugin:+"
+            targetConfig "io.ossim.omar.plugins:omar-stager-core-plugin:+"
+            targetConfig "io.ossim.omar.plugins:omar-raster-plugin:+"
+        }
+
+      compile "com.amazonaws:aws-java-sdk:1.11.662"
+
     }
-
-  compile "com.amazonaws:aws-java-sdk:1.11.662"
-
 }
