@@ -9,24 +9,21 @@ buildscript {
             }
         }
     }
-    configurations {
-        targetConfig {
-            resolutionStrategy {
-                componentSelection {
-                    all { ComponentSelection selection ->
-                        if (selection.candidate.version.contains("SNAPSHOT")) {
-                            selection.reject("Version was rejected since it was a SNAPSHOT")
-                        }
-                    }
+    dependencies {
+        components {
+            all { ComponentMetadataDetails details ->
+                def version = details.id.version
+                if (version.contains("SNAPSHOT")) {
+                    details.status = "milestone" // default in Gradle
+                } else if (version.contains("RELEASE")) {
+                    details.status = "release"
                 }
             }
         }
-    }
-    dependencies {
         if ( ! System.getenv('O2_INLINE_BUILD') ) {
-            targetConfig "io.ossim.omar.plugins:omar-avro-plugin:+"
-            targetConfig "io.ossim.omar.plugins:omar-stager-core-plugin:+"
-            targetConfig "io.ossim.omar.plugins:omar-raster-plugin:+"
+            targetConfig "io.ossim.omar.plugins:omar-avro-plugin:latest.release"
+            targetConfig "io.ossim.omar.plugins:omar-stager-core-plugin:latest.release"
+            targetConfig "io.ossim.omar.plugins:omar-raster-plugin:latest.release"
         }
 
       compile "com.amazonaws:aws-java-sdk:1.11.662"
