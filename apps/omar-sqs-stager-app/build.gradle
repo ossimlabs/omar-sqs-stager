@@ -10,20 +10,10 @@ buildscript {
         }
     }
     dependencies {
-        components {
-            all { ComponentMetadataDetails details ->
-                def version = details.id.version
-                if (version.contains("SNAPSHOT")) {
-                    details.status = "milestone" // default in Gradle
-                } else if (version.contains("RELEASE")) {
-                    details.status = "release"
-                }
-            }
-        }
         if ( ! System.getenv('O2_INLINE_BUILD') ) {
-            targetConfig "io.ossim.omar.plugins:omar-avro-plugin:latest.release"
-            targetConfig "io.ossim.omar.plugins:omar-stager-core-plugin:latest.release"
-            targetConfig "io.ossim.omar.plugins:omar-raster-plugin:latest.release"
+            targetConfig "io.ossim.omar.plugins-RELEASE:omar-avro-plugin:+"
+            targetConfig "io.ossim.omar.plugins-RELEASE:omar-stager-core-plugin:+"
+            targetConfig "io.ossim.omar.plugins-RELEASE:omar-raster-plugin:+"
         }
 
       compile "com.amazonaws:aws-java-sdk:1.11.662"
