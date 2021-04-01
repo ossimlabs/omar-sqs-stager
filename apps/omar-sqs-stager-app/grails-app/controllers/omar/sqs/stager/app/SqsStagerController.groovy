@@ -4,6 +4,7 @@ import grails.converters.JSON
 import io.swagger.annotations.*
 
 @Api( value = "/sqsStager",
+        protocols = "https",
       description = "API operations for SQS Stager"
 )
 class SqsStagerController {
