@@ -14,6 +14,7 @@ class SqsStagerController {
   @ApiOperation(value = "Allows one to stop the pulling of the SQS queue and will try to stop any running jobs",
                 produces="application/json",
                 httpMethod="POST",
+                protocols = "https",
                 notes = """
                 Will stop the processing of jobs and will pause the queue
                 """)
@@ -34,6 +35,7 @@ class SqsStagerController {
     @ApiOperation(value = "Allows one to pause the pulling of the SQS queue and will allow any current jobs to continue running",
                 produces="application/json",
                 httpMethod="POST",
+                protocols = "https",
                 notes = """
                 Will only pauses the pulling of messages of the SQS queue
                 """)
@@ -56,6 +58,7 @@ class SqsStagerController {
     @ApiOperation(value = "Will restart a paused or stopped queue",
                 produces="application/json",
                 httpMethod="POST",
+                protocols = "https",
                 notes = """
                 """)
     def start()
@@ -75,6 +78,7 @@ class SqsStagerController {
     @ApiOperation(value = "Returns a value true or false if the queue is paused",
                 produces="application/json",
                 httpMethod="GET",
+                protocols = "https",
                 notes = """
                 This endpoint will return {result:true} if the queue has been paused by either a previous call to 
                 **sqsStager/pause** or to **sqsStager/stop**. Will return {result:false} otherwise.
@@ -96,6 +100,7 @@ class SqsStagerController {
     @ApiOperation(value = "Returns a value true or false if the queue is not paused or if there are any currently running jobs",
                 produces="application/json",
                 httpMethod="GET",
+                protocols = "https",
                 notes = """
                 This endpoint will return {result:true} if the queue has not been paused or stopped 
                 or if there are any currently running jobs.
@@ -117,6 +122,7 @@ class SqsStagerController {
     @ApiOperation(value = "Returns a value true or false if there are any currently running jobs",
                 produces="application/json",
                 httpMethod="GET",
+                protocols = "https",
                 notes = """
                 This endpoint will return {result:true} if there are any currently running jobs.
                 """)
