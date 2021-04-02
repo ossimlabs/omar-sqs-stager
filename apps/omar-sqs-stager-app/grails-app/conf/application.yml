@@ -292,3 +292,14 @@ omar:
 
 quartz:
   jdbcStore:   false
+
+
+# Set the context path for tha pplication.
+server:
+  contextPath: /omar-sqs-stager
+
+# Define the http protocols that swagger can use
+swagger:
+  schemes:
+    - HTTPS
+    - HTTP
