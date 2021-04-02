@@ -143,6 +143,11 @@ server:
         context-path: /omar-sqs-stager
     contextPath: ${server.servlet.context-path}
 
+swagger:
+  schemes:
+    - HTTPS
+    - HTTP
+
 management:
   endpoints:
     web:
