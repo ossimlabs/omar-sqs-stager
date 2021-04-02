@@ -143,10 +143,15 @@ server:
         context-path: /omar-sqs-stager
     contextPath: ${server.servlet.context-path}
 
+
 swagger:
+  host:
+    "omar-dev.ossim.io"
   schemes:
     - HTTPS
     - HTTP
+  basePath:
+    "/omar-sqs-stager"
 
 management:
   endpoints:
