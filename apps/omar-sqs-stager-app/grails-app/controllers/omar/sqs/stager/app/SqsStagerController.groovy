@@ -4,8 +4,7 @@ import grails.converters.JSON
 import io.swagger.annotations.*
 
 @Api( value = "/sqsStager",
-        consumes = 'https',
-        protocols = "https",
+        protocols = "http, https",
       description = "API operations for SQS Stager"
 )
 class SqsStagerController {
@@ -16,7 +15,6 @@ class SqsStagerController {
                 produces="application/json",
                 httpMethod="POST",
                 protocols = "https",
-                consumes = 'https',
                 notes = """
                 Will stop the processing of jobs and will pause the queue
                 """)
@@ -38,7 +36,6 @@ class SqsStagerController {
                 produces="application/json",
                 httpMethod="POST",
                 protocols = "https",
-                consumes = 'https',
                 notes = """
                 Will only pauses the pulling of messages of the SQS queue
                 """)
@@ -62,7 +59,6 @@ class SqsStagerController {
                 produces="application/json",
                 httpMethod="POST",
                 protocols = "https",
-                consumes = 'https',
                 notes = """
                 """)
     def start()
@@ -83,7 +79,6 @@ class SqsStagerController {
                 produces="application/json",
                 httpMethod="GET",
                 protocols = "https",
-                consumes = 'https',
                 notes = """
                 This endpoint will return {result:true} if the queue has been paused by either a previous call to 
                 **sqsStager/pause** or to **sqsStager/stop**. Will return {result:false} otherwise.
@@ -106,7 +101,6 @@ class SqsStagerController {
                 produces="application/json",
                 httpMethod="GET",
                 protocols = "https",
-                consumes = 'https',
                 notes = """
                 This endpoint will return {result:true} if the queue has not been paused or stopped 
                 or if there are any currently running jobs.
@@ -129,7 +123,6 @@ class SqsStagerController {
                 produces="application/json",
                 httpMethod="GET",
                 protocols = "https",
-                consumes = 'https',
                 notes = """
                 This endpoint will return {result:true} if there are any currently running jobs.
                 """)
