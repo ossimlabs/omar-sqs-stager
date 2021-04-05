@@ -1,20 +1,22 @@
-grails {
-    plugins {
-        //compile project( ":${ rootProject.name }-plugin" )
-        if ( System.getenv('O2_INLINE_BUILD') ) {
-            compile project(":omar-avro-plugin")
-            compile project(":omar-stager-core-plugin")
-            compile project(":omar-raster-plugin")
+buildscript {
+    grails {
+        plugins {
+            //compile project( ":${ rootProject.name }-plugin" )
+            if ( System.getenv('O2_INLINE_BUILD') ) {
+                compile project(":omar-avro-plugin")
+                compile project(":omar-stager-core-plugin")
+                compile project(":omar-raster-plugin")
+            }
         }
     }
-}
-dependencies {
-    if ( ! System.getenv('O2_INLINE_BUILD') ) {
-     compile "io.ossim.omar.plugins:omar-avro-plugin:${omarAvroPluginVersion}"
-     compile "io.ossim.omar.plugins:omar-stager-core-plugin:${omarStagerCorePluginVersion}"
-     compile "io.ossim.omar.plugins:omar-raster-plugin:${omarRasterPluginVersion}"
+    dependencies {
+        if ( ! System.getenv('O2_INLINE_BUILD') ) {
+            compile "io.ossim.omar.plugins-RELEASE:omar-avro-plugin:+"
+            compile "io.ossim.omar.plugins-RELEASE:omar-stager-core-plugin:+"
+            compile "io.ossim.omar.plugins-RELEASE:omar-raster-plugin:+"
+        }
+
+      compile "com.amazonaws:aws-java-sdk:1.11.662"
+
     }
-
-  compile "com.amazonaws:aws-java-sdk:1.11.662"
-
 }
