@@ -97,6 +97,7 @@ hibernate:
         queries: false
         use_second_level_cache: false
         use_query_cache: false
+    dialect: 'org.hibernate.spatial.dialect.postgis.PostgisDialect'
 
 dataSource:
     pooled: true
@@ -142,6 +143,12 @@ server:
     servlet:
         context-path: /omar-sqs-stager
     contextPath: ${server.servlet.context-path}
+
+
+swagger:
+  schemes:
+    - HTTPS
+    - HTTP
 
 management:
   endpoints:
@@ -283,6 +290,38 @@ omar:
       # You should just have to add the url:
       # http://omar-avro-metadata-app:8080/omar-avro-metadata/avroMetadata/add
       addMetadataEndPoint: ""
+---
+# environments:
+#   production:
+#     dataSource:
+#       pooled: true
+#       jmxExport: true
+#       driverClassName: org.postgresql.Driver
+#       dialect: org.hibernate.spatial.dialect.postgis.PostgisDialect
+#       url: jdbc:postgres://localhost:5432/omar_db
+#       username: postgres
+#       password: password
+
+logging:
+  config: classpath:logback.groovy
 
 quartz:
-  jdbcStore:   false
+  # This service supports background jobs using the quartz framework.
+  # Just fix this to not use the jdbcStore.
+  # For now the requests are not persistent.
+  jdbcStore: false
+  threadPool:
+    # Quartz allows one to adjust the number of concurrent threads running.
+    # Here we default to 4 threads.
+    # This will allow 4 concurrent stagers to run for this service.
+    threadCount: 4
+
+# Set the context path for tha pplication.
+server:
+  contextPath: /omar-sqs-stager
+
+# Define the http protocols that swagger can use
+swagger:
+  schemes:
+    - HTTPS
+    - HTTP
